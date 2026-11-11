@@ -24,6 +24,7 @@ import {
 
 import { Loaded } from '@/components/Loaded'
 import { PageHeader } from '@/components/PageHeader'
+import { SectionHeading } from '@/components/SectionHeading'
 import { loadedFrom, useKnowledge } from '@/knowledge/context'
 import { CertDialog } from '@/knowledge/CertDialog'
 import { useLearner } from '@/knowledge/learner'
@@ -104,7 +105,7 @@ function Grid(props: {
   const rows = certRows(c)
   return (
     <section className="space-y-stack">
-      <h2 className="text-heading font-medium">{c.title}</h2>
+      <SectionHeading title={c.title} count={rows.length} />
       <div className="overflow-x-auto rounded-xl border bg-card">
         <table className="w-full text-sm">
           <thead>

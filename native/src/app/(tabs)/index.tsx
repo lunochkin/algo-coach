@@ -21,6 +21,7 @@ import {
   EXAM_LINK,
   focusLabel,
   LESSONS_LINK,
+  MODULES_HEADING,
   moduleStats,
   moduleRows,
   MODULES_LOADING,
@@ -39,7 +40,7 @@ import { useStore } from '@/lib/store';
 import { startQueue, styles, SyncBanner, SyncLine } from '@/ui/common';
 import { FocusCard } from '@/ui/focuscard';
 import { AccountMenu } from '@/ui/account';
-import { PanelItem, PickRow } from '@/ui/rows';
+import { Heading, PanelItem, PickRow } from '@/ui/rows';
 
 export default function Home() {
   const st = useStore();
@@ -230,6 +231,7 @@ export default function Home() {
         </View>
       </View>
       {body}
+      {rows.length ? <Heading title={MODULES_HEADING} count={rows.length} /> : null}
     </View>
   );
 

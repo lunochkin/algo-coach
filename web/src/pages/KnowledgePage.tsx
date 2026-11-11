@@ -23,6 +23,7 @@ import {
   focusView,
   LEARNING,
   LESSONS_LINK,
+  MODULES_HEADING,
   moduleStats,
   type ModuleRow,
   moduleRows,
@@ -260,7 +261,7 @@ export function KnowledgePage() {
             </div>
 
             <section className="space-y-stack">
-              <SectionHeading title="Modules" count={rows.length} />
+              <SectionHeading title={MODULES_HEADING} count={rows.length} />
               <PickPanel>
                 {rows.map((row, i) => (
                   <PickRow

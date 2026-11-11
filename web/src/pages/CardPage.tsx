@@ -10,7 +10,6 @@ import {
   runStartLabel,
   runStartRefused,
 } from '@algo-coach/core'
-import { ChevronDown } from 'lucide-react'
 import { type ReactNode, useState } from 'react'
 import { Link, useParams } from 'react-router'
 
@@ -22,6 +21,7 @@ import { PageHeader } from '@/components/PageHeader'
 import { PickList, PickRow } from '@/components/PickRow'
 import { Panel, Stat, Stats } from '@/components/Panel'
 import { SectionBar } from '@/components/SectionBar'
+import { SectionHeading } from '@/components/SectionHeading'
 import { TemplatePanel } from '@/components/TemplatePanel'
 import { ProgressBar } from '@/components/ProgressBar'
 import { Badge } from '@/components/ui/badge'
@@ -146,7 +146,7 @@ export function CardPage() {
               <Section
                 id="templates"
                 title="Templates"
-                aside={countOf(studied.card.templates.length, 'template')}
+                count={studied.card.templates.length}
                 body="bare"
                 closed={closed.includes('templates')}
                 onToggle={toggle}
@@ -248,6 +248,7 @@ function LadderView({
       title={LADDER_TITLE}
       closed={closed}
       onToggle={onToggle}
+      count={view.count}
       aside={view.aside}
     >
       <PickList>
@@ -322,6 +323,7 @@ function ProbesView({
       id="probes"
       body="rows"
       title={PROBES_TITLE}
+      count={studied.probes.length}
       aside={PROBES_ASIDE}
       closed={closed}
       onToggle={onToggle}
@@ -352,6 +354,7 @@ function ProbesView({
 function Section({
   id,
   title,
+  count,
   aside,
   body = 'prose',
   closed,
@@ -360,7 +363,8 @@ function Section({
 }: {
   id: string
   title: string
-  aside?: string
+  count?: number
+  aside?: string | null
   // the panel the body sits in: prose padded, rows edge to edge, or none
   // where the body brings panels of its own
   body?: 'prose' | 'rows' | 'bare'
@@ -372,21 +376,13 @@ function Section({
     // a heading over a bordered panel, as every page's sections read: a brief
     // carrying headings of its own then reads inside one of them
     <section id={id} className="scroll-mt-16 space-y-stack">
-      <div className="flex items-baseline justify-between gap-3">
-        <button
-          type="button"
-          onClick={() => onToggle(id)}
-          aria-expanded={!closed}
-          className="flex items-baseline gap-2 text-heading font-medium"
-        >
-          <ChevronDown
-            aria-hidden="true"
-            className={cn('size-4 self-center transition-transform', closed && '-rotate-90')}
-          />
-          {title}
-        </button>
-        {aside && <span className="text-meta text-muted-foreground">{aside}</span>}
-      </div>
+      <SectionHeading
+        title={title}
+        count={count}
+        aside={aside}
+        closed={closed}
+        onToggle={() => onToggle(id)}
+      />
       {!closed &&
         (body === 'bare' ? (
           children
@@ -402,8 +398,4 @@ function Section({
         ))}
     </section>
   )
-}
-
-function countOf(count: number, noun: string): string {
-  return count === 1 ? `1 ${noun}` : `${count} ${noun}s`
 }

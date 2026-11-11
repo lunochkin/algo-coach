@@ -23,9 +23,8 @@ import {
 } from '@algo-coach/core';
 import { useEngine } from '@/lib/useEngine';
 import { AccountMenu } from '@/ui/account';
-import { Heading } from '@/ui/cards';
 import { Failed, styles } from '@/ui/common';
-import { PickPanel, PickRow } from '@/ui/rows';
+import { Heading, PickPanel, PickRow } from '@/ui/rows';
 
 /**
  * Every served problem, filtered by technique and difficulty, as the web's
@@ -80,16 +79,17 @@ export default function ProblemsScreen() {
                     ))}
                   </View>
                 ))}
-                <View style={styles.row}>
-                  <View style={{ flex: 1 }}>
-                    <Heading title={listingHeading(view.filtered)} count={view.shown} />
-                  </View>
-                  {view.filtered ? (
-                    <Button compact onPress={() => setFilter(NO_FILTER)}>
-                      {clearFilters(filter)}
-                    </Button>
-                  ) : null}
-                </View>
+                <Heading
+                  title={listingHeading(view.filtered)}
+                  count={view.shown}
+                  aside={
+                    view.filtered ? (
+                      <Button compact onPress={() => setFilter(NO_FILTER)}>
+                        {clearFilters(filter)}
+                      </Button>
+                    ) : null
+                  }
+                />
                 {view.shown === 0 ? (
                   <Text variant="bodyMedium" style={muted}>
                     {PROBLEMS_NONE_MATCH}

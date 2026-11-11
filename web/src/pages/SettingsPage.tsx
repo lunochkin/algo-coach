@@ -1,5 +1,5 @@
 import { ArchiveRestore, LogOut, RefreshCw, Smartphone } from 'lucide-react'
-import { useState, type ReactNode } from 'react'
+import { useState } from 'react'
 
 import {
   ACCOUNT,
@@ -31,6 +31,7 @@ import { api } from '@/api/client'
 import { useLoaded } from '@/api/useLoaded'
 import { Loaded } from '@/components/Loaded'
 import { PageHeader } from '@/components/PageHeader'
+import { SectionHeading } from '@/components/SectionHeading'
 import { Panel } from '@/components/Panel'
 import { SignedInDevices } from '@/components/SignedInDevices'
 import { SignOut } from '@/components/SignOut'
@@ -76,7 +77,7 @@ function Sync() {
   const { now } = useLearner()
   return (
     <section className="space-y-stack">
-      <Heading>Sync</Heading>
+      <SectionHeading title="Sync" />
       <Panel>
         <div className="flex flex-wrap items-center gap-stack">
           <div className="flex-1 space-y-0.5">
@@ -107,7 +108,7 @@ function Archived() {
   if (!archived.length) return null
   return (
     <section className="space-y-stack">
-      <Heading>{ARCHIVED_MODULES}</Heading>
+      <SectionHeading title={ARCHIVED_MODULES} count={archived.length} />
       <ul className="divide-y rounded-xl border bg-card">
         {archived.map((c) => (
           <li key={c.slug} className="flex items-center gap-stack px-4 py-3">
@@ -127,17 +128,13 @@ function Archived() {
   )
 }
 
-function Heading({ children }: { children: ReactNode }) {
-  return <h2 className="text-heading font-medium">{children}</h2>
-}
-
 function Account() {
   const me = useLoaded((signal) => api.GET('/api/me', { signal }), 'me')
   const [apps, setApps] = useState(false)
 
   return (
     <section className="space-y-stack">
-      <Heading>{ACCOUNT}</Heading>
+      <SectionHeading title={ACCOUNT} />
       <Panel>
         <div className="flex flex-wrap items-center gap-stack">
           <div className="flex-1">
@@ -184,7 +181,7 @@ function Study({ stored, said, onSaid: setSaid }: StudyProps) {
 
   return (
     <section className="space-y-stack">
-      <Heading>{STUDY_HEADING}</Heading>
+      <SectionHeading title={STUDY_HEADING} />
       <Panel>
         {STUDY.map(({ name, label }) => (
           <div key={name} className="flex flex-wrap items-center gap-stack">

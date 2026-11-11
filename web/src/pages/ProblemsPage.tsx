@@ -19,6 +19,7 @@ import { api, type Listed } from '@/api/client'
 import { useLoaded } from '@/api/useLoaded'
 import { Loaded } from '@/components/Loaded'
 import { PageHeader } from '@/components/PageHeader'
+import { SectionHeading } from '@/components/SectionHeading'
 import { PickPanel, PickRow } from '@/components/PickRow'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -85,21 +86,21 @@ export function ProblemsPage() {
               </section>
 
               <section className="space-y-stack">
-                <h2 className="flex items-baseline gap-2 text-heading font-medium">
-                  {listingHeading(view.filtered)}
-                  <span className="text-meta font-normal text-muted-foreground tabular-nums">
-                    {view.shown}
-                  </span>
-                  {view.filtered && (
-                    <button
-                      type="button"
-                      onClick={() => go(NO_FILTER)}
-                      className="ml-auto text-meta font-normal text-muted-foreground underline-offset-4 hover:underline"
-                    >
-                      {clearFilters(filter)}
-                    </button>
-                  )}
-                </h2>
+                <SectionHeading
+                  title={listingHeading(view.filtered)}
+                  count={view.shown}
+                  aside={
+                    view.filtered && (
+                      <button
+                        type="button"
+                        onClick={() => go(NO_FILTER)}
+                        className="text-meta text-muted-foreground underline-offset-4 hover:underline"
+                      >
+                        {clearFilters(filter)}
+                      </button>
+                    )
+                  }
+                />
                 {view.shown === 0 ? (
                   <p className="text-meta text-muted-foreground">{PROBLEMS_NONE_MATCH}</p>
                 ) : (

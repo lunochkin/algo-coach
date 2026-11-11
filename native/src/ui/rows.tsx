@@ -1,5 +1,6 @@
 import { Fragment, type ReactNode } from 'react';
-import { StyleSheet, View } from 'react-native';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { Pressable, StyleSheet, View } from 'react-native';
 import { Card, Divider, Text, TouchableRipple, useTheme } from 'react-native-paper';
 
 import type { Stat } from '@algo-coach/core';
@@ -131,6 +132,59 @@ export function PanelItem({ first, last, children }: { first: boolean; last: boo
       }}
     >
       {children}
+    </View>
+  );
+}
+
+/**
+ * A section's heading and how many records it holds, the same on every
+ * screen. `sub` heads a section inside another; `aside` sits at the right.
+ * With `onToggle` the heading is the press that closes its own section.
+ */
+export function Heading(props: {
+  title: string;
+  count?: number;
+  aside?: ReactNode;
+  sub?: boolean;
+  closed?: boolean;
+  onToggle?: () => void;
+}) {
+  const theme = useTheme();
+  const muted = theme.colors.onSurfaceVariant;
+  const text = (
+    <View style={[styles.row, { flex: 1, gap: 6 }]}>
+      {props.onToggle ? (
+        <MaterialCommunityIcons name={props.closed ? 'chevron-right' : 'chevron-down'} size={20} color={muted} />
+      ) : null}
+      <Text variant={props.sub ? 'titleSmall' : 'titleMedium'} style={{ flexShrink: 1 }}>
+        {props.title}
+        {props.count !== undefined ? <Text style={{ color: muted }}>{`  ${props.count}`}</Text> : null}
+      </Text>
+    </View>
+  );
+  const aside =
+    typeof props.aside === 'string' ? (
+      <Text variant="bodySmall" style={{ color: muted, flexShrink: 1, textAlign: 'right' }}>
+        {props.aside}
+      </Text>
+    ) : (
+      props.aside
+    );
+  return (
+    <View style={[styles.row, { marginTop: props.sub ? 0 : 8, minHeight: 32 }]}>
+      {props.onToggle ? (
+        <Pressable
+          onPress={props.onToggle}
+          accessibilityRole="button"
+          accessibilityState={{ expanded: !props.closed }}
+          style={{ flex: 1 }}
+        >
+          {text}
+        </Pressable>
+      ) : (
+        text
+      )}
+      {aside}
     </View>
   );
 }

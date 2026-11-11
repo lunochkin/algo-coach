@@ -268,7 +268,8 @@ describe("a card's ladder", () => {
     }) as unknown as components['schemas']['Studied'];
 
   it('counts the rungs before a run, and the solved ones once it is open', () => {
-    expect(ladderView(studied(false)).aside).toBe('2 rungs');
+    expect(ladderView(studied(false)).count).toBe(2);
+    expect(ladderView(studied(false)).aside).toBeNull();
     expect(ladderView(studied(true)).aside).toBe('1 of 2 solved');
   });
 

@@ -7,9 +7,9 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { boardView, inProgress, readFailure, techniqueStats, type components, loadingLine } from '@algo-coach/core';
 import { useEngine } from '@/lib/useEngine';
 import { AccountMenu } from '@/ui/account';
-import { CardPanel, Heading } from '@/ui/cards';
+import { CardPanel } from '@/ui/cards';
 import { Failed, styles } from '@/ui/common';
-import { PickPanel, PickRow } from '@/ui/rows';
+import { Heading, PickPanel, PickRow } from '@/ui/rows';
 
 type Board = components['schemas']['Board'];
 type ListedCard = components['schemas']['ListedCard'];

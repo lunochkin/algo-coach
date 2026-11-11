@@ -254,7 +254,7 @@ clients.
 - [x] Read every list as rows in one bordered panel, the whole row the link:
       the modules, the lessons, the problems and the card's own lists. The
       phone draws a card per item on the knowledge screens today
-- [ ] Give every section one heading component with its count, and every
+- [x] Give every section one heading component with its count, and every
       panel one ground. The knowledge screens and the engine panels each
       write their own
 - [ ] Draw every header outside the four readings, and route every page's

@@ -36,10 +36,13 @@ export function LessonsPage() {
           <>
             {modules.map(({ c, b }) => (
               <section key={c.slug} className="space-y-stack">
-                <h2 className="text-heading font-medium">{c.title}</h2>
+                <SectionHeading
+                  title={c.title}
+                  count={lessonGroups(b, c).reduce((n, g) => n + g.lessons.length, 0)}
+                />
                 {lessonGroups(b, c).map((g) => (
                   <section key={g.key} className="space-y-stack">
-                    <SectionHeading title={g.title} count={g.lessons.length} />
+                    <SectionHeading sub title={g.title} count={g.lessons.length} />
                     <PickPanel>
                       {g.lessons.map((x) => {
                         const row = lessonRow(b, c, x)

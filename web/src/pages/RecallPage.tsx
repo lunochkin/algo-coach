@@ -31,6 +31,7 @@ import { CodeEditor } from '@/components/CodeEditor'
 import { Loaded } from '@/components/Loaded'
 import { Markdown } from '@/components/Markdown'
 import { PageHeader } from '@/components/PageHeader'
+import { SectionHeading } from '@/components/SectionHeading'
 import { Panel } from '@/components/Panel'
 import { CaseStrip } from '@/components/Verdict'
 import { Badge } from '@/components/ui/badge'
@@ -243,7 +244,7 @@ function Trainer({ slug, templateSlug, trigger, signature }: Props) {
       </Panel>
 
       {taken.map((one) => (
-        <div key={one.hint} className="overflow-hidden rounded-xl border">
+        <div key={one.hint} className="overflow-hidden rounded-xl border bg-card">
           <p className="border-b bg-card px-4 py-2 text-meta text-muted-foreground">
             {hintTaken(one.hint)}
           </p>
@@ -343,14 +344,16 @@ function Ran({
       {/* the form on a press: a user who failed to recall it learns which form
           it was and decides whether to read it */}
       <section className="space-y-stack">
-        <div className="flex items-baseline justify-between gap-3">
-          <h2 className="text-heading font-medium">{RECALL_FORM}</h2>
-          {form === null && (
-            <Button variant="outline" size="sm" onClick={reveal}>
-              {REVEAL_FORM}
-            </Button>
-          )}
-        </div>
+        <SectionHeading
+          title={RECALL_FORM}
+          aside={
+            form === null && (
+              <Button variant="outline" size="sm" onClick={reveal}>
+                {REVEAL_FORM}
+              </Button>
+            )
+          }
+        />
         {form === null ? (
           <p className="rounded-md border border-dashed px-3 py-2 text-meta text-muted-foreground">
             {FORM_HIDDEN}

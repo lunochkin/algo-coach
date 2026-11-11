@@ -10,16 +10,6 @@ type ListedCard = components['schemas']['ListedCard'];
 
 // one card reads as one row wherever it is listed: `pages.md`, A page's areas
 
-/** A list's section heading, with its count. */
-export function Heading({ title, count }: { title: string; count: number }) {
-  const theme = useTheme();
-  return (
-    <Text variant="titleMedium" style={{ marginTop: 8 }}>
-      {title} <Text style={{ color: theme.colors.onSurfaceVariant }}>{count}</Text>
-    </Text>
-  );
-}
-
 /** A panel of card rows, headed by the family several of them teach. */
 export function CardPanel({ technique, cards }: { technique: string | null; cards: ListedCard[] }) {
   const theme = useTheme();

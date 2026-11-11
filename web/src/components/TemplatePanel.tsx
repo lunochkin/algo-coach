@@ -29,7 +29,7 @@ export function TemplatePanel({
   const recallable = (template.cases ?? []).length > 0
 
   return (
-    <div className="overflow-hidden rounded-xl border">
+    <div className="overflow-hidden rounded-xl border bg-card">
       {/* what the form is, and how its recall has gone: the header carries the
           identity, and the body carries the form and the acts on it */}
       <div className="flex flex-wrap items-center gap-x-3 gap-y-1 border-b bg-card px-4 py-3">

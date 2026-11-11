@@ -1,15 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import {
-  meLine,
-  moduleStats,
-  named,
-  refusal,
-  settingRange,
-  signInUnread,
-  signOutWarning,
-  waitingToSend,
-} from './home';
+import { meLine, moduleStats, named, refusal, settingRange, signInUnread, signOutWarning, waitingToSend } from './home';
 
 describe('home words', () => {
   it('counts a module row due first, then its questions', () => {

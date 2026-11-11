@@ -27,6 +27,7 @@ import * as DB from '@/lib/db';
 import { useStore } from '@/lib/store';
 import { useMe } from '@/ui/account';
 import { styles, SyncLine } from '@/ui/common';
+import { Heading } from '@/ui/rows';
 import { useSignOut } from '@/ui/signout';
 
 export default function SettingsScreen() {
@@ -119,7 +120,7 @@ export default function SettingsScreen() {
         contentContainerStyle={[styles.page, { paddingBottom: insets.bottom + 24 }]}
         keyboardShouldPersistTaps="handled"
       >
-        <Text variant="titleMedium">{ACCOUNT}</Text>
+        <Heading title={ACCOUNT} />
         {field('origin', 'Engine address')}
         {!originOk ? <HelperText type="error">An address such as https://example.invalid</HelperText> : null}
         <View style={styles.row}>
@@ -154,7 +155,7 @@ export default function SettingsScreen() {
         </Button>
         {field('device', 'Device name')}
         {!deviceOk ? <HelperText type="error">Letters, digits, - and _ only</HelperText> : null}
-        <Text variant="titleMedium">{STUDY}</Text>
+        <Heading title={STUDY} />
         {field('newPerDay', SETTING_LABEL.new_per_day, true)}
         {!study.ok.new_per_day ? <HelperText type="error">{settingRange('new_per_day')}</HelperText> : null}
         {field('examSize', SETTING_LABEL.exam_size, true)}
@@ -178,9 +179,7 @@ export default function SettingsScreen() {
         ) : null}
         {st.archived.length ? (
           <>
-            <Text variant="titleMedium" style={{ marginTop: 16 }}>
-              {ARCHIVED_MODULES}
-            </Text>
+            <Heading title={ARCHIVED_MODULES} count={st.archived.length} />
             {st.archived.map((c) => (
               <View key={c.slug} style={styles.row}>
                 <Text variant="bodyLarge" style={{ flex: 1 }}>

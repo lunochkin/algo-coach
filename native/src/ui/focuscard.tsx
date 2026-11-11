@@ -50,7 +50,16 @@ export function FocusCard(props: Props) {
   const muted = { color: theme.colors.onSurfaceVariant };
 
   return (
-    <View style={{ borderRadius: 16, backgroundColor: theme.colors.elevation.level2, padding: 12 }}>
+    // a panel's ground and edge, as every panel on the phone draws them
+    <View
+      style={{
+        borderRadius: theme.roundness * 3,
+        borderWidth: 1,
+        borderColor: theme.colors.outlineVariant,
+        backgroundColor: theme.colors.surface,
+        padding: 12,
+      }}
+    >
       <View style={{ gap: 8 }}>
         <View style={[styles.row, { gap: 4 }]}>
           <MaterialCommunityIcons

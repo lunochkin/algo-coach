@@ -16,6 +16,7 @@ export const CERTIFICATIONS_LINK = 'Certifications';
 export const CONTINUE = 'Continue';
 export const EXAM_LINK = 'Exam';
 export const PAUSED = 'paused';
+export const MODULES_HEADING = 'Modules';
 
 export const waitingOutside = (n: number) => `${n} waiting outside`;
 

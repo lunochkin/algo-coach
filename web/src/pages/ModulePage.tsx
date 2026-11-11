@@ -11,7 +11,6 @@ import {
   aimFocus,
   archiveTitle,
   type CellState,
-  counted,
   type CourseStatus,
   dueCount,
   type Focus,
@@ -40,6 +39,7 @@ import {
 
 import { Loaded } from '@/components/Loaded'
 import { PageHeader } from '@/components/PageHeader'
+import { SectionHeading } from '@/components/SectionHeading'
 import { Button } from '@/components/ui/button'
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
 import {
@@ -201,36 +201,36 @@ export function ModulePage() {
             {tab === 'groups' &&
               c.topics.map((t) => (
                 <section key={t.slug} className="space-y-stack">
-                  <div className="flex items-baseline gap-stack">
-                    <h2 className="flex-1 text-heading font-medium">
-                      {t.title}
-                      <span className="ml-2 text-meta font-normal text-muted-foreground">
-                        {counted(t.subs.length, 'subtopic')}
-                      </span>
-                    </h2>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() =>
-                        setStarting({
-                          course: module,
-                          topic: t.slug,
-                          sub: null,
-                          level: null,
-                        })
-                      }
-                    >
-                      {MODULE_START}
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      disabled={aimed(t.slug, null)}
-                      onClick={() => aim({ course: module, topic: t.slug, sub: null })}
-                    >
-                      {aimed(t.slug, null) ? MODULE_FOCUSED : MODULE_FOCUS}
-                    </Button>
-                  </div>
+                  <SectionHeading
+                    title={t.title}
+                    count={t.subs.length}
+                    aside={
+                      <>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() =>
+                            setStarting({
+                              course: module,
+                              topic: t.slug,
+                              sub: null,
+                              level: null,
+                            })
+                          }
+                        >
+                          {MODULE_START}
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          disabled={aimed(t.slug, null)}
+                          onClick={() => aim({ course: module, topic: t.slug, sub: null })}
+                        >
+                          {aimed(t.slug, null) ? MODULE_FOCUSED : MODULE_FOCUS}
+                        </Button>
+                      </>
+                    }
+                  />
                   <div className="overflow-x-auto rounded-xl border bg-card">
                     <table className="w-full text-sm">
                       <thead>

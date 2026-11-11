@@ -5,7 +5,8 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { cardBlocks, inProgress, notInProgress, readFailure, type components, loadingLine } from '@algo-coach/core';
 import { useEngine } from '@/lib/useEngine';
 import { AccountMenu } from '@/ui/account';
-import { CardPanel, Heading } from '@/ui/cards';
+import { CardPanel } from '@/ui/cards';
+import { Heading } from '@/ui/rows';
 import { Failed, styles } from '@/ui/common';
 
 type ListedCard = components['schemas']['ListedCard'];

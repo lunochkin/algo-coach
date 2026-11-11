@@ -1,7 +1,6 @@
-import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { memo, useMemo, useState } from 'react';
-import { Pressable, SectionList, View } from 'react-native';
+import { SectionList, View } from 'react-native';
 import { Appbar, Text, useTheme } from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -17,8 +16,7 @@ import {
   modulesInOrder,
 } from '@algo-coach/core';
 import { useStore } from '@/lib/store';
-import { styles } from '@/ui/common';
-import { PanelItem, PickRow } from '@/ui/rows';
+import { Heading, PanelItem, PickRow } from '@/ui/rows';
 
 // every module's lessons, by module, as the web lists them: `pages.md`, The two clients
 export default function LessonsScreen() {
@@ -37,20 +35,23 @@ export default function LessonsScreen() {
   const isOpen = (key: string) => open[key] ?? true;
   const sections = useMemo(
     () =>
-      modules.flatMap(({ c, b }) =>
-        lessonGroups(b, c).map((g, i) => {
+      modules.flatMap(({ c, b }) => {
+        const groups = lessonGroups(b, c);
+        const lessons = groups.reduce((n, g) => n + g.lessons.length, 0);
+        return groups.map((g, i) => {
           const key = `${c.slug}:${g.key}`;
           return {
             key,
             c,
             b,
             module: i === 0 ? c.title : null,
+            lessons,
             title: g.title,
             total: g.lessons.length,
             data: isOpen(key) ? g.lessons : [],
           };
-        }),
-      ),
+        });
+      }),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [modules, open],
   );
@@ -75,27 +76,15 @@ export default function LessonsScreen() {
           renderSectionHeader={({ section }) => {
             const expanded = isOpen(section.key);
             return (
-              <View style={{ backgroundColor: theme.colors.background }}>
-                {section.module ? (
-                  <Text variant="titleMedium" style={{ paddingTop: 12 }}>
-                    {section.module}
-                  </Text>
-                ) : null}
-                <Pressable
-                  onPress={() => setOpen((o) => ({ ...o, [section.key]: !expanded }))}
-                  style={[styles.row, { justifyContent: 'space-between', paddingVertical: 8 }]}
-                  accessibilityRole="button"
-                  accessibilityState={{ expanded }}
-                >
-                  <Text variant="titleSmall" style={{ color: theme.colors.primary }}>
-                    {`${section.title} · ${section.total}`}
-                  </Text>
-                  <MaterialCommunityIcons
-                    name={expanded ? 'chevron-up' : 'chevron-down'}
-                    size={22}
-                    color={theme.colors.primary}
-                  />
-                </Pressable>
+              <View style={{ backgroundColor: theme.colors.background, paddingBottom: 4 }}>
+                {section.module ? <Heading title={section.module} count={section.lessons} /> : null}
+                <Heading
+                  sub
+                  title={section.title}
+                  count={section.total}
+                  closed={!expanded}
+                  onToggle={() => setOpen((o) => ({ ...o, [section.key]: !expanded }))}
+                />
               </View>
             );
           }}

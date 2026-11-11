@@ -30,7 +30,7 @@ import { useStore } from '@/lib/store';
 import { useEngine } from '@/lib/useEngine';
 import { CodeBlock, Failed, styles } from '@/ui/common';
 import { Markdown } from '@/ui/markdown';
-import { Badge, PickPanel, PickRow } from '@/ui/rows';
+import { Badge, Heading, PickPanel, PickRow } from '@/ui/rows';
 
 type Template = components['schemas']['Template'];
 type Recalled = components['schemas']['Recalled'];
@@ -62,16 +62,14 @@ export default function CardScreen() {
           <Text variant="bodyMedium">{loadingLine('the card')}</Text>
         ) : (
           <>
-            <Text variant="titleMedium">When to reach for it</Text>
+            <Heading title="When to reach for it" />
             <Markdown>{card.trigger}</Markdown>
-            <Text variant="titleMedium">The brief</Text>
+            <Heading title="The brief" />
             <Markdown>{card.brief}</Markdown>
             <Ladder studied={studied.data!} />
             {studied.data!.run ? null : <RunStart slug={slug} onStarted={studied.reload} />}
             {studied.data!.probes.length > 0 ? <Probes studied={studied.data!} /> : null}
-            <Text variant="titleMedium">
-              Templates <Text style={{ color: theme.colors.onSurfaceVariant }}>{card.templates.length}</Text>
-            </Text>
+            <Heading title="Templates" count={card.templates.length} />
             {/* a drawn recall is offered beside a run's progress, as on the web */}
             {studied.data!.run && card.templates.some((one) => (one.cases ?? []).length > 0) ? (
               <Button
@@ -179,9 +177,7 @@ function Ladder({ studied }: { studied: Studied }) {
   const muted = { color: theme.colors.onSurfaceVariant };
   return (
     <>
-      <Text variant="titleMedium">
-        {LADDER_TITLE} <Text style={muted}>{view.aside}</Text>
-      </Text>
+      <Heading title={LADDER_TITLE} count={view.count} aside={view.aside} />
       {view.rows.length > 0 || view.gaps.length > 0 ? (
         <PickPanel>
           {[
@@ -236,12 +232,9 @@ function Ladder({ studied }: { studied: Studied }) {
 }
 
 function Probes({ studied }: { studied: Studied }) {
-  const theme = useTheme();
   return (
     <>
-      <Text variant="titleMedium">
-        {PROBES_TITLE} <Text style={{ color: theme.colors.onSurfaceVariant }}>{PROBES_ASIDE}</Text>
-      </Text>
+      <Heading title={PROBES_TITLE} count={studied.probes.length} aside={PROBES_ASIDE} />
       <PickPanel>
         {studied.probes.map((one) => (
           <PickRow

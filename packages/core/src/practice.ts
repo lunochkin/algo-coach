@@ -238,7 +238,10 @@ export interface RungRow {
 }
 
 export interface LadderView {
-  aside: string;
+  // the rungs, beside the section's heading
+  count: number;
+  // how many are solved, where a run is open
+  aside: string | null;
   rows: RungRow[];
   // a core template no problem covers yet: `content.md`, Cards
   gaps: string[];
@@ -250,7 +253,8 @@ export function ladderView(studied: Studied): LadderView {
   const solved = studied.rungs.filter((one) => one.solved).length;
   const n = studied.rungs.length;
   return {
-    aside: studied.run ? `${solved} of ${n} solved` : n === 1 ? '1 rung' : `${n} rungs`,
+    count: n,
+    aside: studied.run ? `${solved} of ${n} solved` : null,
     rows: studied.rungs.map((rung) => ({
       problemId: rung.problem.id,
       title: rung.problem.title,

@@ -34,6 +34,7 @@ import { getToken } from '@/lib/settings';
 import { useStore } from '@/lib/store';
 import { useEngine } from '@/lib/useEngine';
 import { CodeBlock, Failed, styles, tones } from '@/ui/common';
+import { Heading } from '@/ui/rows';
 import { CodeEditor, type EditorHandle } from '@/ui/editor';
 import type { Key } from '@/lib/keys';
 import { KeyPad } from '@/ui/keys';
@@ -279,7 +280,7 @@ function Ran({
       <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant }}>
         {view.hints}
       </Text>
-      <Text variant="titleMedium">{RECALL_FORM}</Text>
+      <Heading title={RECALL_FORM} />
       {form === null ? (
         <>
           <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant }}>

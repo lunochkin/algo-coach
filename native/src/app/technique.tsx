@@ -6,9 +6,9 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { readFailure, techniqueCards, techniqueStats, loadingLine } from '@algo-coach/core';
 import { useEngine } from '@/lib/useEngine';
-import { CardPanel, Heading } from '@/ui/cards';
+import { CardPanel } from '@/ui/cards';
 import { Failed, styles } from '@/ui/common';
-import { PickPanel, PickRow } from '@/ui/rows';
+import { Heading, PickPanel, PickRow } from '@/ui/rows';
 
 /**
  * A technique's problems and the cards teaching it or a narrower one:
