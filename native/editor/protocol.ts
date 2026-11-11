@@ -23,4 +23,8 @@ export type FromApp =
   // the WebView changed size: the page lays itself out again only on its next input
   | { kind: 'measure' };
 
-export type FromPage = { kind: 'ready' } | { kind: 'change'; doc: string };
+export type FromPage =
+  | { kind: 'ready' }
+  | { kind: 'change'; doc: string }
+  // the declared names the row offers, narrowed to the word before the caret
+  | { kind: 'names'; names: string[] };

@@ -4,7 +4,6 @@ import {
   afterLetter,
   cased,
   DOUBLE_TAP_MS,
-  dragSteps,
   EMPTY,
   type Edit,
   type Key,
@@ -12,8 +11,6 @@ import {
   keywordText,
   pressed,
   shiftPressed,
-  STEP_X,
-  STEP_Y,
 } from './keys';
 
 const typed = (keys: Key[], from: Edit = EMPTY) => keys.reduce(pressed, from);
@@ -82,14 +79,19 @@ describe('the editor layer', () => {
     expect(new Set(names).size).toBe(names.length);
   });
 
-  it('steps the caret once per stride of the drag, either way', () => {
-    expect(dragSteps(STEP_X * 2.5, 0)).toEqual({ x: 2, y: 0 });
-    expect(dragSteps(-STEP_X, STEP_Y * 1.9)).toEqual({ x: -1, y: 1 });
-  });
-
   it('leaves a one-line field alone on the editor-only keys', () => {
     const edit: Edit = { text: 'ab', selection: { start: 1, end: 1 } };
-    for (const key of ['enter', 'indent', 'dedent', 'up', 'down', 'lineUp', 'duplicate', 'block'] as Key[])
+    for (const key of [
+      'enter',
+      'indent',
+      'dedent',
+      'up',
+      'down',
+      'lineUp',
+      'duplicate',
+      'block',
+      { name: 'nums' },
+    ] as Key[])
       expect(pressed(edit, key)).toBe(edit);
   });
 });

@@ -459,19 +459,19 @@ what it offers. The inventory is the list both clients build to.
   and returning resumes only that pause, as a hidden page does on the web.
 - **The phone's Recall screen types the form through the app's keyboard**,
   into the editor `README.md` gives. The editor's pad adds enter, indent and
-  dedent, a strip the finger drags to move the caret, and a layer of
-  Python's keywords. Its line keys move or duplicate a line, and select the
-  block around the caret by indentation, wider on each press, so indent and
-  dedent move the block whole. The editor draws an indent level two
-  characters wide while the file keeps four, and wraps a long line under its
-  own indent. A phone fits some forty characters, where a median canonical's
-  widest line is fifty-five. A press beside Run hides the keyboard, and the
-  editor then holds some twenty lines, where a median canonical is eighteen.
-  A key carries a keyword at most, never a name or a line of a form, since a
-  key carrying one would be a hint the recall measures. The screen opens
-  from a template's press on Card, and a drawn recall opens beside a run, as
-  on the web. A menu switches between the card's templates, where the web's
-  page holds the same menu.
+  dedent, a row of the names the file declares, narrowed to the word being
+  typed, and a layer of Python's keywords. Its line keys move or duplicate a
+  line, and select the block around the caret by indentation, wider on each
+  press, so indent and dedent move the block whole. The editor draws an
+  indent level two characters wide while the file keeps four, and wraps a
+  long line under its own indent. A phone fits some forty characters, where
+  a median canonical's widest line is fifty-five. A press beside Run hides
+  the keyboard, and the editor then holds some twenty lines, where a median
+  canonical is eighteen. A key carries a keyword or a name the file
+  declares, never a library name or a line of a form, as `flows.md` gives.
+  The screen opens from a template's press on Card, and a drawn recall opens
+  beside a run, as on the web. A menu switches between the card's templates,
+  where the web's page holds the same menu.
 - **The phone's Problems tab reads the listing as the web's page does.** A
   row opens the phone's Problem screen, which reads the record and the
   statement. The filters live in the tab while it is open, since the phone

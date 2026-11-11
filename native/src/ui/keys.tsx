@@ -1,13 +1,12 @@
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { type ReactNode, useEffect, useRef, useState } from 'react';
-import { PanResponder, Pressable, View } from 'react-native';
+import { Pressable, ScrollView, View } from 'react-native';
 import { Text, useTheme } from 'react-native-paper';
 
 import {
   afterLetter,
   cased,
   DIGITS,
-  dragSteps,
   type Key,
   KEYWORDS,
   keywordText,
@@ -33,9 +32,17 @@ export const PAD_HEIGHT = ROWS * HEIGHT + (ROWS - 1) * GAP;
 // keywords an editor adds
 type Layer = 'letters' | 'rare' | 'keywords';
 
-// `lines` is the editor's pad: enter where `?` sits, the strip dragging the
-// caret, indent and dedent, and the keywords
-export function KeyPad({ onKey, lines = false }: { onKey: (key: Key) => void; lines?: boolean }) {
+// `lines` is the editor's pad: enter where `?` sits, the line keys, the
+// names the file declares, and the keywords
+export function KeyPad({
+  onKey,
+  lines = false,
+  names = [],
+}: {
+  onKey: (key: Key) => void;
+  lines?: boolean;
+  names?: string[];
+}) {
   const [shift, setShift] = useState<Shift>('off');
   const [layer, setLayer] = useState<Layer>('letters');
   const lastShift = useRef(0);
@@ -69,18 +76,29 @@ export function KeyPad({ onKey, lines = false }: { onKey: (key: Key) => void; li
     <View style={{ gap: GAP }}>
       {lines ? (
         <Row>
-          <Cap icon="format-indent-decrease" accessibilityLabel="Dedent" onPress={() => onKey('dedent')} />
-          <Cap icon="format-indent-increase" accessibilityLabel="Indent" onPress={() => onKey('indent')} />
+          <Cap grow={0.75} icon="format-indent-decrease" accessibilityLabel="Dedent" onPress={() => onKey('dedent')} />
+          <Cap grow={0.75} icon="format-indent-increase" accessibilityLabel="Indent" onPress={() => onKey('indent')} />
           {/* a block selected here moves whole under indent and dedent */}
-          <Cap icon="select-group" accessibilityLabel="Select the block" onPress={() => onKey('block')} />
-          <Strip onKey={onKey} />
-          <Cap icon="arrow-up-bold-outline" accessibilityLabel="Move the line up" onPress={() => onKey('lineUp')} />
+          <Cap grow={0.75} icon="select-group" accessibilityLabel="Select the block" onPress={() => onKey('block')} />
+          <Names names={names} onKey={onKey} />
           <Cap
+            grow={0.75}
+            icon="arrow-up-bold-outline"
+            accessibilityLabel="Move the line up"
+            onPress={() => onKey('lineUp')}
+          />
+          <Cap
+            grow={0.75}
             icon="arrow-down-bold-outline"
             accessibilityLabel="Move the line down"
             onPress={() => onKey('lineDown')}
           />
-          <Cap icon="content-duplicate" accessibilityLabel="Duplicate the line" onPress={() => onKey('duplicate')} />
+          <Cap
+            grow={0.75}
+            icon="content-duplicate"
+            accessibilityLabel="Duplicate the line"
+            onPress={() => onKey('duplicate')}
+          />
         </Row>
       ) : null}
       {[...SYMBOLS, DIGITS].map((row) => (
@@ -187,47 +205,38 @@ export function KeyPad({ onKey, lines = false }: { onKey: (key: Key) => void; li
   );
 }
 
-// a bar the finger drags to move the caret: a character per stride sideways,
-// a line per stride up or down. Tapping between characters on a phone lands
-// a character or two off
-function Strip({ onKey }: { onKey: (key: Key) => void }) {
+// the names the file declares, in the strip's place so they cost no height:
+// `flows.md` gives why a declared name is offered and a library name never is
+function Names({ names, onKey }: { names: string[]; onKey: (key: Key) => void }) {
   const theme = useTheme();
-  const [held, setHeld] = useState(false);
-  const made = useRef({ x: 0, y: 0 });
-  const sink = useRef(onKey);
-  sink.current = onKey;
-  const pan = useRef(
-    PanResponder.create({
-      onStartShouldSetPanResponder: () => true,
-      onPanResponderGrant: () => {
-        made.current = { x: 0, y: 0 };
-        setHeld(true);
-      },
-      onPanResponderMove: (_, drag) => {
-        const steps = dragSteps(drag.dx, drag.dy);
-        for (; made.current.x < steps.x; made.current.x++) sink.current('right');
-        for (; made.current.x > steps.x; made.current.x--) sink.current('left');
-        for (; made.current.y < steps.y; made.current.y++) sink.current('down');
-        for (; made.current.y > steps.y; made.current.y--) sink.current('up');
-      },
-      onPanResponderRelease: () => setHeld(false),
-      onPanResponderTerminate: () => setHeld(false),
-    }),
-  ).current;
   return (
-    <View
-      {...pan.panHandlers}
-      accessibilityLabel="Drag to move the cursor"
-      style={{
-        flex: 3,
-        height: HEIGHT,
-        borderRadius: 8,
-        alignItems: 'center',
-        justifyContent: 'center',
-        backgroundColor: held ? theme.colors.surfaceDisabled : theme.colors.elevation.level3,
-      }}
-    >
-      <MaterialCommunityIcons name="cursor-move" size={20} color={theme.colors.onSurfaceVariant} />
+    // a horizontal scroll sizes to its content inside a row, so a plain view
+    // holds the row's share and the scroll fills it
+    <View style={{ flex: 5, height: HEIGHT, borderRadius: 8, backgroundColor: theme.colors.elevation.level3 }}>
+      <ScrollView
+        horizontal
+        keyboardShouldPersistTaps="always"
+        showsHorizontalScrollIndicator={false}
+        contentContainerStyle={{ alignItems: 'center', gap: GAP, paddingHorizontal: 4 }}
+      >
+        {names.map((one) => (
+          <Pressable
+            key={one}
+            accessibilityRole="button"
+            accessibilityLabel={`Name ${one}`}
+            onPress={() => onKey({ name: one })}
+            style={({ pressed }) => ({
+              height: HEIGHT - 8,
+              paddingHorizontal: 10,
+              borderRadius: 6,
+              justifyContent: 'center',
+              backgroundColor: pressed ? theme.colors.surfaceDisabled : theme.colors.surfaceVariant,
+            })}
+          >
+            <Text style={{ fontFamily: 'monospace', fontSize: 14, color: theme.colors.onSurfaceVariant }}>{one}</Text>
+          </Pressable>
+        ))}
+      </ScrollView>
     </View>
   );
 }

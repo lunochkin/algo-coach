@@ -82,4 +82,11 @@ describe('a key from the app keyboard', () => {
     expect(typed(editing(), [...text('['), 'back']).doc.toString()).toBe('');
     expect(typed(editing(), text("'a")).doc.toString()).toBe("'a'");
   });
+
+  it('puts a name in place of the part of it typed before the caret', () => {
+    const state = typed(editing('total = 0\nx = to'), [{ name: 'total' }]);
+    expect(state.doc.toString()).toBe('total = 0\nx = total');
+    expect(state.selection.main.head).toBe(state.doc.length);
+    expect(typed(editing('x = '), [{ name: 'nums' }]).doc.toString()).toBe('x = nums');
+  });
 });

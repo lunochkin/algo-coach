@@ -1,7 +1,16 @@
 // the page the phone's editor WebView loads: the shared Python setup, typed
 // through the app's keyboard. `just editor-page` bundles it into
 // `src/editor/page.ts`, which the app ships
-import { type EditorKey, keyed, narrowIndent, pythonEditing } from '@algo-coach/editor';
+import {
+  declaredNames,
+  type EditorKey,
+  keyed,
+  narrowIndent,
+  offered,
+  pythonEditing,
+  wordBefore,
+} from '@algo-coach/editor';
+import { syntaxTree } from '@codemirror/language';
 import { EditorState } from '@codemirror/state';
 import { drawSelection, EditorView } from '@codemirror/view';
 
@@ -72,12 +81,29 @@ function open(doc: string, colors: Colors) {
         }),
         EditorView.updateListener.of((update) => {
           if (update.docChanged) post({ kind: 'change', doc: update.state.doc.toString() });
+          if (update.docChanged || update.selectionSet) names(update.state);
         }),
         look(colors),
       ],
     }),
   });
   view.focus();
+  lastNames = '';
+  names(view.state);
+}
+
+// sent only where the row would change, so a caret moving inside one word
+// costs no message
+let lastNames = '';
+function names(state: EditorState) {
+  const doc = state.doc.toString();
+  const head = state.selection.main.head;
+  const line = state.doc.lineAt(head);
+  const row = offered(declaredNames(doc, syntaxTree(state)), wordBefore(line.text.slice(0, head - line.from)));
+  const key = row.join(' ');
+  if (key === lastNames) return;
+  lastNames = key;
+  post({ kind: 'names', names: row });
 }
 
 function press(key: EditorKey) {

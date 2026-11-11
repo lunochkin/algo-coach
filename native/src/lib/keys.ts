@@ -24,8 +24,6 @@ const at = (text: string, caret: number): Edit => ({ text, selection: { start: c
 /** The text and caret after one press. A selection is replaced by an insert and removed by back. */
 export function pressed(edit: Edit, key: Key): Edit {
   const { text } = edit;
-  // a field of one line takes an insert, back and the sideways moves alone
-  if (typeof key === 'string' && key !== 'back' && key !== 'left' && key !== 'right') return edit;
   const start = Math.min(edit.selection.start, edit.selection.end);
   const end = Math.max(edit.selection.start, edit.selection.end);
   if (key === 'left') return at(text, start === end ? Math.max(0, start - 1) : start);
@@ -35,6 +33,7 @@ export function pressed(edit: Edit, key: Key): Edit {
     if (start === 0) return edit;
     return at(text.slice(0, start - 1) + text.slice(start), start - 1);
   }
+  if (typeof key === 'string' || !('insert' in key)) return edit;
   return at(text.slice(0, start) + key.insert + text.slice(end), start + key.insert.length);
 }
 
@@ -88,13 +87,3 @@ export const KEYWORDS: string[][] = [
 // a keyword something always follows takes its space with it
 const BARE = new Set(['else', 'pass', 'break', 'continue', 'None', 'True', 'False']);
 export const keywordText = (word: string) => (BARE.has(word) ? word : `${word} `);
-
-// how far a finger drags the strip for one step of the caret: a character
-// sideways, a line up or down
-export const STEP_X = 14;
-export const STEP_Y = 28;
-
-/** The caret steps a drag has made since it started. */
-export function dragSteps(dx: number, dy: number): { x: number; y: number } {
-  return { x: Math.trunc(dx / STEP_X), y: Math.trunc(dy / STEP_Y) };
-}

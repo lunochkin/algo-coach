@@ -183,6 +183,7 @@ function SittingOn({
   const [keys, setKeys] = useState(true);
   const [ending, setEnding] = useState(false);
   const editor = useRef<EditorHandle>(null);
+  const [names, setNames] = useState<string[]>([]);
   const code = useRef<string | null>(null);
 
   // each reading of the statement is a reading of the sitting, stamped on arrival
@@ -419,6 +420,7 @@ function SittingOn({
       <View style={{ flex: 1, display: tab === 'code' ? 'flex' : 'none' }}>
         <CodeEditor
           ref={editor}
+          onNames={setNames}
           initial={opened.code}
           onChange={(typed) => {
             code.current = typed;
@@ -445,7 +447,7 @@ function SittingOn({
         ) : null}
         {keys && !clock.ended ? (
           <View style={{ paddingHorizontal: 8, paddingTop: 6 }}>
-            <KeyPad lines onKey={(key) => editor.current?.press(key)} />
+            <KeyPad lines names={names} onKey={(key) => editor.current?.press(key)} />
           </View>
         ) : null}
       </View>

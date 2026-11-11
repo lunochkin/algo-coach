@@ -85,6 +85,7 @@ function Trainer({ slug, prompt, drawn, bottom }: { slug: string; prompt: Prompt
   const theme = useTheme();
   const { origin } = useStore().settings;
   const editor = useRef<EditorHandle>(null);
+  const [names, setNames] = useState<string[]>([]);
   const top = useRef<ScrollViewInstance>(null);
   const code = useRef(recallBlank(prompt.signature));
   const [taken, setTaken] = useState<{ hint: Hint; text: string }[]>([]);
@@ -159,7 +160,7 @@ function Trainer({ slug, prompt, drawn, bottom }: { slug: string; prompt: Prompt
           </View>
         ))}
       </ScrollView>
-      <CodeEditor ref={editor} initial={code.current} onChange={(typed) => (code.current = typed)} />
+      <CodeEditor ref={editor} onNames={setNames} initial={code.current} onChange={(typed) => (code.current = typed)} />
       <View style={[styles.row, { paddingHorizontal: 8, paddingVertical: 6, gap: 8 }]}>
         <Button mode="contained" onPress={run} disabled={running}>
           {runLabel(running)}
@@ -187,7 +188,7 @@ function Trainer({ slug, prompt, drawn, bottom }: { slug: string; prompt: Prompt
       ) : null}
       {keys ? (
         <View style={{ paddingHorizontal: 8 }}>
-          <KeyPad lines onKey={(key) => editor.current?.press(key)} />
+          <KeyPad lines names={names} onKey={(key) => editor.current?.press(key)} />
         </View>
       ) : null}
     </View>

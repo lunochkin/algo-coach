@@ -45,10 +45,13 @@ export interface EditorHandle {
 export function CodeEditor({
   initial,
   onChange,
+  onNames,
   ref,
 }: {
   initial: string;
   onChange: (code: string) => void;
+  // the declared names the keyboard offers, as the caret and the code move
+  onNames?: (names: string[]) => void;
   ref?: Ref<EditorHandle>;
 }) {
   const theme = useTheme();
@@ -74,7 +77,8 @@ export function CodeEditor({
     // the document is sent once the page can take it, and never again: a
     // second send would move the caret under the user's typing
     if (message.kind === 'ready') send({ kind: 'open', doc: initial, colors });
-    else onChange(message.doc);
+    else if (message.kind === 'change') onChange(message.doc);
+    else onNames?.(message.names);
   };
 
   return (

@@ -1,3 +1,4 @@
+import { wordBefore } from './names';
 import { deleteBracketPair, insertBracket } from '@codemirror/autocomplete';
 import {
   copyLineDown,
@@ -17,6 +18,8 @@ import { EditorSelection, type EditorState, type StateCommand, type Transaction 
 // dedent to move whole
 export type EditorKey =
   | { insert: string }
+  // a declared name, in place of the part of it typed before the caret
+  | { name: string }
   | 'back'
   | 'left'
   | 'right'
@@ -60,6 +63,15 @@ export function keyed(state: EditorState, key: EditorKey): Transaction | null {
             : EditorSelection.cursor(step < 0 ? range.from : range.to),
         ),
       ),
+      scrollIntoView: true,
+    });
+  } else if ('name' in key) {
+    const head = state.selection.main.head;
+    const typed = wordBefore(state.doc.lineAt(head).text.slice(0, head - state.doc.lineAt(head).from));
+    made = state.update({
+      changes: { from: head - typed.length, to: head, insert: key.name },
+      selection: { anchor: head - typed.length + key.name.length },
+      userEvent: 'input.type',
       scrollIntoView: true,
     });
   }
