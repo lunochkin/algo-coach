@@ -38,9 +38,9 @@ import { Loaded } from '@/components/Loaded'
 import { Markdown } from '@/components/Markdown'
 import { PageHeader } from '@/components/PageHeader'
 import { SectionHeading } from '@/components/SectionHeading'
-import { Panel, PanelStrip } from '@/components/Panel'
+import { Panel, PanelFrame, PanelStrip } from '@/components/Panel'
 import { CaseStrip } from '@/components/Verdict'
-import { Badge } from '@/components/ui/badge'
+import { Tag } from '@/components/Tag'
 import { Button } from '@/components/ui/button'
 import {
   DropdownMenu,
@@ -111,11 +111,7 @@ export function RecallPage() {
                   says which kind this one is. Withheld on a drawn recall: a
                   card carries at most one optional template, and the badge
                   would name the form the trigger is asking for */}
-              {recallOptional(prompt.data) && (
-                <Badge variant="outline" className="font-normal">
-                  {RECALL_OPTIONAL}
-                </Badge>
-              )}
+              {recallOptional(prompt.data) && <Tag>{RECALL_OPTIONAL}</Tag>}
             </span>
           )
         }
@@ -250,14 +246,14 @@ function Trainer({ slug, templateSlug, trigger, signature }: Props) {
       </Panel>
 
       {taken.map((one) => (
-        <div key={one.hint} className="overflow-hidden rounded-xl border bg-card">
+        <PanelFrame key={one.hint}>
           <PanelStrip>
             <span className="text-meta text-muted-foreground">{hintTaken(one.hint)}</span>
           </PanelStrip>
           <div className="px-4 py-3">
             {one.hint === 'form' ? <PythonCode code={one.text} /> : <Markdown>{one.text}</Markdown>}
           </div>
-        </div>
+        </PanelFrame>
       ))}
 
       <section className="space-y-stack">

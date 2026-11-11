@@ -15,7 +15,10 @@ type Props = {
   readOnly?: boolean
 }
 
-const locked = (readOnly: boolean) => [EditorState.readOnly.of(readOnly), EditorView.editable.of(!readOnly)]
+const locked = (readOnly: boolean) => [
+  EditorState.readOnly.of(readOnly),
+  EditorView.editable.of(!readOnly),
+]
 
 // the shared Python setup, with the web's own keymap and look
 export function CodeEditor({ initial, onChange, onSubmit, handle, readOnly = false }: Props) {

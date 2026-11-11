@@ -15,6 +15,7 @@ import { SectionBar } from '@/components/SectionBar'
 import { TemplatePanel } from '@/components/TemplatePanel'
 import { ThemeToggle } from '@/components/ThemeToggle'
 import { Verdict } from '@/components/Verdict'
+import { Tag } from '@/components/Tag'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
@@ -187,7 +188,7 @@ export function GalleryPage() {
         </div>
         <div className="flex flex-wrap items-center gap-2">
           <Badge variant="secondary">optional</Badge>
-          <Badge variant="outline">procedure</Badge>
+          <Tag>procedure</Tag>
         </div>
       </Section>
 
@@ -233,7 +234,7 @@ export function GalleryPage() {
           <PickRow
             to="/gallery"
             title="Smallest feasible speed"
-            badge={<Badge variant="outline">medium</Badge>}
+            badge={<Tag>medium</Tag>}
             stats={[
               { label: 'attempts', value: 2 },
               { label: 'solved', value: '1/2' },

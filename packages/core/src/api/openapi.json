@@ -1544,6 +1544,13 @@
               }
             ]
           },
+          "techniques": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Techniques"
+          },
           "attempt_count": {
             "type": "integer",
             "title": "Attempt Count"
@@ -1570,6 +1577,7 @@
           "problem_id",
           "title",
           "difficulty",
+          "techniques",
           "attempt_count",
           "solved_count",
           "last_attempt_at"

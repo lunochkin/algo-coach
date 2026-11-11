@@ -13,20 +13,18 @@ import {
   toggled,
   type ListingFilter,
   OF,
-  techniquesLine,
 } from '@algo-coach/core'
 import { useSearchParams } from 'react-router'
 
-import { api, type Listed } from '@/api/client'
+import { api } from '@/api/client'
 import { useLoaded } from '@/api/useLoaded'
 import { Loaded } from '@/components/Loaded'
 import { PageHeader } from '@/components/PageHeader'
 import { SectionHeading } from '@/components/SectionHeading'
-import { PickPanel, PickRow } from '@/components/PickRow'
-import { Badge } from '@/components/ui/badge'
+import { PickPanel } from '@/components/PickRow'
+import { ProblemRow } from '@/components/ProblemRow'
 import { Button } from '@/components/ui/button'
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
-import { counts } from '@/lib/format'
 
 // every served problem at once, where the board reaches them one technique at
 // a time. Core reads the filters, the counts and the page: `listingView`
@@ -110,7 +108,19 @@ export function ProblemsPage() {
                   <>
                     <PickPanel>
                       {view.rows.map((one) => (
-                        <ProblemRow key={one.problem_id} listed={one} drilled={view.drilled} />
+                        <ProblemRow
+                          key={one.problem_id}
+                          problem={one}
+                          // the one tag the listing is filtered to is the technique
+                          // the claim then ticks, as a pick from the board ticks its own
+                          query={
+                            new URLSearchParams(
+                              view.drilled === null
+                                ? { from: 'problems' }
+                                : { from: 'problems', technique: view.drilled },
+                            )
+                          }
+                        />
                       ))}
                     </PickPanel>
                     {view.pages > 1 && (
@@ -142,29 +152,5 @@ export function ProblemsPage() {
         }}
       </Loaded>
     </section>
-  )
-}
-
-// the techniques read under the title, where a row's right-hand cluster is
-// the counts. `drilled` is the one tag the listing is filtered to, which the
-// claim then ticks as a pick from the board ticks its technique
-function ProblemRow({ listed, drilled }: { listed: Listed; drilled: string | null }) {
-  const query = new URLSearchParams({ from: 'problems' })
-  if (drilled !== null) query.set('technique', drilled)
-  return (
-    <PickRow
-      to={`/problems/${encodeURIComponent(listed.problem_id)}?${query.toString()}`}
-      title={listed.title}
-      badge={
-        listed.difficulty && (
-          <Badge variant="outline" className="font-normal">
-            {listed.difficulty}
-          </Badge>
-        )
-      }
-      stats={counts(listed)}
-      note={techniquesLine(listed.techniques)}
-      mono
-    />
   )
 }

@@ -194,6 +194,16 @@ def test_a_candidate_carries_no_statement(client):
     assert "statement" not in str(rows)
 
 
+def test_a_candidate_carries_the_techniques_a_listed_problem_does(client):
+    """A technique's problem reads as the same row the listing draws."""
+    rows = client.get("/api/techniques/sorting/candidates").json()
+    listed = {row["problem_id"]: row for row in client.get("/api/problems").json()}
+
+    assert [row["techniques"] for row in rows] == [
+        listed[row["problem_id"]]["techniques"] for row in rows
+    ]
+
+
 def test_a_retired_problem_is_not_a_candidate(client, database):
     ProblemStore(database).retire("p-greedy", RetirementReason.DEFECTIVE)
 

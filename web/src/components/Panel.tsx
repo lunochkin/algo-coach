@@ -1,9 +1,20 @@
 import type { ReactNode } from 'react'
 
+import { cn } from '@/lib/utils'
+
 // a bordered block on the card surface: what a page holds beside its reading,
 // as the run's counts on a card and the press that starts a sitting
-export function Panel({ children }: { children: ReactNode }) {
-  return <div className="space-y-stack rounded-xl border bg-card px-4 py-3">{children}</div>
+export function Panel({ children, className }: { children: ReactNode; className?: string }) {
+  return (
+    <div className={cn('space-y-stack rounded-xl border bg-card px-4 py-3', className)}>
+      {children}
+    </div>
+  )
+}
+
+// the same edge with no inset, for a panel headed by its strip
+export function PanelFrame({ children }: { children: ReactNode }) {
+  return <div className="overflow-hidden rounded-xl border bg-card">{children}</div>
 }
 
 // the strip heading a panel: it names what the panel holds, and where it

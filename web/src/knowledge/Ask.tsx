@@ -35,6 +35,8 @@ import { Link } from 'react-router'
 
 import { SectionHeading } from '@/components/SectionHeading'
 import { PlainCode, PythonCode } from '@/components/PythonCode'
+import { optionTile } from '@/components/optionTile'
+import { Panel } from '@/components/Panel'
 import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Input } from '@/components/ui/input'
@@ -121,10 +123,7 @@ export function Ask({ q, course, head, onAnswered, onNext, exam, onLesson }: Pro
                 aria-checked={on}
                 disabled={!!result}
                 onClick={() => toggle(pos)}
-                className={cn(
-                  'flex w-full items-baseline gap-3 rounded-xl border px-4 py-2.5 text-left',
-                  on ? 'border-foreground bg-muted' : 'hover:bg-muted/50',
-                )}
+                className={cn(optionTile(on), 'w-full items-baseline')}
               >
                 <span className="font-medium">{LETTERS[pos]}</span>
                 <span className="flex-1 whitespace-pre-wrap">{q.choices[i]}</span>
@@ -232,10 +231,7 @@ function Tick(props: {
   return (
     <label
       // one option tile, as a choice is drawn: picked reads bordered and tinted
-      className={cn(
-        'flex items-start gap-3 rounded-xl border px-4 py-2.5',
-        props.on ? 'border-foreground bg-muted' : 'hover:bg-muted/50',
-      )}
+      className={cn(optionTile(props.on), 'items-start')}
     >
       <Checkbox
         checked={props.on}
@@ -281,7 +277,7 @@ export function Details({
   const sections = detailSections(r.q)
   const lessons = taughtBy(r.q, course)
   return (
-    <div className="space-y-stack rounded-xl border bg-card px-4 py-3">
+    <Panel>
       {answer && (
         <Section title={DETAIL_YOUR_ANSWER}>
           {answer.kind === 'rows' ? (
@@ -349,7 +345,7 @@ export function Details({
           )}
         </p>
       ))}
-    </div>
+    </Panel>
   )
 }
 

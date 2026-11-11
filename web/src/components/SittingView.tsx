@@ -59,6 +59,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog'
+import { Panel } from '@/components/Panel'
 import { Verdict } from '@/components/Verdict'
 import { autoStarts, pressed } from '@/lib/clock'
 import { DEVICE } from '@/knowledge/copy'
@@ -404,9 +405,9 @@ export function SittingView({ problemId, drilled, card, from }: Props) {
           {/* the verdict sits under the editor: a failing case is read beside
               the code that failed it */}
           {submitted && (
-            <div className="max-h-[45%] overflow-auto rounded-xl border bg-card px-4 py-3">
+            <Panel className="max-h-[45%] overflow-auto">
               <Verdict submitted={submitted} />
-            </div>
+            </Panel>
           )}
         </section>
       </div>

@@ -45,6 +45,7 @@ import {
   OF,
 } from '@algo-coach/core'
 
+import { optionTile } from '@/components/optionTile'
 import { Choice } from '@/components/Choice'
 import { PickPanel, PickRow } from '@/components/PickRow'
 import { Loaded } from '@/components/Loaded'
@@ -58,7 +59,6 @@ import { Ask, Details, Verdict } from '@/knowledge/Ask'
 import { linesOf, loadedFrom, useKnowledge, type Knowledge } from '@/knowledge/context'
 import { useLearner } from '@/knowledge/learner'
 import { CERTIFICATIONS, KNOWLEDGE } from '@/knowledge/paths'
-import { cn } from '@/lib/utils'
 
 const ALL = 'all'
 
@@ -342,10 +342,8 @@ function Reviewed({
           {r.order.map((i, pos) => (
             <li
               key={pos}
-              className={cn(
-                'flex gap-3 rounded-xl border px-4 py-2.5',
-                r.picked.includes(pos) && 'border-foreground bg-muted',
-              )}
+              // read back, not offered: no hover
+              className={optionTile(r.picked.includes(pos), false)}
             >
               <span className="font-medium">{LETTERS[pos]}</span>
               <span className="flex-1 whitespace-pre-wrap">{r.q.choices[i]}</span>

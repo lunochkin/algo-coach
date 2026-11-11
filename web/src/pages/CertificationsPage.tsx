@@ -37,7 +37,8 @@ import { useLearner } from '@/knowledge/learner'
 import { KNOWLEDGE } from '@/knowledge/paths'
 import { StartSheet, type Scope } from '@/knowledge/StartSheet'
 import { type Sections, useSections } from '@/lib/sections'
-import { GRID_CELL, GRID_LEVEL_HEAD, GRID_PRESS } from '@/lib/grid'
+import { GridTable } from '@/components/GridTable'
+import { GRID_CELL, GRID_PRESS } from '@/lib/grid'
 import { cn } from '@/lib/utils'
 
 type Picked = { course: string; id: string }
@@ -125,50 +126,47 @@ function Grid(props: {
       closed={props.sections.closed(c.slug)}
       onToggle={props.sections.toggle}
     >
-      <div className="overflow-x-auto rounded-xl border bg-card">
-        <table className="w-full text-meta">
-          <thead>
-            <tr className="text-meta text-muted-foreground">
-              <th className="px-4 py-2 text-left font-normal">{SCOPE_COLUMN}</th>
-              {props.levels.map((l) => (
-                <th key={l} className={cn(GRID_LEVEL_HEAD, practiceLevel(c, l) && 'opacity-60')}>
-                  {levelName(props.rules, l, true)}
-                  {practiceLevel(c, l) && <span className="block">{PRACTICE}</span>}
-                </th>
-              ))}
-            </tr>
-          </thead>
-          <tbody className="divide-y">
-            {rows.map((row) => (
-              <tr key={row.scope}>
-                <td className={cn('px-4 py-2', row.scope === COURSE_SCOPE && 'font-medium')}>
-                  {row.title}
+      <GridTable
+        first={SCOPE_COLUMN}
+        levels={props.levels.map((l) => ({
+          key: l,
+          faint: practiceLevel(c, l),
+          head: (
+            <>
+              {levelName(props.rules, l, true)}
+              {practiceLevel(c, l) && <span className="block">{PRACTICE}</span>}
+            </>
+          ),
+        }))}
+      >
+        {rows.map((row) => (
+          <tr key={row.scope}>
+            <td className={cn('px-4 py-2', row.scope === COURSE_SCOPE && 'font-medium')}>
+              {row.title}
+            </td>
+            {props.levels.map((l) => {
+              const id = certId(c.slug, row.scope, l)
+              const s = states.get(id)
+              return (
+                <td key={l} className={GRID_CELL}>
+                  {s && s.state !== 'empty' ? (
+                    <button
+                      type="button"
+                      onClick={() => props.onPick(id)}
+                      className={cn(GRID_PRESS, s.state === 'ready' && 'bg-accent')}
+                      aria-label={certCell(c.certs?.get(id)?.title ?? id, s)}
+                    >
+                      <Cell s={s} />
+                    </button>
+                  ) : (
+                    <span className="text-muted-foreground">—</span>
+                  )}
                 </td>
-                {props.levels.map((l) => {
-                  const id = certId(c.slug, row.scope, l)
-                  const s = states.get(id)
-                  return (
-                    <td key={l} className={GRID_CELL}>
-                      {s && s.state !== 'empty' ? (
-                        <button
-                          type="button"
-                          onClick={() => props.onPick(id)}
-                          className={cn(GRID_PRESS, s.state === 'ready' && 'bg-accent')}
-                          aria-label={certCell(c.certs?.get(id)?.title ?? id, s)}
-                        >
-                          <Cell s={s} />
-                        </button>
-                      ) : (
-                        <span className="text-muted-foreground">—</span>
-                      )}
-                    </td>
-                  )
-                })}
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+              )
+            })}
+          </tr>
+        ))}
+      </GridTable>
     </PageSection>
   )
 }

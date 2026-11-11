@@ -653,6 +653,8 @@ export interface components {
       /** Title */
       title: string;
       difficulty: components['schemas']['ProblemDifficulty'] | null;
+      /** Techniques */
+      techniques: string[];
       /** Attempt Count */
       attempt_count: number;
       /** Solved Count */

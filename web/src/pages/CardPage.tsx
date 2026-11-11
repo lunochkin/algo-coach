@@ -38,7 +38,7 @@ import { PageSection as Section } from '@/components/PageSection'
 import { SectionBar } from '@/components/SectionBar'
 import { TemplatePanel } from '@/components/TemplatePanel'
 import { ProgressBar } from '@/components/ProgressBar'
-import { Badge } from '@/components/ui/badge'
+import { Tag } from '@/components/Tag'
 import { Button } from '@/components/ui/button'
 import { useSections } from '@/lib/sections'
 
@@ -234,13 +234,7 @@ function LadderView({
             to={`/problems/${encodeURIComponent(rung.problemId)}?card=${encodeURIComponent(slug)}`}
             lead={rung.solved !== null && <Mark solved={rung.solved} />}
             title={rung.title}
-            badge={
-              rung.difficulty && (
-                <Badge variant="outline" className="font-normal">
-                  {rung.difficulty}
-                </Badge>
-              )
-            }
+            badge={rung.difficulty && <Tag>{rung.difficulty}</Tag>}
             note={rung.covers}
             stats={[{ label: '', value: rung.need }]}
           />
@@ -251,9 +245,7 @@ function LadderView({
             className="flex items-baseline gap-3 px-4 py-3 text-meta text-muted-foreground"
           >
             {gap}
-            <Badge variant="outline" className="ml-auto font-normal">
-              {LADDER_GAP}
-            </Badge>
+            <Tag className="ml-auto">{LADDER_GAP}</Tag>
           </p>
         ))}
       </PickList>
@@ -310,13 +302,7 @@ function ProbesView({
             key={one.problem.id}
             to={`/problems/${encodeURIComponent(one.problem.id)}?card=${encodeURIComponent(slug)}`}
             title={one.problem.title}
-            badge={
-              one.problem.difficulty && (
-                <Badge variant="outline" className="font-normal">
-                  {one.problem.difficulty}
-                </Badge>
-              )
-            }
+            badge={one.problem.difficulty && <Tag>{one.problem.difficulty}</Tag>}
             stats={[{ label: '', value: probeState(one.attempted) }]}
           />
         ))}

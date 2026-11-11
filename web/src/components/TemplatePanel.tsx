@@ -4,10 +4,10 @@ import { useState } from 'react'
 import { Link } from 'react-router'
 
 import type { Recalled, Template } from '@/api/client'
-import { PanelStrip } from '@/components/Panel'
+import { PanelFrame, PanelStrip } from '@/components/Panel'
 import { Markdown } from '@/components/Markdown'
 import { PythonCode, RevealPress } from '@/components/PythonCode'
-import { Badge } from '@/components/ui/badge'
+import { Tag } from '@/components/Tag'
 import { Button } from '@/components/ui/button'
 import { templateView } from '@/lib/format'
 
@@ -28,15 +28,13 @@ export function TemplatePanel({
   const view = templateView(template, recalled)
 
   return (
-    <div className="overflow-hidden rounded-xl border bg-card">
+    <PanelFrame>
       {/* what the form is, and how its recall has gone: the header carries the
           identity, and the body carries the form and the acts on it */}
       <PanelStrip>
         <h3 className="font-medium">{template.title}</h3>
         {view.badges.map((badge) => (
-          <Badge key={badge} variant="outline" className="font-normal">
-            {badge}
-          </Badge>
+          <Tag key={badge}>{badge}</Tag>
         ))}
         <span className="ml-auto text-meta text-muted-foreground">{view.status}</span>
       </PanelStrip>
@@ -78,6 +76,6 @@ export function TemplatePanel({
           )}
         </div>
       </div>
-    </div>
+    </PanelFrame>
   )
 }

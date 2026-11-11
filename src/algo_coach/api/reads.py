@@ -66,6 +66,7 @@ class Candidate(BaseModel):
     problem_id: str
     title: str
     difficulty: ProblemDifficulty | None
+    techniques: list[str]  # one problem reads as one row wherever it is listed
     attempt_count: int
     solved_count: int
     last_attempt_at: datetime | None
@@ -394,6 +395,7 @@ def offered(root: Root, user_id: UserId, technique: str) -> list[Candidate]:
             problem_id=row.problem.id,
             title=row.problem.title,
             difficulty=row.problem.difficulty,
+            techniques=row.problem.techniques,
             attempt_count=row.attempt_count,
             solved_count=row.solved_count,
             last_attempt_at=row.last_attempt_at,

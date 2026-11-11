@@ -14,10 +14,9 @@ import { useLoaded } from '@/api/useLoaded'
 import { CardPanel } from '@/components/CardPanel'
 import { Loaded } from '@/components/Loaded'
 import { PageHeader } from '@/components/PageHeader'
-import { PickPanel, PickRow } from '@/components/PickRow'
+import { PickPanel } from '@/components/PickRow'
+import { ProblemRow } from '@/components/ProblemRow'
 import { SectionHeading } from '@/components/SectionHeading'
-import { counts } from '@/lib/format'
-import { Badge } from '@/components/ui/badge'
 
 export function TechniquePage() {
   const { technique = '' } = useParams()
@@ -48,18 +47,10 @@ export function TechniquePage() {
             <SectionHeading title={TECHNIQUE_PROBLEMS} count={rows.length} />
             <PickPanel>
               {rows.map((row) => (
-                <PickRow
+                <ProblemRow
                   key={row.problem_id}
-                  to={`/problems/${encodeURIComponent(row.problem_id)}?technique=${encodeURIComponent(technique)}`}
-                  title={row.title}
-                  badge={
-                    row.difficulty && (
-                      <Badge variant="outline" className="font-normal">
-                        {row.difficulty}
-                      </Badge>
-                    )
-                  }
-                  stats={counts(row)}
+                  problem={row}
+                  query={new URLSearchParams({ technique })}
                 />
               ))}
             </PickPanel>

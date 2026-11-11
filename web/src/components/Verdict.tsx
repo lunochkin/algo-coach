@@ -53,7 +53,7 @@ export function CaseStrip({ results }: { results: CaseResult[] }) {
 
 function FailureView({ failure }: { failure: NonNullable<SubmissionView['failure']> }) {
   return (
-    <div className="space-y-2 rounded-md border p-3 text-meta">
+    <div className="space-y-2 rounded-xl border px-4 py-3 text-meta">
       <p className={cn('font-medium', OUTCOME[failure.outcome].text)}>{failure.title}</p>
       <Value label={FAILURE_ARGS} value={failure.args} />
       <Value label={FAILURE_EXPECTED} value={failure.expected} />
