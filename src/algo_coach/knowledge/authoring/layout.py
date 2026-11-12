@@ -1,5 +1,5 @@
-"""Rule 24: a `text` fence holds a drawing. Rule 25: a line of code fits a
-phone."""
+"""Rule 24: a `text` fence holds a drawing, and a drawing sits in one. Rule
+25: a line of code fits a phone."""
 
 import re
 
@@ -10,6 +10,9 @@ FENCE = re.compile(r"^```(\w*)\n(.*?)^```", re.S | re.M)
 # a layout: columns aligned by spaces, arrows, an underline, an ordering
 DRAWN = re.compile(DIAGRAM.pattern + r"|\S {2,}\S|->|[→←⇒▲▼✓✗]|\|=|[~^]{3}| < .* < ", re.M)
 WIDE = 60
+BOX = re.compile(r"[─│┌┐└┘├┤┬┴┼═║╔╗╚╝╭╮╰╯]")
+# a tool's own output may hold them, as `uv tree` prints
+HOLDS_BOX = ("text", "output", "console")
 
 
 def _line(text: str, at: int) -> str:
@@ -25,6 +28,37 @@ def text_fences(course: Course, report: Report) -> None:
                     f"lessons/{slug}.md {_line(text, m.start())}",
                     "a text block draws nothing: fence output as `output`",
                 )
+
+
+def box_drawing(course: Course, report: Report) -> None:
+    for slug, text in course.lessons.items():
+        fences = list(FENCE.finditer(text))
+        if m := _in_prose(text, fences):
+            at = f"lessons/{slug}.md {_line(text, m.start())} of the prose"
+            report.error(24, at, _boxed(m[0]))
+        for f in fences:
+            if f[1] not in HOLDS_BOX and (m := BOX.search(f[2])):
+                report.error(24, f"lessons/{slug}.md {_line(text, f.start())}", _boxed(m[0]))
+    for q in course.questions:
+        detail = q.get("detail", {})
+        for name, value in (
+            ("prompt", q.get("prompt")),
+            ("code", q.get("code")),
+            ("example", detail.get("example")),
+            ("mechanism", detail.get("mechanism")),
+        ):
+            if isinstance(value, str) and (m := BOX.search(value)):
+                report.error(24, f"{where(q)} {name}", _boxed(m[0]))
+
+
+def _in_prose(text: str, fences: list[re.Match[str]]) -> re.Match[str] | None:
+    spans = [(f.start(), f.end()) for f in fences]
+    prose = (m for m in BOX.finditer(text) if not any(a <= m.start() < b for a, b in spans))
+    return next(prose, None)
+
+
+def _boxed(char: str) -> str:
+    return f"{char!r} draws outside a `text` block: a structure is Mermaid, a table is markdown"
 
 
 def _wide(code: str) -> str | None:

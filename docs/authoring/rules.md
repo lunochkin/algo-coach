@@ -169,8 +169,12 @@ The rules come from three review passes over the Python module in November
     drawing alone.** A phone wraps a long line of an `output` block and keeps
     a `text` block whole, since a wrap breaks a drawing. Output fenced as
     `text` scrolls sideways on a phone and hides the end of each long line.
-    *check (a `text` block with no box-drawing or tree characters is
-    warned)*
+    A box-drawing character appears only in a `text` block, a question's
+    `diagram`, or a tool's own output in an `output` or `console` fence.
+    Anywhere else it draws a structure, and a phone wraps the drawing apart
+    where Mermaid or a markdown table fits the screen. *check (a `text`
+    block with no box-drawing or tree characters is warned; a box-drawing
+    character elsewhere is refused)*
 25. **A line of code holds at most 60 characters, and 40 where it holds
     without a break.** This covers a question's `code` and `example`, a
     lesson fence naming a language, and an `output` fence. A phone fits some

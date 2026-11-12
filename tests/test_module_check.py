@@ -175,6 +175,24 @@ def test_a_text_block_drawing_nothing_is_warned(tmp_path):
     ]
 
 
+def test_box_drawing_outside_a_text_block_is_refused(tmp_path):
+    """Rule 24: a drawing made of box characters scrolls sideways on a
+    phone, so it sits in a `text` block or a question's diagram. A tool's
+    own output in an `output` or `console` fence may hold them."""
+    tree = "├── a\n└── b\n"
+    q = question("a", detail={"mechanism": "m", "example": tree, "diagram": tree})
+    langs = ("python", "", "text", "output", "console")
+    fences = "".join(f"\n```{lang}\n{tree}```\n" for lang in langs)
+    root = written(tmp_path, [q], lessons={"les": (["sub@0"], LESSON + "\nA │ B\n" + fences)})
+
+    assert [e.split(": ")[0] for e in found(checked(root).errors, 24)] == [
+        "[24] lessons/les.md line 7 of the prose",
+        "[24] lessons/les.md line 9",
+        "[24] lessons/les.md line 14",
+        "[24] banks/t/sub.toml a example",
+    ]
+
+
 def test_a_line_wider_than_a_phone_is_warned(tmp_path):
     """Rule 25: a phone wraps a line past some 40 characters, and a wrap in
     a snippet read for its output can pass for a line break. A `text`

@@ -593,7 +593,7 @@ items below.
 - [x] Rewrite the diagram rule in `docs/authoring/modules.md`: a table is a
       markdown table, a structure is Mermaid, and a `text` block holds
       character art alone
-- [ ] Make the module check refuse box-drawing characters outside a `text`
+- [x] Make the module check refuse box-drawing characters outside a `text`
       block, so a new lesson cannot bring the old form back. Triggered when
       the content repository's conversion is done
 
