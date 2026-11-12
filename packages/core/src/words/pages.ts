@@ -130,6 +130,15 @@ export const ADDRESS_HINT = 'An address such as https://example.invalid';
 export const DEVICE_NAME = 'Device name';
 export const DEVICE_NAME_RULE = 'Letters, digits, - and _ only';
 export const REMINDER_HOUR = 'Reminder hour (0–23)';
+
+/** The phone's colour scheme: the system's, or one held whatever the system says. */
+export type SchemeChoice = 'system' | 'light' | 'dark';
+export const COLOUR_SCHEME = 'Colour scheme';
+export const SCHEME_CHOICES: { value: SchemeChoice; label: string }[] = [
+  { value: 'system', label: 'System' },
+  { value: 'light', label: 'Light' },
+  { value: 'dark', label: 'Dark' },
+];
 export const REMINDER_HOUR_RULE = '0–23';
 export const REMINDER_CHANNEL = 'Review reminders';
 export const SIGNED_OUT_ERROR = 'signed out: sign in again in Settings';

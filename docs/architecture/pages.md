@@ -488,6 +488,7 @@ what it offers. The inventory is the list both clients build to.
 | Read the sync's state, and sync now | the settings page | Settings, and Home's footer | same |
 | Sign out, naming unsent records | the account menu and the settings page | the account menu and Settings | same |
 | Revoke a signed-in device | the signed-in devices | the signed-in devices | same |
+| Choose the colour scheme | the switch in the navigation | Settings | by platform |
 | Set the engine's address, the device name or the reminder hour | none | Settings | phone only |
 
 - **The phone's sitting holds the statement and the editor as two tabs**,
@@ -572,6 +573,11 @@ what it offers. The inventory is the list both clients build to.
 - **A `short` reply is typed on the app's keyboard on the phone.** The web is
   read at a physical keyboard, which holds every symbol on its keys. The
   phone's system keyboard hides them, and its suggestion strip completes words.
+- **The phone chooses its colour scheme in Settings, from System, Light and
+  Dark.** System follows the phone's own setting, and is the default. The web
+  holds a light and dark switch in its navigation, where a reader at a desk
+  reaches it. The phone keeps the choice on the device and the web keeps it in
+  the browser, since the choice is about the screen rather than the account.
 - **The engine's address, the device name and the reminder hour are
   phone only.** Each one is about one phone, and the web reaches the engine
   it was served from.
@@ -741,7 +747,7 @@ difference it found. No row is marked `to fix` today.
   scale and a palette of its own, and each of its variables is bound to a
   token. A document's own title reads at the title role, and its headings at
   the heading role.
-- **The app opens in the browser's colour-scheme and carries a switch.** The
+- **The web opens in the browser's colour-scheme and carries a switch.** The
   switch writes the chosen scheme to the browser, and a reader who never
   presses it follows their browser for as long as they never press it. No
   store holds the choice, since the choice is about the machine the reader is

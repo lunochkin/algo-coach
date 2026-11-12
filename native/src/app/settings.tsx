@@ -2,7 +2,7 @@ import { router } from 'expo-router';
 import { Fragment, useEffect, useState } from 'react';
 import { View } from 'react-native';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-controller';
-import { Button, HelperText, Text, TextInput, useTheme } from 'react-native-paper';
+import { Button, HelperText, SegmentedButtons, Text, TextInput, useTheme } from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import {
@@ -37,8 +37,11 @@ import {
   validReminderHour,
   validDeviceName,
   validOrigin,
+  COLOUR_SCHEME,
+  SCHEME_CHOICES,
 } from '@algo-coach/core';
 import * as DB from '@/lib/db';
+import { useScheme } from '@/lib/scheme';
 import { useStore } from '@/lib/store';
 import { useMe } from '@/ui/account';
 import { BottomBar, styles, SyncLine, Press, ScreenHeader } from '@/ui/common';
@@ -48,6 +51,7 @@ import { font, space } from '@/ui/tokens';
 
 export default function SettingsScreen() {
   const st = useStore();
+  const scheme = useScheme();
   const theme = useTheme();
   const insets = useSafeAreaInsets();
   const signOut = useSignOut();
@@ -179,6 +183,13 @@ export default function SettingsScreen() {
         </Button>
         {field('device', DEVICE_NAME)}
         {!deviceOk ? <HelperText type="error">{DEVICE_NAME_RULE}</HelperText> : null}
+        {/* applied at once and kept apart from Save, as the web's switch is */}
+        <Text variant="labelLarge">{COLOUR_SCHEME}</Text>
+        <SegmentedButtons
+          value={scheme.choice}
+          onValueChange={(v) => scheme.choose(v as typeof scheme.choice)}
+          buttons={SCHEME_CHOICES.map((x) => ({ value: x.value, label: x.label }))}
+        />
         <Heading title={STUDY} />
         {/* the study settings in the order core lists them, as the web's page reads them */}
         {STUDY_SETTINGS.map((name) => (

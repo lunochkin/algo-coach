@@ -2,16 +2,25 @@ import { useMaterial3Theme } from '@pchmn/expo-material3-theme';
 import { DarkTheme, DefaultTheme, Stack, ThemeProvider } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { useMemo } from 'react';
-import { useColorScheme, View } from 'react-native';
+import { View } from 'react-native';
 import { MD3DarkTheme, MD3LightTheme, PaperProvider, useTheme } from 'react-native-paper';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { KeyboardProvider } from 'react-native-keyboard-controller';
 import { SafeAreaProvider, useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { SchemeProvider, useScheme } from '@/lib/scheme';
 import { StoreProvider } from '@/lib/store';
 
 export default function RootLayout() {
-  const dark = useColorScheme() === 'dark';
+  return (
+    <SchemeProvider>
+      <Themed />
+    </SchemeProvider>
+  );
+}
+
+function Themed() {
+  const { dark } = useScheme();
   const { theme: m3 } = useMaterial3Theme();
   const paper = useMemo(
     () => (dark ? { ...MD3DarkTheme, colors: m3.dark } : { ...MD3LightTheme, colors: m3.light }),
@@ -41,7 +50,7 @@ export default function RootLayout() {
           <PaperProvider theme={paper}>
             <ThemeProvider value={nav}>
               <StoreProvider>
-                <StatusBar style="auto" />
+                <StatusBar style={dark ? 'light' : 'dark'} />
                 <Stack screenOptions={{ headerShown: false }} />
                 <NavigationScrim />
               </StoreProvider>
