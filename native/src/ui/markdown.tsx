@@ -128,11 +128,20 @@ export function markdownOptions(theme: MD3Theme, renderer: Renderer) {
   };
 }
 
+/**
+ * The options held while the theme and the renderer stay: new ones make the
+ * library parse the text again and remount every element it drew.
+ */
+export function useMarkdownOptions(renderer: Renderer) {
+  const theme = useTheme();
+  return useMemo(() => markdownOptions(theme, renderer), [theme, renderer]);
+}
+
 /** Authored markdown, rendered in place rather than as a list. */
 export function Markdown({ children }: { children: string }) {
-  const theme = useTheme();
   const renderer = useMemo(() => new CodeRenderer(), []);
-  const elements = useMarkdown(withMath(children), markdownOptions(theme, renderer));
+  const text = useMemo(() => withMath(children), [children]);
+  const elements = useMarkdown(text, useMarkdownOptions(renderer));
   return (
     <View style={{ gap: BLOCK_GAP }}>
       {elements.map((el, i) => (

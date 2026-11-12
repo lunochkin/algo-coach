@@ -1,5 +1,5 @@
 import { router, useLocalSearchParams } from 'expo-router';
-import { cloneElement, Fragment, isValidElement, useEffect, useMemo, type ReactElement, type ReactNode } from 'react';
+import { cloneElement, Fragment, isValidElement, memo, useEffect, useMemo, type ReactElement, type ReactNode } from 'react';
 import { type HostInstance, ScrollView, View, type TextStyle } from 'react-native';
 import { useMarkdown } from 'react-native-marked';
 import { Text, useTheme } from 'react-native-paper';
@@ -22,7 +22,7 @@ import {
 } from '@algo-coach/core';
 import { useStore } from '@/lib/store';
 import { Blank, BottomBar, fromCopy, Loaded, styles, Press, ScreenHeader } from '@/ui/common';
-import { BLOCK_GAP, CodeRenderer, InlineCode, type InlineCodeProps, markdownOptions } from '@/ui/markdown';
+import { BLOCK_GAP, CodeRenderer, InlineCode, type InlineCodeProps, useMarkdownOptions } from '@/ui/markdown';
 import { Heading } from '@/ui/rows';
 import { PageSection, type Sections, SectionBar, useSections } from '@/ui/sections';
 import { space } from '@/ui/tokens';
@@ -63,9 +63,12 @@ class LessonRenderer extends CodeRenderer {
 }
 
 /** A stretch of a lesson, rendered without a list so the outer ScrollView can jump to it. */
-function Chunk(props: { text: string; renderer: LessonRenderer; at: (view: HostInstance | null) => void }) {
-  const theme = useTheme();
-  const elements = useMarkdown(props.text, markdownOptions(theme, props.renderer));
+const Chunk = memo(function Chunk(props: {
+  text: string;
+  renderer: LessonRenderer;
+  at: (view: HostInstance | null) => void;
+}) {
+  const elements = useMarkdown(props.text, useMarkdownOptions(props.renderer));
   return (
     <View ref={props.at} collapsable={false} style={{ gap: BLOCK_GAP }}>
       {elements.map((el, i) => (
@@ -73,24 +76,32 @@ function Chunk(props: { text: string; renderer: LessonRenderer; at: (view: HostI
       ))}
     </View>
   );
-}
+});
 
-/** Text cut at its `###` headings, each a view a link's anchor can reach. */
-function Chunks(props: { text: string; renderer: LessonRenderer; of: Sections }) {
-  const chunks = useMemo(() => sections(props.text), [props.text]);
+const UNNAMED = () => {};
+
+/**
+ * Text cut at its `###` headings, each a view a link's anchor can reach. Held
+ * while the reader scrolls: the section they are in moves, and the text stays.
+ */
+const Chunks = memo(function Chunks(props: {
+  text: string;
+  renderer: LessonRenderer;
+  register: Sections['register'];
+}) {
+  const { text, register } = props;
+  const chunks = useMemo(
+    () => sections(text).map((chunk) => ({ ...chunk, at: chunk.anchor ? register(chunk.anchor) : UNNAMED })),
+    [text, register],
+  );
   return (
     <View style={{ gap: BLOCK_GAP }}>
       {chunks.map((chunk, i) => (
-        <Chunk
-          key={i}
-          text={chunk.text}
-          renderer={props.renderer}
-          at={chunk.anchor ? props.of.register(chunk.anchor) : () => {}}
-        />
+        <Chunk key={i} text={chunk.text} renderer={props.renderer} at={chunk.at} />
       ))}
     </View>
   );
-}
+});
 
 export default function LessonScreen() {
   const st = useStore();
@@ -157,10 +168,10 @@ export default function LessonScreen() {
           >
             {parts.map((part, i) =>
               part.title === null ? (
-                <Chunks key={i} text={part.text} renderer={renderer} of={sections} />
+                <Chunks key={i} text={part.text} renderer={renderer} register={sections.register} />
               ) : (
                 <PageSection key={i} of={sections} id={part.anchor!} title={part.title}>
-                  <Chunks text={part.text} renderer={renderer} of={sections} />
+                  <Chunks text={part.text} renderer={renderer} register={sections.register} />
                 </PageSection>
               ),
             )}
