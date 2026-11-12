@@ -111,7 +111,7 @@ export function emptyContinue(o: { blocked: boolean; newLimit: number; focus: Fo
   if (o.focus?.cert) {
     return {
       notice: 'Nothing weak, due or new for the certification in focus. See its conditions and exam.',
-      action: { kind: 'certs', label: 'Certificates' },
+      action: { kind: 'certs', label: 'Certifications' },
     };
   }
   if (o.focus)

@@ -42,7 +42,7 @@ export const LEARNING = 'learning';
 export const NEW_LEFT = 'new left today';
 export const RAISE_TODAY = `${NEW_STEP} more new today`;
 export const FOCUS_NEXT = 'Next:';
-export const FOCUS_CERT = 'Certificate:';
+export const FOCUS_CERT = 'Certification:';
 
 // the account menu
 export const YOUR_ACCOUNT = 'Your account';
