@@ -74,6 +74,17 @@ hooks:
 seed source="content/cards":
     uv run algo-coach seed cards {{ source }}
 
+# Install the tool the seed draws Mermaid diagrams with: `knowledge.md`,
+# Diagrams. It sits outside the npm workspace, so the engine's own install
+# downloads no browser. puppeteer's install script stays denied, and the
+# browser is installed here by name instead.
+diagrams-install:
+    cd tools/diagrams && npm ci && npx puppeteer browsers install chrome
+
+# Test how the diagram tool prepares an SVG for the phone.
+diagrams-test:
+    cd tools/diagrams && node --test
+
 # Seed one knowledge module from its authored directory, by slug. The
 # module's own checker runs first, and a module it refuses is not seeded.
 seed-module name="python":

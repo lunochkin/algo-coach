@@ -1,0 +1,17 @@
+{
+  "name": "algo-coach-diagrams",
+  "private": true,
+  "type": "module",
+  "description": "Draws Mermaid sources to SVG for the seed: docs/architecture/knowledge.md, Diagrams",
+  "scripts": {
+    "test": "node --test"
+  },
+  "dependencies": {
+    "@mermaid-js/mermaid-cli": "12.2.0",
+    "puppeteer": "25.17.0",
+    "svgo": "4.1.0"
+  },
+  "allowScripts": {
+    "puppeteer": false
+  }
+}

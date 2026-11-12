@@ -583,7 +583,7 @@ items below.
       into `knowledge.md`: drawn to SVG at seed time, in both schemes, and
       carried in the snapshot. The snapshot then stops equalling learn's
       format 6, which that file states today
-- [ ] Add `tools/diagrams/`, a script drawing Mermaid sources to the light and
+- [x] Add `tools/diagrams/`, a script drawing Mermaid sources to the light and
       the dark SVG `knowledge.md` `## Diagrams` prepares, and a `just` recipe
       installing it
 - [ ] Add the `diagrams` table, and draw in the seed every source not yet
