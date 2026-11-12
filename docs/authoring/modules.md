@@ -74,7 +74,11 @@ precedence over this file.
 - **A diagram is plain text in monospace**: box-drawing characters, and lines
   of at most 60 characters. A diagram is added only where the structure is
   the content: a hierarchy, an MRO or a lookup order, a timeline of who runs
-  when, a state machine, a request or data flow, a comparison table.
+  when, a state machine, a request or data flow.
+- **A table is a markdown table**, in a lesson or as a question's whole
+  `diagram`: a comparison, or a trace with a row per step. A phone draws a
+  markdown table to its width, and scrolls a table drawn in characters
+  sideways.
 - **A fact in a diagram is verified as code is**, against `__mro__` or the
   real order of the output.
 

@@ -33,6 +33,7 @@ import {
 
 import { Link } from 'react-router'
 
+import { Markdown } from '@/components/Markdown'
 import { SectionHeading } from '@/components/SectionHeading'
 import { PlainCode, PythonCode } from '@/components/PythonCode'
 import { optionTile } from '@/components/optionTile'
@@ -309,7 +310,9 @@ export function Details({
       )}
       {sections.map((x) => (
         <Section key={x.title} title={x.title}>
-          {'code' in x ? (
+          {'table' in x ? (
+            <Markdown>{x.table}</Markdown>
+          ) : 'code' in x ? (
             <PlainCode wrap={x.wrap}>{x.code}</PlainCode>
           ) : 'items' in x ? (
             <ul className="list-disc space-y-1 pl-5">

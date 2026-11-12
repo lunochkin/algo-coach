@@ -110,6 +110,18 @@ describe('the detail', () => {
   it('has no section where the question carries no detail', () => {
     expect(detailSections(choice)).toEqual([]);
   });
+
+  it('reads a diagram that is a markdown table as a table', () => {
+    const diagram = '| method | 0 rows |\n|---|---|\n| `first()` | `None` |';
+    const q = { ...choice, detail: { mechanism: 'm', example: '', pitfalls: [], versions: '', diagram } };
+    expect(detailSections(q)[0]).toEqual({ title: 'Diagram', table: diagram });
+  });
+
+  it('keeps a drawing whose lines open with a bar as monospace', () => {
+    const diagram = '│ a │ b │\n├───┼───┤\n│ 1 │ 2 │';
+    const q = { ...choice, detail: { mechanism: 'm', example: '', pitfalls: [], versions: '', diagram } };
+    expect(detailSections(q)[0]).toEqual({ title: 'Diagram', code: diagram, wrap: false });
+  });
 });
 
 describe('the lessons a question links to', () => {

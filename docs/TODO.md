@@ -576,6 +576,9 @@ items below.
       fixed width and scrolls
 - [x] Render a markdown table that way, with the phone's own renderer and the
       web's below the phone's width
+- [x] Read a question's `diagram` that is one markdown table alone as a
+      table, in `detailSections` and on both clients, so a question's table
+      converts as a lesson's does
 - [ ] Decide how a Mermaid diagram reaches the clients, and write the choice
       into `knowledge.md`: drawn to SVG at seed time, in both schemes, and
       carried in the snapshot. The snapshot then stops equalling learn's

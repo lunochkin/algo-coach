@@ -2,6 +2,7 @@ import { LETTERS } from './courses';
 import { headings } from './lessontext';
 import type { CardFields } from './records';
 import { answerKey, block } from './reply';
+import { isTable } from './table';
 import type { Course, Grade, Question } from './types';
 
 /** One answered question as a result screen shows it, on either client. */
@@ -101,9 +102,13 @@ export function yourAnswer(r: Result): YourAnswer {
   return null;
 }
 
-/** One section of a question's detail. Code reads in monospace, and a diagram never wraps. */
+/**
+ * One section of a question's detail. Code reads in monospace, and a diagram
+ * never wraps, but a diagram that is a markdown table reads as one.
+ */
 export type DetailSection =
   | { title: 'Diagram' | 'Example'; code: string; wrap: boolean }
+  | { title: 'Diagram'; table: string }
   | { title: 'How it works' | 'Versions'; text: string }
   | { title: 'Pitfalls'; items: string[] };
 
@@ -112,7 +117,8 @@ export function detailSections(q: Question): DetailSection[] {
   const d = q.detail;
   if (!d) return [];
   const out: DetailSection[] = [];
-  if (d.diagram) out.push({ title: 'Diagram', code: d.diagram, wrap: false });
+  if (d.diagram)
+    out.push(isTable(d.diagram) ? { title: 'Diagram', table: d.diagram } : { title: 'Diagram', code: d.diagram, wrap: false });
   if (d.mechanism) out.push({ title: 'How it works', text: block(d.mechanism) });
   if (d.example) out.push({ title: 'Example', code: d.example, wrap: true });
   if (d.pitfalls.length) out.push({ title: 'Pitfalls', items: d.pitfalls.map(block) });

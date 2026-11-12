@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { tableShape } from './table';
+import { isTable, tableShape } from './table';
 
 describe('table shape', () => {
   const header = ['method', '0 rows', '2+ rows'];
@@ -20,5 +20,20 @@ describe('table shape', () => {
 
   it('counts a header longer than its cells', () => {
     expect(tableShape(['a long header', 'b'], [['x', 'y']], 15)).toBe('rows');
+  });
+});
+
+describe('a markdown table', () => {
+  it('is a header, a rule and rows, each line between bars', () => {
+    expect(isTable('| a | b |\n|:--|--:|\n| 1 | 2 |\n')).toBe(true);
+  });
+
+  it('needs the rule under its header', () => {
+    expect(isTable('| a | b |\n| 1 | 2 |')).toBe(false);
+  });
+
+  it('is the whole text, with no line around it', () => {
+    expect(isTable('a table:\n| a |\n|---|')).toBe(false);
+    expect(isTable('| a |\n|---|\nafter')).toBe(false);
   });
 });

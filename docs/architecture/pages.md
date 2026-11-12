@@ -780,6 +780,9 @@ difference it found. No row is marked `to fix` today.
   and a fence naming `text` or no language may be drawn in characters, and
   wrapping would break the drawing. A program's output is fenced `output`
   instead, so its long lines wrap as code does.
+- **A detail's diagram that is one markdown table alone reads as a table**,
+  as a table in a lesson does. A table drawn in characters scrolls sideways on
+  a phone, and the reader sees a third of its columns at a time.
 - **A markdown table reads as a grid where its columns fit the reading
   width, and as one block per row where they do not, on both clients.** A
   phone is too narrow for most tables of three columns. A grid squeezed to fit

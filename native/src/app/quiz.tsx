@@ -73,6 +73,7 @@ import { useStore, type ExamSession, type QueueSession } from '@/lib/store';
 import { Heading, PickPanel, PickRow } from '@/ui/rows';
 import { BottomBar, CodeBlock, fromCopy, Loaded, Press, ScreenHeader, styles } from '@/ui/common';
 import { KeyPad, PAD_HEIGHT } from '@/ui/keys';
+import { Markdown } from '@/ui/markdown';
 import { font, palette, radius, space } from '@/ui/tokens';
 
 // a note under an answer row starts past the row's mark and its space
@@ -696,7 +697,9 @@ function Details({ r }: { r: Result }) {
       ) : null}
       {sections.map((x) => (
         <Section key={x.title} title={x.title}>
-          {'code' in x ? (
+          {'table' in x ? (
+            <Markdown>{x.table}</Markdown>
+          ) : 'code' in x ? (
             <CodeBlock code={x.code} verbatim wrap={x.wrap} />
           ) : 'items' in x ? (
             x.items.map((p, i) => (

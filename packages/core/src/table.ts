@@ -13,3 +13,12 @@ export function tableShape(header: string[], rows: string[][], cols: number): Ta
   const width = widths.reduce((a, b) => a + b, 0) + TABLE_GAP * (widths.length - 1);
   return width <= cols ? 'grid' : 'rows';
 }
+
+const ROW = /^\|.*\|$/;
+const RULE = /^\|(\s*:?-+:?\s*\|)+$/;
+
+/** Text that is one markdown table alone: a header, its rule, and rows. */
+export function isTable(text: string): boolean {
+  const lines = text.trim().split('\n').map((l) => l.trim());
+  return lines.length >= 2 && RULE.test(lines[1]) && lines.every((l) => ROW.test(l));
+}
