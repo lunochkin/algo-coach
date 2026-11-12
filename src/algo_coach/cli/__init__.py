@@ -19,6 +19,7 @@ from algo_coach.cli.hand_match import hand_match
 from algo_coach.cli.invite import invitation
 from algo_coach.cli.knowledge import knowledge
 from algo_coach.cli.match import match
+from algo_coach.cli.module import module
 from algo_coach.cli.movement import moved
 from algo_coach.cli.problem import problem
 from algo_coach.cli.retime import retime
@@ -336,6 +337,35 @@ def main() -> None:
     # named every time: the history is one person's, never a default's
     import_parser.add_argument("--user", required=True, help="whose history it is")
 
+    module_parser = _command(sub, "module", "a knowledge module's authored files")
+    module_action = module_parser.add_subparsers(dest="action", required=True)
+    check_parser = module_action.add_parser(
+        "check", help="hold a module to the rules docs/authoring/rules.md tags check"
+    )
+    check_parser.add_argument("slug", help="the module's directory under --content")
+    check_parser.add_argument(
+        "--content", default="content/modules", help="the directory holding the modules"
+    )
+    check_parser.add_argument(
+        "--no-run", action="store_true", help="skip rules 1-5, which run code"
+    )
+    check_parser.add_argument(
+        "--no-versions",
+        action="store_true",
+        help="skip rule 5, which runs every snippet on the older interpreters",
+    )
+    check_parser.add_argument(
+        "--fresh", action="store_true", help="run everything again, ignoring the kept results"
+    )
+    check_parser.add_argument(
+        "--near",
+        nargs="?",
+        const="",
+        metavar="ID",
+        help="list the questions explained most alike, for one id or for all, and stop",
+    )
+    check_parser.add_argument("--json", action="store_true", help="emit the report as JSON")
+
     log_parser = _command(sub, "log", "one user's whole log, read out or erased")
     action = log_parser.add_subparsers(dest="action", required=True)
     export_parser = action.add_parser("export", help="print every record of the log as JSON")
@@ -374,6 +404,7 @@ COMMANDS: dict[str, Callable[[argparse.Namespace, argparse.ArgumentParser, Datab
     "movement": moved,
     "log": user_log,
     "knowledge": knowledge,
+    "module": lambda args, parser, _root: module(args, parser),
     "invite": invitation,
 }
 

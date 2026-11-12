@@ -27,7 +27,7 @@ repository holds the modules alone. Planned 2026-11-11.
 - [x] Move `RULES.md` and the authoring half of `content/modules/CLAUDE.md`
       into this repo's docs, with learn's names replaced: `courses/`,
       `just learn check`, `spec/learn.md`. A writer session follows them
-- [ ] Port `content/modules/check.py` to `algo-coach module check <slug>`,
+- [x] Port `content/modules/check.py` to `algo-coach module check <slug>`,
       with a test per rule it checks. Its 1126 lines carry no test today, and
       every later step trusts its verdict
 - [ ] Add the `Finding` record and its schema snapshot: the rule, the

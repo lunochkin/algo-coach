@@ -77,7 +77,7 @@ seed source="content/cards":
 # Seed one knowledge module from its authored directory, by slug. The
 # module's own checker runs first, and a module it refuses is not seeded.
 seed-module name="python":
-    uv run python content/modules/check.py {{ name }}
+    uv run algo-coach module check {{ name }}
     uv run algo-coach seed knowledge content/modules/{{ name }}
 
 # --- practice ---
