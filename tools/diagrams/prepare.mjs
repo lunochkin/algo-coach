@@ -22,6 +22,20 @@ const svgo = (prefix) => ({
 
 const ENTITIES = { '&gt;': '>', '&lt;': '<', '&amp;': '&', '&quot;': '"', '&apos;': "'", '&#39;': "'" };
 
+const ROWS = '((?:<\\/tspan>|<tspan[^>]*>)+)';
+// a word too long for its row is cut by character, inside an entity too
+const CUT = new RegExp(`&([a-z]{0,3})${ROWS}([a-z]{0,3};)`, 'g');
+// Mermaid writes `#quot;` as the six characters `&quot;` and escapes them
+// again, so the cut may also fall inside the second entity
+const QUOT = new RegExp(`&amp;([quot]{0,4})((?:<\\/tspan>|<tspan[^>]*>)*)([quot]{0,4};)`, 'g');
+const NAMES = ['amp;', 'gt;', 'lt;'];
+
+/** Each entity Mermaid's wrap cut made whole on its first row, and a quote escaped twice made one. */
+export function wholeEntities(svg) {
+  const joined = svg.replace(CUT, (all, head, tags, tail) => (NAMES.includes(head + tail) ? `&${head}${tail}${tags}` : all));
+  return joined.replace(QUOT, (all, head, tags, tail) => (head + tail === 'quot;' ? `&quot;${tags}` : all));
+}
+
 /** One label's words, each its own span, joined: the phone places nested spans apart. */
 export function joinWords(svg) {
   return svg.replace(/<tspan[^>]*class="text-inner-tspan"[^>]*>([^<]*)<\/tspan>/g, '$1');
@@ -58,5 +72,5 @@ export function plainText(svg) {
 
 /** Mermaid's SVG as the phone and the web both draw it, its ids opening on `prefix`. */
 export function prepare(svg, prefix) {
-  return plainText(markersInDefs(optimize(joinWords(svg), svgo(prefix)).data));
+  return plainText(markersInDefs(optimize(joinWords(wholeEntities(svg)), svgo(prefix)).data));
 }

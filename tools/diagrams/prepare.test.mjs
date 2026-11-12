@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 
-import { joinWords, markersInDefs, plainText, prepare } from './prepare.mjs';
+import { joinWords, markersInDefs, plainText, prepare, wholeEntities } from './prepare.mjs';
 
 const LABEL =
   '<text><tspan class="text-outer-tspan row" x="0"><tspan class="text-inner-tspan">trial</tspan>' +
@@ -52,4 +52,23 @@ test('opens every id on the prefix, so two diagrams on one page keep their own m
   const ids = [...out.matchAll(/id="([^"]+)"/g)].map((m) => m[1]);
   assert.ok(ids.length > 0 && ids.every((id) => id.startsWith('p')));
   assert.match(out, new RegExp(`url\\(#${ids[0]}\\)`));
+});
+
+test('makes a quote Mermaid escaped twice one entity, on its first row where the wrap cut it', () => {
+  const cut = '<tspan>log(&amp;quot;on&amp;q</tspan><tspan dy="1.1em">uot;) now</tspan>';
+  assert.equal(wholeEntities(cut), '<tspan>log(&quot;on&quot;</tspan><tspan dy="1.1em">) now</tspan>');
+});
+
+test('moves a quote cut right after its ampersand onto the first row', () => {
+  const cut = '<tspan>on&amp;</tspan><tspan dy="1.1em">quot;)</tspan>';
+  assert.equal(wholeEntities(cut), '<tspan>on&quot;</tspan><tspan dy="1.1em">)</tspan>');
+});
+
+test('makes an ampersand the wrap cut by character whole on its first row', () => {
+  const cut = '<tspan>a=1&a</tspan><tspan dy="1.1em">mp;b=2</tspan>';
+  assert.equal(wholeEntities(cut), '<tspan>a=1&amp;</tspan><tspan dy="1.1em">b=2</tspan>');
+});
+
+test('leaves an ampersand that is no quote as it is', () => {
+  assert.equal(wholeEntities('<tspan>a &amp; b &amp;gt;</tspan>'), '<tspan>a &amp; b &amp;gt;</tspan>');
 });
