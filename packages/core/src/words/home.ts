@@ -128,3 +128,16 @@ export const forecastSummary = (sum: number, days: number, today: number) =>
 export const forecastBarLabel = (day: string, reviews: number) =>
   `${day}: ${reviews} ${reviews === 1 ? 'review' : 'reviews'}`;
 
+// the focus's projected date
+export const FOCUS_REACHED = 'Reached:';
+const perDayLabel = (n: number) => (n >= 10 || Number.isInteger(n) ? String(Math.round(n)) : n.toFixed(1));
+export const targetLine = (
+  limit: { perDay: number; day: string | null },
+  pace: { perDay: number; day: string | null } | null,
+) => {
+  const at = (d: { perDay: number; day: string | null }) =>
+    d.day ? `by ${d.day}` : d.perDay > 0 ? 'not within three years' : 'never';
+  const first = `at ${perDayLabel(limit.perDay)} a day, ${at(limit)}`;
+  if (!pace) return `${first} · no pace yet`;
+  return `${first} · at your pace of ${perDayLabel(pace.perDay)} a day, ${at(pace)}`;
+};

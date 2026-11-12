@@ -438,6 +438,8 @@ problem's path reads as its record, as "Every problem" gives.
 | +--------------------------------------------------------+             |
 | | Focus: Python . Core                                   |             |
 | | [ Strict ]  [ 5 more new today ]  [ Clear ]            |             |
+| | Reached: at 10 a day, by Thu 3 Dec . at your pace of   |             |
+| | 4 a day, by Sat 9 Jan                                  |             |
 | +--------------------------------------------------------+             |
 |                                                                        |
 |             [ Continue ]                                               |

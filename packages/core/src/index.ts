@@ -8,6 +8,7 @@ export * from './base64';
 export * from './reminder';
 export * from './stats';
 export * from './forecast';
+export * from './target';
 export * from './modes';
 export * from './focus';
 export * from './fsrs';

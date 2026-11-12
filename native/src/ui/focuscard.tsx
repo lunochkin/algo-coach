@@ -16,6 +16,9 @@ import {
   FOCUS_NEXT,
   type FocusPart,
   focusView,
+  FOCUS_REACHED,
+  projectTarget,
+  targetView,
   LEARNING,
   NEW_LEFT,
   type Queue,
@@ -51,9 +54,13 @@ export function FocusCard(props: Props) {
   const { focus, b, queue } = props;
   const theme = useTheme();
   const tone = tones(theme.dark);
-  const { now } = useStore();
+  const { now, newPerDay, newLimit } = useStore();
 
   const info = useMemo(() => focusView(b, focus, queue, props.exams, now), [b, focus, queue, props.exams, now]);
+  const target = useMemo(
+    () => targetView(projectTarget(b, focus, props.exams, { perDay: newPerDay, limit: newLimit }, now), now),
+    [b, focus, props.exams, newPerDay, newLimit, now],
+  );
   const color: Record<FocusPart, string> = {
     mastered: tone.done,
     learning: theme.colors.primary,
@@ -157,6 +164,12 @@ export function FocusCard(props: Props) {
           <Text variant="bodySmall">
             <Text style={muted}>{FOCUS_CERT} </Text>
             {info.cert}
+          </Text>
+        ) : null}
+        {target ? (
+          <Text variant="bodySmall">
+            <Text style={muted}>{FOCUS_REACHED} </Text>
+            {target}
           </Text>
         ) : null}
         {props.footer}

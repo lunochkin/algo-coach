@@ -262,6 +262,9 @@ platforms.
 - **The forecast reads neutral, with today in ink.** A load owed is not
   progress, so it carries no flame. The forecast asks for no act, so it sits
   below the rows the home's act and its modules need.
+- **The focus panel names when the focus is reached**, at the daily limit and
+  at the user's own pace, on both clients. `knowledge.md` gives how each date
+  is projected. The line is gone once the focus is reached.
 - **The home raises today's limit and never sets the daily limit.** A raise
   answers today's practice, so the home offers it beside the focus. The daily
   limit is a standing choice, set on the settings page.

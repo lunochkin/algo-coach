@@ -591,7 +591,7 @@ re-aims it by hand. Nothing aims the next focus once the current one is done.
       both suites
 - [ ] Add, remove and reweight a target on both clients, from the knowledge
       home and a module's page, with a row per act in `pages.md` `### Acts`
-- [ ] Write into `knowledge.md` when a focus target counts as done, for each
+- [x] Write into `knowledge.md` when a focus target counts as done, for each
       of the four kinds: module, topic, subtopic and certification. A route
       advances on that rule, and the focus has none today
 - [ ] Write the route into `knowledge.md`: an ordered list of focus targets,
@@ -606,13 +606,11 @@ re-aims it by hand. Nothing aims the next focus once the current one is done.
 
 ### Projections
 
-`knowledge.md` gives the review forecast the knowledge home reads.
+`knowledge.md` gives the review forecast and the focus's projected date.
 
-- [ ] Write into `knowledge.md` the pace a certification's date is projected
-      from: which stretch of the log it reads, and what it counts. Triggered
-      when a certification is the focus for a week of practice
-- [ ] Show the date a focused certification is projected to be reached, on
-      its conditions on both clients
+- [ ] Count the reviews a failed question needs in the focus's date, once the
+      log holds a failure rate per level. The date now takes every failed
+      question to pass on its next review
 - [ ] Show a module's own forecast on its page. Triggered when the home's
       forecast reads two modules' load and the user asks which one it is
 

@@ -24,6 +24,9 @@ import {
   type FocusPart,
   focusTitle,
   focusView,
+  FOCUS_REACHED,
+  projectTarget,
+  targetView,
   LEARNING,
   NEW_LEFT,
   newRecord,
@@ -75,7 +78,7 @@ function focusPath(f: Focus): string {
 
 export function KnowledgeNext({ controls }: { controls: boolean }) {
   const k = useKnowledge()
-  const { catalog, focus, board, newLimit, certExams, now } = useLearner()
+  const { catalog, focus, board, newLimit, newPerDay, certExams, now } = useLearner()
   const navigate = useNavigate()
   const [empty, setEmpty] = useState<EmptyContinue | null>(null)
 
@@ -85,10 +88,17 @@ export function KnowledgeNext({ controls }: { controls: boolean }) {
     return {
       counts: plan && continueCounts(plan, focus, now),
       panel: focus && plan ? focusView(plan.b, focus, plan.queue, certExams, now) : null,
+      target:
+        focus && plan
+          ? targetView(
+              projectTarget(plan.b, focus, certExams, { perDay: newPerDay, limit: newLimit }, now),
+              now,
+            )
+          : null,
     }
-  }, [catalog, board, focus, newLimit, certExams, now])
+  }, [catalog, board, focus, newLimit, newPerDay, certExams, now])
   if (!next) return null
-  const { counts, panel } = next
+  const { counts, panel, target } = next
 
   function setFocus(f: Focus | null) {
     void k.add('focus', newRecord.focus(f))
@@ -200,6 +210,11 @@ export function KnowledgeNext({ controls }: { controls: boolean }) {
       {panel.cert && (
         <p className="text-meta">
           {FOCUS_CERT} {panel.cert}
+        </p>
+      )}
+      {target && (
+        <p className="text-meta">
+          {FOCUS_REACHED} {target}
         </p>
       )}
     </>

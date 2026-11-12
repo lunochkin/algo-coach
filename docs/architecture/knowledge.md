@@ -323,10 +323,47 @@ never stored, as a question state is.
 - **A day counts 24 hours from its start.** A shift to or from summer time
   moves one boundary of the fourteen by an hour, and that is accepted.
 
+### When the focus is reached
+
+The focus panel names the day the focus is projected to be reached, at two
+paces side by side.
+
+- **A focus on a module, a topic or a subtopic is reached once every group in
+  it is done.** A group is done at the module's pass ratio, as `## The
+  schedule` gives.
+- **A certification focus is reached once the certification is earned.** A
+  lapsed certification still counts, as it does for the certifications that
+  need it.
+- **The route reads the same rule** to aim its next target.
+- **The remaining work is the new questions the focus still needs answered.**
+  Each group needs its pass ratio's share passed. A question seen and not yet
+  passed is taken to pass on its next review, so it takes no new question's
+  place.
+- **The first pace is the daily limit**, the `new_per_day` setting. Today's
+  room is today's limit less the new questions answered today.
+- **The second pace is the user's own**: the new questions first answered per
+  day over the last fourteen complete learning days. A day with no answer
+  counts as zero. A log younger than fourteen days is read over the days it
+  holds, and a log with no complete day yet has no pace.
+- **The pace counts every module.** The next queue takes its new questions
+  from the focus, so a pace measured before the focus was aimed still applies.
+- **Two dates are shown, because they answer different questions.** The
+  limit's date says what the setting allows. The pace's date says what the
+  user's practice reaches. The gap between them says which of the two is
+  holding the user back.
+- **A certification's date waits for retention too.** Every review is assumed
+  to pass, as in the forecast, and the date is the day enough of its questions
+  reach the rule's stability. A question not yet seen is taken to be first
+  answered on the day coverage is reached. The exam is taken that day.
+- **The date is a lower bound.** A failed review, the time spent reading a
+  lesson and a failed exam each push it later, and the projection counts none
+  of them.
+- **A date more than three years away is not named.** No user plans by it.
+
 Deferred, since only use answers each:
 
-- When a certification is reached at the user's own pace. The pace needs a rule
-  for which stretch of the log it is read from.
+- The retention and the exams of a certification's prerequisite
+  certifications. The date counts their coverage alone.
 - A forecast per module, on the module's page.
 
 ## The records
