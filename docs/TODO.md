@@ -397,6 +397,9 @@ one form its target named.
       expression in a code span, never TeX, and say so in `corpus.md`. A code
       span reads the same on both clients, where the phone reads TeX through a
       Unicode fallback. Triggered by the next generation sweep
+- [ ] List every served easy problem that asks for more than the form applied
+      to the input as given, and what it asks for. The list shows whether the
+      generator writes past its own definition of easy or labels too low
 
 ### Cases and verdicts
 
@@ -500,6 +503,53 @@ tests less than writing the solution does.
       is not a solve. Triggered when a phone sitting proves too slow to use
 - [ ] Compare tracing with the knowledge module's `output` questions, and
       write into `knowledge.md` whether a traced output is one of them
+
+### Audio
+
+Practice with the screen off: questions read aloud and answered by voice, on
+the phone. Android carries an on-device speech engine and recogniser, which an
+Expo module reaches. Code read aloud loses its indentation, so audio suits the
+questions that carry none. The spoken framing of a recognition drill is listed
+under its own block.
+
+- [ ] Write into `knowledge.md` which questions an audio queue serves: no code
+      and no diagram, `choice` and `open` alone. A `short` reply is usually
+      code, which a recogniser spells badly
+- [ ] Decide what a spoken answer stores, and write the choice into
+      `knowledge.md`. The transcript is the user's words, and the audio is a
+      recording of their voice that nothing reads afterwards
+- [ ] Read a queue's prompt and choices aloud through the phone's speech
+      engine, and take a `choice` answer spoken as its letter. A letter is one
+      word, which an on-device recogniser hears reliably
+- [ ] Transcribe a spoken answer to an `open` question, and propose the key
+      points it named. The user still ticks the points, since the grade is the
+      user's own report
+- [ ] Score the proposed points against the user's ticks before any proposal
+      is shown pre-ticked. A proposal the user accepts unread grades the answer
+      by the model
+- [ ] Read a lesson aloud on the phone, naming each code block rather than
+      speaking it. Triggered when the audio queue is in use
+
+### Swipe typing on the code keyboard
+
+A spike: whether dragging one finger across the app's keys types a word
+faster than tapping it. The word list is Python's keywords and the names the
+file declares, the same words the name row offers, so the rule in `flows.md`
+against library names still holds.
+
+- [ ] Find a path-to-word matcher that runs in JavaScript over a word list
+      the app supplies, or write down that none fits. Gboard's matcher is not
+      reachable from an app's own keyboard
+- [ ] Build a throwaway swipe layer on `native/src/ui/keys.tsx` with that
+      matcher, behind a dev flag. A spike that ships nothing needs no polish
+- [ ] Type the same three median canonicals by tapping and by swiping, and
+      write down the time and the corrections for each. The name row already
+      saves most retyping, so swiping has to beat tap plus the row
+- [ ] Count how often the top match is wrong over those files' words. Short
+      names such as `i`, `j` and `n` sit inside longer paths
+- [ ] Decide from those numbers whether swipe typing ships, and write the
+      decision with its numbers into `docs/architecture/README.md`, beside
+      the editor's latency measurement
 
 ### Questions served by the engine
 
