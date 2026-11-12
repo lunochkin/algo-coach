@@ -51,6 +51,7 @@ class LessonRenderer extends CodeRenderer {
       : children;
     return (
       <Text
+        key={this.getKey()}
         accessibilityRole="link"
         onPress={() => this.onLesson(href.slice('lesson:'.length))}
         style={[style, linked]}
