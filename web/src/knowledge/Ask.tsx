@@ -41,6 +41,7 @@ import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { useLearner } from '@/knowledge/learner'
 import { lessonPath } from '@/knowledge/paths'
 import { cn } from '@/lib/utils'
 
@@ -275,7 +276,8 @@ export function Details({
 }) {
   const answer = yourAnswer(r)
   const sections = detailSections(r.q)
-  const lessons = taughtBy(r.q, course)
+  const { catalog } = useLearner()
+  const lessons = taughtBy(r.q, course, catalog?.lessonsDone)
   return (
     <Panel>
       {answer && (

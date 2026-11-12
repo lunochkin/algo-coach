@@ -125,24 +125,41 @@ export interface LessonLink {
   slug: string;
   anchor: string; // a section of the lesson, or '' for its start
   label: string;
+  read: boolean;
 }
 
 /**
  * Where a question is taught: its own lesson, to the section it names, or
- * otherwise the lessons teaching its subtopic at its level.
+ * otherwise the lessons teaching its subtopic at its level. `done` holds the
+ * read lessons as `course:lesson`.
  */
-export function taughtBy(q: Question, c: Course | undefined): LessonLink[] {
+export function taughtBy(q: Question, c: Course | undefined, done?: ReadonlySet<string>): LessonLink[] {
   const graph = c?.graph;
   if (!graph) return [];
   const [slug, anchor = ''] = q.lesson.split('#');
   const own = q.lesson ? graph.lesson(slug) : undefined;
   if (own) {
     const part = anchor ? headings(c.lessonBodies[slug] ?? '')[anchor] : undefined;
+    const read = isRead(own.slug);
     return [
-      { course: q.course, slug: own.slug, anchor, label: `📖 Learn this: ${own.title}${part ? ` › ${part}` : ''}` },
+      {
+        course: q.course,
+        slug: own.slug,
+        anchor,
+        label: `📖 Learn this: ${own.title}${part ? ` › ${part}` : ''}${read ? READ : ''}`,
+        read,
+      },
     ];
   }
-  return graph
-    .teaching(q.sub, q.level)
-    .map((x) => ({ course: q.course, slug: x.slug, anchor: '', label: `From lesson: ${x.title}` }));
+  return graph.teaching(q.sub, q.level).map((x) => {
+    const read = isRead(x.slug);
+    return { course: q.course, slug: x.slug, anchor: '', label: `From lesson: ${x.title}${read ? READ : ''}`, read };
+  });
+
+  function isRead(slug: string): boolean {
+    return !!done?.has(`${q.course}:${slug}`);
+  }
 }
+
+// as a lesson's note says it: `lessonNote`
+const READ = ' · read';

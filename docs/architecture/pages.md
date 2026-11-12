@@ -302,6 +302,10 @@ platforms.
 - **An answered question offers its detail on a press**: how it works, the
   example, the pitfalls, the version notes and the diagram, each where the
   question carries one.
+- **The detail links the lessons teaching the question, and names each one
+  already read.** A reader then knows before opening a lesson whether it is
+  new. A lesson is marked read only on the lesson itself, since a mark given
+  from a link records a reading that never happened.
 - **A lesson the queue offers is a stop in the queue**, on both clients: the
   lesson's title, its reading time, why it is offered, and Read and Later as
   its presses. The reading time lets the reader choose between Read and Later

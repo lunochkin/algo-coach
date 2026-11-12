@@ -134,8 +134,17 @@ describe('the lessons a question links to', () => {
 
   it('links to its own lesson, at the section it names', () => {
     expect(taughtBy({ ...choice, lesson: 'names#name-binding' }, c)).toEqual([
-      { course: 'c', slug: 'names', anchor: 'name-binding', label: '📖 Learn this: Names › Name binding' },
+      { course: 'c', slug: 'names', anchor: 'name-binding', label: '📖 Learn this: Names › Name binding', read: false },
     ]);
+  });
+
+  it('says which of its lessons are read', () => {
+    const done = new Set(['c:names']);
+    expect(taughtBy({ ...choice, lesson: 'names' }, c, done)[0]).toMatchObject({
+      label: '📖 Learn this: Names · read',
+      read: true,
+    });
+    expect(taughtBy(choice, c, done).map((x) => x.label)).toEqual(['From lesson: Names · read']);
   });
 
   it('otherwise names the lessons teaching its subtopic at its level', () => {

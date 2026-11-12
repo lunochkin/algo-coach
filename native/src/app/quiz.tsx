@@ -667,7 +667,8 @@ function Row({ row }: { row: AnswerRow }) {
 function Details({ r }: { r: Result }) {
   const theme = useTheme();
   const q = r.q;
-  const course = useStore().catalog?.courses.find((c) => c.slug === q.course);
+  const catalog = useStore().catalog;
+  const course = catalog?.courses.find((c) => c.slug === q.course);
   const answer = yourAnswer(r);
   const sections = detailSections(q);
   return (
@@ -706,7 +707,7 @@ function Details({ r }: { r: Result }) {
           {DETAIL_NONE}
         </Text>
       ) : null}
-      {taughtBy(q, course).map((x) => (
+      {taughtBy(q, course, catalog?.lessonsDone).map((x) => (
         <Text
           key={x.slug}
           variant="labelLarge"
