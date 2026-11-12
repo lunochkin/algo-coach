@@ -71,10 +71,26 @@ precedence over this file.
   point and one per trap.
 - **A short accurate section is preferred over a long one**, and a section
   that would be filler is left out.
-- **A diagram is plain text in monospace**: box-drawing characters, and lines
-  of at most 60 characters. A diagram is added only where the structure is
-  the content: a hierarchy, an MRO or a lookup order, a timeline of who runs
-  when, a state machine, a request or data flow.
+- **A diagram is added only where the structure is the content**: a
+  hierarchy, an MRO or a lookup order, a state machine, a request or data
+  flow, a timeline of who runs when.
+- **A structure is a Mermaid diagram**: a ` ```mermaid ` fence in a lesson, or
+  a question's `diagram` that is one such fence alone. The seed draws it to
+  the screen's width, and a drawing made of characters scrolls sideways on a
+  phone. `docs/architecture/knowledge.md` `## Diagrams` gives how it is drawn.
+- **A Mermaid diagram is laid out top to bottom, as `flowchart TB`, with at
+  most three nodes side by side.** A wider one shrinks to fit a phone, and its
+  labels shrink below reading size. A long or wide structure is split into
+  two diagrams, or into subgraphs stacked top to bottom.
+- **A hierarchy puts the parent on top, joined to each child by a plain line
+  (`---`)**. An arrow reads as "subclass of" in one diagram and "has
+  subclass" in the next, and the reader has to learn its direction again.
+- **A Mermaid label writes `#gt;`, `#lt;` and `#amp;` for `>`, `<` and `&`**,
+  and is quoted where it holds other punctuation. Mermaid drops a bare `>`
+  from a label.
+- **A `text` block holds character art alone**: a memory layout, a trace
+  aligned by column, a timeline whose columns are positions in time. Its lines
+  hold at most 60 characters.
 - **A table is a markdown table**, in a lesson or as a question's whole
   `diagram`: a comparison, or a trace with a row per step. A phone draws a
   markdown table to its width, and scrolls a table drawn in characters

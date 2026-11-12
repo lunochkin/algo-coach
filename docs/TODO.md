@@ -590,7 +590,7 @@ items below.
       drawn
 - [x] Carry `diagrams` in the snapshot, and draw a ` ```mermaid ` fence and a
       Mermaid `diagram` from it on both clients
-- [ ] Rewrite the diagram rule in `docs/authoring/modules.md`: a table is a
+- [x] Rewrite the diagram rule in `docs/authoring/modules.md`: a table is a
       markdown table, a structure is Mermaid, and a `text` block holds
       character art alone
 - [ ] Make the module check refuse box-drawing characters outside a `text`
