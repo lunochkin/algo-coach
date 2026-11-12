@@ -4,23 +4,28 @@ The phases still open. A ticked item stays while its phase is open. When a
 phase closes, its items are harvested into `docs/ROADMAP.md` and removed whole.
 The work not yet ready for a phase waits under Further developments.
 
-## Phase 19 — modules written by a pipeline (current)
+## Phase 19 — the content pipeline (current)
 
-A knowledge module written, checked and revised by Claude Code sessions, with
-no call to the API. The pipeline lives in this repo, and the content
-repository holds the modules alone. Planned 2026-11-11.
+Modules and cards written, checked and revised by Claude Code sessions, with no
+call to the API. The pipeline lives in this repo, and the content repository
+holds the content alone. Planned 2026-11-11, and cards joined on 2026-11-12.
+Which modules and cards get written is the content repository's `PLAN.md`.
 
 ### The design
 
 - [x] Write into `knowledge.md` where authoring lives: the rules, the level
       definitions, the skills and the checks in this repo, and the modules
       with their own rules and skip lists in the content repository
-- [ ] Add "Authoring a module" to `flows.md`: the steps in order, why a
-      reviewer sees neither the key nor the writer's reasoning, why the fixer
-      is another session, and what stops the loop
-- [ ] Decide what a question written by a session records about its writer,
-      and write the choice into `machine.md`. A Claude Code session leaves no
-      call in the call log
+- [ ] Add "Authoring content" to `flows.md`: the steps in order for a module
+      and for a card, why a reviewer sees neither the key nor the writer's
+      reasoning, why the fixer is another session, and what stops the loop
+- [ ] Decide what a question or a card written by a session records about its
+      writer, and write the choice into `machine.md`. A Claude Code session
+      leaves no call in the call log
+- [ ] Add the rule for a question no interpreter proves to
+      `docs/authoring/rules.md`: the question names its source and the date
+      the source was read. A module of such questions needs it before its
+      first bank
 
 ### The move
 
@@ -30,11 +35,17 @@ repository holds the modules alone. Planned 2026-11-11.
 - [x] Port `content/modules/check.py` to `algo-coach module check <slug>`,
       with a test per rule it checks. Its 1126 lines carry no test today, and
       every later step trusts its verdict
-- [ ] Add the `Finding` record and its schema snapshot: the rule, the
-      question, the reviewer, the verdict and the outcome, stored as one
-      JSON-lines file per module in the content repository
+- [ ] Move the card rules out of the `card-author` skill into
+      `docs/authoring/cards.md`, numbered as `rules.md` numbers a module's.
+      A reviewer cites a rule by its number, and a skill's prose carries none
+- [ ] Port the skill's `validate.py` to `algo-coach card check <slug>`, with a
+      test per check, and have the content repository's pre-commit hook run
+      it on a staged card
+- [ ] Add the `Finding` record and its schema snapshot: the rule, the question
+      or the template, the reviewer, the verdict and the outcome, stored as
+      one JSON-lines file per module and per card in the content repository
 
-### The reviewers
+### The module reviewers
 
 - [ ] Write the solver's skill: a session answers each question without its
       key, and a reply differing from the key is a finding under rules 7
@@ -51,43 +62,49 @@ repository holds the modules alone. Planned 2026-11-11.
       against its example and its questions, under rules 15 and 22
 - [ ] Have each reviewer read its example defects from a path in the content
       repository. The skill is public, and a real question is not
+
+### The card reviewers
+
+- [ ] Run the mutants of each template's form against its cases in `card
+      check`, and report each survivor as a case the template lacks.
+      `algo_coach.mutation` enumerates them already, and the pass costs no
+      call
+- [ ] Write the trigger reviewer's skill: a session reads a card's trigger and
+      each template's trigger alone and names the form, and a wrong form is a
+      finding. A probe asks a user the same question
+- [ ] Write the brief reviewer's skill: a session checks each claim of a brief
+      and a template's notes against the technique's criterion and the
+      template's own code
+
+### The loop
+
 - [ ] Write the loop's skill: the writer, the check, the reviewers and a fixer
-      in turn, reviewing again only a question whose text or whose rule moved
-      since its last review
+      in turn, for a module and for a card. A question or a template is
+      reviewed again only where its text or its rule moved since its last
+      review
 
 ### The reviewers, scored
 
 - [ ] List the defects the three passes fixed, each with its question and the
       rule it broke, read from the content repository's three fix commits
-- [ ] Run the reviewers over the Python module as it stood before the first
-      pass, and write each rule's recall against that list into `ROADMAP.md`
+- [ ] Run the module reviewers over the Python module as it stood before the
+      first pass, and write each rule's recall against that list into
+      `ROADMAP.md`
 - [ ] Read by hand a sample of the findings the three passes did not make, and
       write the share that are real defects beside the recall
-
-### System Design
-
-- [ ] Write the module's own `CLAUDE.md`: its scope, its sources, its kinds,
-      and how each kind is proved
-- [ ] Add the rule for a question no interpreter proves to the rules: the
-      question names its source and the date the source was read
-- [ ] Write the topics, the subtopics, the graph and the coverage maps, and
-      read them by hand before any question is written
-- [ ] Write levels 0 and 1 of every subtopic through the loop, and seed the
-      module
-
-### AI Engineering
-
-- [ ] Write into the module's own `CLAUDE.md` where AI Engineering ends and
-      Machine Learning begins. The two share embeddings, attention and
-      evaluation metrics, and rule 14 allows one question per fact
-- [ ] Write levels 0 and 1 of every subtopic through the loop, and seed the
-      module
+- [ ] Run the card reviewers over the nine authored cards, read every finding
+      by hand, and write the share that are real defects into `ROADMAP.md`.
+      No pass labelled a card's defects, so no recall can be taken
 
 ### Exit
-- [ ] The reviewers carry a recall per rule against the three passes, written
-      in `ROADMAP.md`
-- [ ] The System Design module is seeded with nothing refused and every
-      finding closed
+
+- [ ] The module reviewers carry a recall per rule against the three passes,
+      and the card reviewers a share of real findings, both in `ROADMAP.md`
+- [ ] One Python subtopic level is rewritten through the loop, seeded with
+      nothing refused and every finding closed. The three passes fixed that
+      level by hand, so the rewrite shows whether the loop reaches their work
+- [ ] One authored card is revised through the loop, seeded with `card check`
+      passing and every finding closed
 
 ## Phase 16 — scheduling and mastery
 
@@ -549,8 +566,8 @@ one form its target named.
 
 A table or a diagram drawn with box-drawing characters scrolls sideways on a
 phone, where a reader sees a third of it at a time. The content repository's
-`modules/TODO.md` converts them to markdown tables and Mermaid, and waits on
-the items below.
+`PLAN.md` converts them to markdown tables and Mermaid, and waits on the
+items below.
 
 - [ ] Write into `pages.md` how a markdown table reads on both clients: its
       cells wrap, and a table wider than the screen reads each row as lines of
@@ -565,6 +582,28 @@ the items below.
 - [ ] Draw a ` ```mermaid ` block and a `diagram` field holding Mermaid as the
       seed's image, on both clients. Triggered when the content repository
       converts its first diagram
+- [ ] Rewrite the diagram rule in `docs/authoring/modules.md`: a table is a
+      markdown table, a structure is Mermaid, and a `text` block holds
+      character art alone
+- [ ] Make the module check refuse box-drawing characters outside a `text`
+      block, so a new lesson cannot bring the old form back. Triggered when
+      the content repository's conversion is done
+
+### Code width on a phone
+
+A phone fits some 36 to 40 characters of code, and a longer line wraps under
+its own indent behind a `↪`. In a question about what code prints, the reader
+then has to tell a wrap from a line break. The content repository's `PLAN.md`
+rewraps the lines these items name.
+
+- [ ] Add a module check warning for a code line over 60 characters, in a
+      question's `code` and `example` and in a lesson fence naming a language,
+      and write its rule into `docs/authoring/rules.md`
+- [ ] Write the width into `docs/authoring/modules.md` beside the diagram
+      rule: code lines of at most 60 characters, and 40 where a line holds
+      without a break
+- [ ] Lower the warning to 40 characters, and write down what it names.
+      Triggered when the content repository leaves no line over 60
 
 ### Audio
 
@@ -658,7 +697,8 @@ re-aims it by hand. Nothing aims the next focus once the current one is done.
 ### The algorithms module
 
 Mastery's knowledge part counts answers to the questions a technique carries,
-and no question carries a technique yet.
+and no question carries a technique yet. The module itself is authored in the
+content repository, as its `PLAN.md` gives.
 
 - [ ] Decide how a subtopic names the technique it teaches, and write the field
       into `knowledge.md`. `log.md` defers how a question is tied to its
@@ -668,8 +708,6 @@ and no question carries a technique yet.
       the facts. Without the split a lesson and a brief restate each other
 - [ ] Add the technique field to the seed and the snapshot, checked against
       the vocabulary as the seed runs
-- [ ] Author the algorithms module in the content repository, first a subtopic
-      per technique a card teaches
 - [ ] Link a card's page to its technique's subtopic on both clients, with the
       row in `pages.md` `### Acts`
 - [ ] Count a technique's knowledge reading from the answers to its subtopic's
@@ -678,7 +716,9 @@ and no question carries a technique yet.
 ### Output questions typed
 
 An `output` question answered by picking an option tests recognition. Typing
-the output tests recall, which is what a syntax trainer measures.
+the output tests recall, which is what a syntax trainer measures. The Python
+module's questions are rewritten in the content repository, as its `PLAN.md`
+gives.
 
 - [ ] Decide whether changing a question's format keeps its slug, and write the
       rule into `knowledge.md` `## Seeding`. The fact asked stays the same, and
@@ -686,8 +726,6 @@ the output tests recall, which is what a syntax trainer measures.
 - [ ] Write into `knowledge.md` `## Questions` how a `short` reply to an
       `output` question is matched. The rule today strips whitespace and
       quotes, which can erase the difference the question asks about
-- [ ] Rewrite the Python module's `output` questions from `choice` to `short`
-      in the content repository
 
 ### Variants of an output question
 
@@ -708,18 +746,12 @@ user recalls the answer rather than the semantics.
 ### Covering a book's ground
 
 A module claims to cover a book only where a test the module did not write
-shows it.
+shows it. The coverage map and the held-out question set are private, and the
+content repository's `PLAN.md` writes them.
 
-- [ ] Write a book's coverage map in the content repository: each section
-      heading mapped to a subtopic and a level, as covered, partly covered or
-      missing. Headings only, since the book's text never enters a repository
 - [ ] Add a coverage reviewer to the module pipeline, naming each mapped
       section no group covers and each group whose questions test recognition
       alone
-- [ ] Write a held-out question set from a book's table of contents, apart
-      from the module, and score a reader before and after the module. The
-      certification exams sample the module's own questions, so they cannot
-      show coverage
 
 ### Training judgement
 

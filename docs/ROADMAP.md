@@ -474,37 +474,41 @@ Measured:
 - A release build of the app after a TypeScript change took 25 s against
   177 s, once the Android project is regenerated only when its inputs change.
 
-## Phase 19 — Modules written by a pipeline (current)
+## Phase 19 — The content pipeline (current)
 
-A knowledge module written, checked and revised by a pipeline of Claude Code
-sessions, with the pipeline's reviewers measured before a module is trusted to
+Modules and cards written, checked and revised by a pipeline of Claude Code
+sessions, with the pipeline's reviewers measured before content is trusted to
 them. Planned on 2026-11-11, after three review passes by hand over the Python
-module left 23 numbered rules.
+module left 23 numbered rules. Cards joined on 2026-11-12.
 
-- The authoring rules, the level definitions, the skills and the checker in
-  this repo. The content repository holds the modules, and each module's own
-  rules and skip list.
+- The authoring rules, the level definitions, the skills and the checks in
+  this repo. The content repository holds the modules and the cards, each
+  module's own rules and skip list, and the plan of what to write.
 - The content repository's `check.py` ported into the engine as a tested
   command. The seed's own gate stays apart from it, since the gate executes
   no snippet.
+- The card rules numbered in `docs/authoring/cards.md`, and the card
+  validator ported to `algo-coach card check`, which also runs each
+  template's mutants against its cases.
 - A writer session per subtopic level, working through the module's coverage
-  map.
-- **Blind reviewers, each a fresh session asked one question.** One answers
-  without the key, one picks from the choices alone, one assigns a level from
-  the definitions, one checks each fact against the module's named sources,
-  and one reads a lesson's prose against its example.
-- A fixer that is not the reviewer, and a findings file per module naming the
-  rule, the question and the outcome of each finding.
+  map, and per card.
+- **Blind reviewers, each a fresh session asked one question.** For a module,
+  one answers without the key, one picks from the choices alone, one assigns a
+  level from the definitions, one checks each fact against the module's named
+  sources, and one reads a lesson's prose against its example. For a card, one
+  names the form from a trigger alone, and one checks a brief against the
+  criterion and the code.
+- A fixer that is not the reviewer, and a findings file per module and per
+  card naming the rule, the question or template, and the outcome.
 - **The reviewers scored before they are used.** The Python module as it stood
-  before the three passes is the test set, and the defects those passes fixed
-  are its labels.
+  before the three passes is the module reviewers' test set, and the defects
+  those passes fixed are its labels. No pass labelled a card, so the card
+  reviewers' findings over the nine cards are read by hand.
 - A module names how each kind of question is proved: by running code, by
-  arithmetic, or by a dated source. Python's proof is the interpreter, and a
-  System Design question has none.
-- System Design as the first module written this way. AI Engineering follows,
-  and Machine Learning is a candidate after it.
-- Exit: the reviewers carry a recall per rule against the three passes, and
-  the System Design module is seeded with every finding closed.
+  arithmetic, or by a dated source.
+- Exit: the reviewers are scored, one Python subtopic level is rewritten
+  through the loop, and one card is revised through it, each with every
+  finding closed.
 
 ## Phase 16 — Scheduling and mastery
 
