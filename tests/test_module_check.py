@@ -178,10 +178,12 @@ def test_a_text_block_drawing_nothing_is_warned(tmp_path):
 def test_a_line_wider_than_a_phone_is_warned(tmp_path):
     """Rule 25: a phone wraps a line past some 40 characters, and a wrap in
     a snippet read for its output can pass for a line break. A `text`
-    block is a drawing, kept whole, and is not counted."""
+    block is a drawing, kept whole, and a `mermaid` one is drawn to the
+    screen's width: neither is counted."""
     wide = "print(" + "x" * 60 + ")\n"
     q = question("a", kind="output", code=wide, detail={"mechanism": "m", "example": wide})
-    fences = "".join(f"\n```{lang}\n{wide}```\n" for lang in ("python", "output", "text"))
+    langs = ("python", "output", "text", "mermaid")
+    fences = "".join(f"\n```{lang}\n{wide}```\n" for lang in langs)
     root = written(tmp_path, [q], lessons={"les": (["sub@0"], LESSON + fences)})
 
     assert found(checked(root).warnings, 25) == [

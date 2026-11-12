@@ -43,8 +43,9 @@ def widths(course: Course, report: Report) -> None:
         ):
             if isinstance(code, str) and (found := _wide(code)):
                 report.warn(25, f"{where(q)} {name}", found)
-    # a fence naming a language or `output` wraps, and a `text` one is a drawing
+    # a fence naming a language or `output` wraps; a `text` one is a drawing,
+    # and a `mermaid` one is drawn to the screen's width
     for slug, text in course.lessons.items():
         for m in FENCE.finditer(text):
-            if m[1] and m[1] != "text" and (found := _wide(m[2])):
+            if m[1] and m[1] not in ("text", "mermaid") and (found := _wide(m[2])):
                 report.warn(25, f"lessons/{slug}.md {_line(text, m.start())}", found)
