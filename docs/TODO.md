@@ -295,7 +295,23 @@ a block that became ready. A block, or a single item of one, is planned into a
 phase once it is clear enough to plan. An item's trigger, where it names one, is
 the event that makes the item ready.
 
-### The recognition drill
+### Algorithm practice on the phone
+
+The phone becomes a place to practise algorithms in full, as it already is for
+the knowledge modules. A solution typed on the phone's keys is slow, so the
+phone's own algorithm practice asks for little typing: naming the approach,
+ordering and completing a solution, and tracing what it prints. A new exercise
+meant for the phone joins this block rather than opening a block of its own.
+
+- [ ] Time five sittings on the phone and five on the web, on problems of one
+      difficulty, and write the medians into `log.md`. Execution reads the
+      elapsed time beside `device`, and nothing yet says what the phone's keys
+      cost a solve
+- [ ] Write into `pages.md` which page of the Practice section serves the
+      recognition drill and the short exercises on both clients, and draw it in
+      `wireframes.md`
+
+#### The recognition drill
 
 A problem served without its technique, answered in words with no code run.
 Moved out of Phase 16 on 2026-10-02: hiding the technique matters less than
@@ -315,6 +331,43 @@ feeds it.
       a sitting with fewer steps
 - [ ] Take the framing spoken, transcribed in front of the same judge.
       Triggered when the judge's score holds on text
+
+#### Short exercises
+
+Exercises that need little typing, and so suit a phone: ordering a solution's
+shuffled lines, filling one blank in it, and tracing what it prints. Each
+tests less than writing the solution does.
+
+- [ ] Write the design of a short exercise into `log.md`: its own record
+      kind, and that mastery never counts it as execution. A reordered line
+      is not a solve
+- [ ] Compare tracing with the knowledge module's `output` questions, and
+      write into `knowledge.md` whether a traced output is one of them
+
+### Practice with an assistant in the loop
+
+Coding beside an AI assistant moves the skill from typing code to specifying
+it and checking it. Three exercises train that skill, and the first two reuse
+records the corpus already holds.
+
+- [ ] Write the high-level design into `log.md`: the three exercises, the
+      record each leaves, and which part of mastery each counts toward, if
+      any. A bug found in someone else's code is not a solve
+- [ ] Decide how a served mutant is named, and write the rule into
+      `corpus.md`. No store holds a mutant today, and an operator set that
+      changes would re-derive a different mutant under the same position
+- [ ] Serve a killed mutant as code an assistant wrote, take the line the user
+      names and the fix, and run the fixed code against the problem's cases
+- [ ] Serve a canonical beside its naive solution, take the user's reading of
+      which grows faster and at what size it fails, and check the reading
+      against the problem's separating case
+- [ ] Serve the instruction exercise: the user writes an instruction for a
+      problem, a model writes `solve` from it alone, and the problem's cases
+      judge that code. Triggered when the first two exercises are in use,
+      since each attempt costs a call
+- [ ] Show the bug and the comparison exercises on the phone first. Each asks
+      for reading and a tap, which the block "Algorithm practice on the phone"
+      is for
 
 ### Scheduling on the diagnosed cause
 
@@ -492,18 +545,6 @@ one form its target named.
       retrieved. Triggered when a flow needs a similar problem that the
       technique alone cannot select
 
-### Exercises for the phone
-
-Exercises that need little typing, and so suit a phone: ordering a solution's
-shuffled lines, filling one blank in it, and tracing what it prints. Each
-tests less than writing the solution does.
-
-- [ ] Write the design of a short exercise into `log.md`: its own record
-      kind, and that mastery never counts it as execution. A reordered line
-      is not a solve. Triggered when a phone sitting proves too slow to use
-- [ ] Compare tracing with the knowledge module's `output` questions, and
-      write into `knowledge.md` whether a traced output is one of them
-
 ### Tables and diagrams on a phone
 
 A table or a diagram drawn with box-drawing characters scrolls sideways on a
@@ -613,6 +654,56 @@ re-aims it by hand. Nothing aims the next focus once the current one is done.
       question to pass on its next review
 - [ ] Show a module's own forecast on its page. Triggered when the home's
       forecast reads two modules' load and the user asks which one it is
+
+### The algorithms module
+
+Mastery's knowledge part counts answers to the questions a technique carries,
+and no question carries a technique yet.
+
+- [ ] Decide how a subtopic names the technique it teaches, and write the field
+      into `knowledge.md`. `log.md` defers how a question is tied to its
+      technique, and the field settles it
+- [ ] Write into `content.md` how a card and a subtopic share one technique:
+      the card holds the trigger, the templates and the ladder, the subtopic
+      the facts. Without the split a lesson and a brief restate each other
+- [ ] Add the technique field to the seed and the snapshot, checked against
+      the vocabulary as the seed runs
+- [ ] Author the algorithms module in the content repository, first a subtopic
+      per technique a card teaches
+- [ ] Link a card's page to its technique's subtopic on both clients, with the
+      row in `pages.md` `### Acts`
+- [ ] Count a technique's knowledge reading from the answers to its subtopic's
+      questions, as `log.md` gives, and show it on the board
+
+### Output questions typed
+
+An `output` question answered by picking an option tests recognition. Typing
+the output tests recall, which is what a syntax trainer measures.
+
+- [ ] Decide whether changing a question's format keeps its slug, and write the
+      rule into `knowledge.md` `## Seeding`. The fact asked stays the same, and
+      a new slug would discard every answer already given
+- [ ] Write into `knowledge.md` `## Questions` how a `short` reply to an
+      `output` question is matched. The rule today strips whitespace and
+      quotes, which can erase the difference the question asks about
+- [ ] Rewrite the Python module's `output` questions from `choice` to `short`
+      in the content repository
+
+### Variants of an output question
+
+An `output` question with fixed values is memorised after a few reviews: the
+user recalls the answer rather than the semantics.
+
+- [ ] Write the variant into `knowledge.md`: a template, its parameter sets,
+      every variant scheduled under the question's slug, and the kinds that
+      may carry one
+- [ ] Decide whether an answer records the variant it met, and write the field
+      into `knowledge.md` `## The records`. Without it a wrong answer cannot be
+      traced to the values behind it
+- [ ] Compute each variant's output by running it as the seed runs, and carry
+      the variants in the snapshot. No client runs a question's code
+- [ ] Serve a variant at random on both clients, with the shared fixtures
+      passing in both suites
 
 ### Questions served by the engine
 

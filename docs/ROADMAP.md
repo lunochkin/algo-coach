@@ -599,6 +599,13 @@ items of each block, the smaller ones included.
   and is scored against a hand-graded set before its grades feed mastery. The
   scheduler mixes drills with full sittings and never replaces a sitting with
   one. Text first, and a spoken answer later in front of the same judge.
+- **Practice with an assistant in the loop.** Exercises for coding beside an
+  AI assistant, where the skill is specifying and checking code rather than
+  typing it. The user finds the bug in a mutant of a canonical, served as code
+  an assistant wrote, and the problem's cases check the fix. The user judges a
+  canonical against its naive solution, and the separating case checks the
+  judgement. The user writes the instruction a model implements, and the
+  problem's cases judge the code the model wrote.
 - **Scheduling on the diagnosed cause.** What Phase 18 names, fed back into
   what the board picks next. It waits on the scores that phase produces.
 - **Alternative solutions.** Every other way to solve a stored problem,
