@@ -4,10 +4,11 @@ import rehypeKatex from 'rehype-katex'
 import remarkGfm from 'remark-gfm'
 import remarkMath from 'remark-math'
 import type { Components } from 'react-markdown'
-import type { ReactNode } from 'react'
-import { codeWraps, EXTERNAL_HINT, EXTERNAL_MARK, isExternal } from '@algo-coach/core'
+import { Children, isValidElement, type ReactNode } from 'react'
+import { codeWraps, EXTERNAL_HINT, EXTERNAL_MARK, isExternal, tableShape } from '@algo-coach/core'
 
 import { WrappedText } from '@/components/PythonCode'
+import { useColumns } from '@/lib/columns'
 
 // authored and generated prose: a card's brief, a template's notes and a
 // statement, tables and `$…$` math included
@@ -17,7 +18,7 @@ export function Markdown({ children }: { children: string }) {
       <ReactMarkdown
         remarkPlugins={[remarkGfm, remarkMath]}
         rehypePlugins={[rehypeKatex]}
-        components={{ pre: CodeFence, a: ProseLink }}
+        components={{ pre: CodeFence, a: ProseLink, table: ProseTable }}
       >
         {children}
       </ReactMarkdown>
@@ -58,3 +59,52 @@ export const CodeFence: Components['pre'] = ({ node, children }) => {
     </pre>
   )
 }
+
+// a character of prose, averaged over ordinary words
+const PROSE_PROBE = 'the quick brown fox jumps over the lazy dog'
+
+const kids = (n: ReactNode): ReactNode[] =>
+  isValidElement(n) ? Children.toArray((n.props as { children?: ReactNode }).children) : []
+
+// a table's cells as rendered, rows below the header's, read in the order
+// the hast node holds them
+function cellsOf(children: ReactNode): ReactNode[][] {
+  return Children.toArray(children)
+    .flatMap(kids)
+    .filter(isValidElement)
+    .map((tr) => kids(tr).filter(isValidElement).map((cell) => kids(cell)))
+}
+
+const textRows = (n: Hast): string[][] =>
+  (n.children ?? [])
+    .filter((x) => x.tagName === 'thead' || x.tagName === 'tbody')
+    .flatMap((part) => (part.children ?? []).filter((tr) => tr.tagName === 'tr'))
+    .map((tr) => (tr.children ?? []).filter((c) => c.tagName === 'th' || c.tagName === 'td').map(textOf))
+
+// a grid where the columns fit, and a block per row where they do not: `pages.md`, The design system
+export const ProseTable: Components['table'] = ({ node, children }) => {
+  const { ref, cols } = useColumns(PROSE_PROBE)
+  const [header = [], ...rows] = node ? textRows(node as Hast) : []
+  const grid = tableShape(header, rows, cols) === 'grid'
+  const [head = [], ...body] = grid ? [] : cellsOf(children)
+  return (
+    <div ref={ref as React.RefObject<HTMLDivElement>} className={grid ? undefined : 'table-rows space-y-3'}>
+      {grid ? (
+        <table>{children}</table>
+      ) : (
+        body.map((row, i) => (
+          <div key={i} className="border-l-2 border-border pl-3">
+            <div className="font-medium">{row[0]}</div>
+            {row.slice(1).map((cell, j) => (
+              <div key={j}>
+                {header[j + 1]?.trim() && <span className="text-muted-foreground">{head[j + 1]}: </span>}
+                {cell}
+              </div>
+            ))}
+          </div>
+        ))
+      )}
+    </div>
+  )
+}
+

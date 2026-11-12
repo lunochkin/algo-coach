@@ -316,6 +316,16 @@ export function GalleryPage() {
         <Markdown>
           {'Return the **smallest** speed `k` such that every pile is eaten within `h` hours.'}
         </Markdown>
+        {/* a grid in a wide window, and a block per row below the phone's width */}
+        <Markdown>
+          {[
+            '| method | 0 rows | 2+ rows |',
+            '|---|---|---|',
+            '| `scalar_one()` | `NoResultFound` | `MultipleResultsFound` |',
+            '| `scalar_one_or_none()` | `None` | `MultipleResultsFound` |',
+            '| `first()` | `None` | first row, rest dropped |',
+          ].join('\n')}
+        </Markdown>
       </Section>
 
       <Section title="The editor">

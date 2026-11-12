@@ -9,7 +9,7 @@ import remarkMath from 'remark-math'
 import { anchor } from '@algo-coach/core'
 
 import { lessonPath } from '@/knowledge/paths'
-import { CodeFence, ProseLink } from '@/components/Markdown'
+import { CodeFence, ProseLink, ProseTable } from '@/components/Markdown'
 
 // a lesson's Markdown: its `lesson:` links stay in the app, and each heading
 // carries the anchor a link names, as the core reads them. `onLesson` opens a
@@ -30,6 +30,7 @@ export function LessonText({
         rehypePlugins={[rehypeKatex]}
         components={{
           pre: CodeFence,
+          table: ProseTable,
           h2: ({ children }) => <h2 id={anchor(plain(children))}>{children}</h2>,
           h3: ({ children }) => <h3 id={anchor(plain(children))}>{children}</h3>,
           a: ({ href = '', children }) => {

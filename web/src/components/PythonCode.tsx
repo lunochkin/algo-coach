@@ -1,34 +1,8 @@
 import { codeRows, WRAP_MARK, type CodeRow } from '@algo-coach/core'
 import { pieces } from '@algo-coach/editor'
-import { useLayoutEffect, useRef, useState, type ReactNode } from 'react'
+import { type ReactNode } from 'react'
 
-// the columns a block holds, from its width and the width of one mono character
-function useColumns() {
-  const ref = useRef<HTMLElement>(null)
-  const [cols, setCols] = useState(Infinity)
-  useLayoutEffect(() => {
-    const el = ref.current
-    if (!el) return
-    const probe = document.createElement('span')
-    probe.textContent = 'M'.repeat(40)
-    probe.style.cssText = 'position:absolute;visibility:hidden;white-space:pre'
-    el.appendChild(probe)
-    const measure = () => {
-      const char = probe.getBoundingClientRect().width / 40
-      const style = getComputedStyle(el)
-      const width = el.clientWidth - parseFloat(style.paddingLeft) - parseFloat(style.paddingRight)
-      if (char) setCols(Math.floor(width / char))
-    }
-    measure()
-    const observer = new ResizeObserver(measure)
-    observer.observe(el)
-    return () => {
-      observer.disconnect()
-      probe.remove()
-    }
-  }, [])
-  return { ref, cols }
-}
+import { useColumns } from '@/lib/columns'
 
 // each wrapped part opens on a mark no copy carries: `pages.md`, The design system
 function Rows({ rows, body }: { rows: CodeRow[]; body: (row: CodeRow) => ReactNode }) {

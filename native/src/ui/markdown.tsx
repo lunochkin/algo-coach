@@ -7,6 +7,7 @@ import { codeWraps, EXTERNAL_HINT, EXTERNAL_MARK, isExternal } from '@algo-coach
 
 import { withMath } from '@/lib/math';
 import { CodeBlock } from '@/ui/common';
+import { ProseTable } from '@/ui/table';
 import { font, space, textSize } from '@/ui/tokens';
 
 const CODE_SCALE = 0.85;
@@ -34,6 +35,11 @@ const soft = (text: string | ReactNode[]) => (typeof text === 'string' ? text.re
 export class CodeRenderer extends Renderer {
   code(text: string, language?: string, _container?: ViewStyle, _style?: TextStyle): ReactNode {
     return <CodeBlock key={this.getKey()} code={text} verbatim wrap={codeWraps(language)} flush />;
+  }
+
+  // a grid where the columns fit, a block per row otherwise, never scrolled sideways
+  table(header: ReactNode[][], rows: ReactNode[][][]): ReactNode {
+    return <ProseTable key={this.getKey()} header={header} rows={rows} />;
   }
 
   // the library returns a list's items as a fragment, which the gap between

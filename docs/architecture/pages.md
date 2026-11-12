@@ -780,6 +780,17 @@ difference it found. No row is marked `to fix` today.
   and a fence naming `text` or no language may be drawn in characters, and
   wrapping would break the drawing. A program's output is fenced `output`
   instead, so its long lines wrap as code does.
+- **A markdown table reads as a grid where its columns fit the reading
+  width, and as one block per row where they do not, on both clients.** A
+  phone is too narrow for most tables of three columns. A grid squeezed to fit
+  wraps each cell to a few words a line, and a grid scrolled sideways hides
+  its last columns.
+- **A table read as blocks opens each row on its first cell, and gives every
+  other cell under its header.** A table's first column usually names the
+  row, so the name stays beside its values.
+- **`packages/core` decides a table's shape**, from the length of each cell's
+  text and a column count each client measures in characters of prose. A
+  table then reads the same on the phone and in a narrow window on the web.
 - **One mapping colours Python wherever it appears.** The editor and a
   template's form read the same mapping from the language's tags to the five
   code tokens, so a form on a card is coloured as the editor colours it. A

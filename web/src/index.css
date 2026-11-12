@@ -250,7 +250,7 @@ summary {
   margin-bottom: 0.25rem;
 }
 
-.prose :is(p, ul, ol, blockquote, pre, table) {
+.prose :is(p, ul, ol, blockquote, pre, table, .table-rows) {
   margin-block: var(--spacing-stack);
 }
 
