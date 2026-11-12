@@ -669,9 +669,15 @@ difference it found. No row is marked `to fix` today.
 - **A section collapses from its own heading**, and every section is open until
   the reader closes it. The count beside the heading stays readable while the
   section is closed.
-- **A section's body sits in a bordered panel under its heading**, prose padded
-  and rows edge to edge, on a long page as on a list. A card's brief carries
-  headings of its own, and the panel keeps them inside one section.
+- **A section of rows sits in a bordered panel under its heading**, the rows
+  edge to edge. The border groups the rows into one list.
+- **A section of prose reads bare under its heading.** A code block inside it
+  is then the only box on the page. A panel around the prose put a box inside
+  a box and cost four characters of a phone's code width.
+- **A lesson and a card's brief are cut at their `##` headings**, each heading
+  a section of the page. Without a panel, a heading inside a section would
+  read as a section of its own, so no section holds one. Text before the first
+  heading reads under the brief's own title.
 - **Which sections a reader closed is not stored**, in the browser or
   anywhere else, so a reload opens every section again.
 

@@ -106,7 +106,9 @@ each technique, and a card and a mastery estimate share no data.
 - **The trigger is its own field**, apart from the prose it could
   sit in, because a probe asks exactly that question: is the form recognised
   unprompted. So the trigger is shown and withheld on its own, where the rest of
-  what to read is one authored block the engine never parses. The trigger is
+  what to read is one authored block the engine never parses. The pages cut
+  that block at its headings for display alone, and no heading carries a
+  meaning the engine reads. The trigger is
   carried at both levels, because recall is per template. The card's trigger
   says to reach for the technique, and a template's trigger says which of the
   technique's forms.

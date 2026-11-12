@@ -1,6 +1,7 @@
 import { lastAt } from './account';
 import type { components } from './api/schema';
 import { described, type EngineClient } from './engine';
+import { lessonParts } from './lessontext';
 import type { Outcome } from './sittingrun';
 import {
   CARD_BRIEF,
@@ -383,12 +384,28 @@ export function cardNote(studied: Studied, now: number): string {
   return [studied.card.technique, run && studyingSince(lastAt(run.started_at, now))].filter(Boolean).join(' · ');
 }
 
+/**
+ * A card's brief cut at its `##` headings, as a lesson is, so each heading is
+ * a section of the card's page rather than a heading inside one. Text before
+ * the first heading reads under the brief's own title.
+ */
+export function briefParts(brief: string): { id: string; title: string; text: string }[] {
+  return lessonParts(brief).map((part) =>
+    part.title === null
+      ? { id: 'brief', title: CARD_BRIEF, text: part.text }
+      : // prefixed: a brief heading named like the ladder must not take its id
+        { id: `brief-${part.anchor}`, title: part.title, text: part.text },
+  );
+}
+
 /** A card's sections, as both clients' section bars name them. Probes read only once a run drew some. */
-export function cardSections(studied: Pick<Studied, 'probes'> | null | undefined): { id: string; label: string }[] {
+export function cardSections(
+  studied: (Pick<Studied, 'probes'> & { card: Pick<Studied['card'], 'brief'> }) | null | undefined,
+): { id: string; label: string }[] {
   if (!studied) return [];
   return [
     { id: 'trigger', label: CARD_TRIGGER },
-    { id: 'brief', label: CARD_BRIEF },
+    ...briefParts(studied.card.brief).map((part) => ({ id: part.id, label: part.title })),
     { id: 'ladder', label: LADDER_TITLE },
     ...(studied.probes.length > 0 ? [{ id: 'probes', label: PROBES_TITLE }] : []),
     { id: 'templates', label: CARD_TEMPLATES },

@@ -58,7 +58,6 @@ export function ModuleGroups({
           id={t.slug}
           title={t.title}
           count={t.count}
-          body="bare"
           aside={
             <>
               <Button

@@ -1,7 +1,6 @@
 import type { ReactNode } from 'react'
 
 import { SectionHeading } from '@/components/SectionHeading'
-import { cn } from '@/lib/utils'
 
 // the heading is the press that closes its own section, and the bar above
 // reaches every one of them by id
@@ -22,8 +21,9 @@ export function PageSection({
   // a section inside another, as a module's lessons sit under the module
   sub?: boolean
   aside?: ReactNode
-  // the panel the body sits in: prose padded, rows edge to edge, or none
-  // where the body brings panels of its own
+  // rows sit in a panel edge to edge. Prose reads bare under its heading, so
+  // a code block in it is the only box, and `bare` is a body bringing panels
+  // of its own
   body?: 'prose' | 'rows' | 'bare'
   // without onToggle the section does not close, as the board's sections do not
   closed?: boolean
@@ -31,8 +31,6 @@ export function PageSection({
   children: ReactNode
 }) {
   return (
-    // a heading over a bordered panel, as every page's sections read: a brief
-    // carrying headings of its own then reads inside one of them
     <section id={id} className="scroll-mt-16 space-y-stack">
       <SectionHeading
         sub={sub}
@@ -43,17 +41,10 @@ export function PageSection({
         onToggle={onToggle && (() => onToggle(id))}
       />
       {!closed &&
-        (body === 'bare' ? (
-          children
+        (body === 'rows' ? (
+          <div className="overflow-hidden rounded-xl border bg-card">{children}</div>
         ) : (
-          <div
-            className={cn(
-              'rounded-xl border bg-card',
-              body === 'prose' ? 'px-4 py-3' : 'overflow-hidden',
-            )}
-          >
-            {children}
-          </div>
+          children
         ))}
     </section>
   )

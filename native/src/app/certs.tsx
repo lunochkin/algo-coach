@@ -226,7 +226,7 @@ function Matrix(props: { of: Sections; c: Course; states: Map<string, CertStatus
   const lv = levels(rules);
   const rows = certRows(c);
   return (
-    <PageSection of={props.of} id={c.slug} title={c.title} count={rows.length} body="bare">
+    <PageSection of={props.of} id={c.slug} title={c.title} count={rows.length}>
       <Panel padded>
         <View style={styles.row}>
           <View style={{ flex: 1 }} />

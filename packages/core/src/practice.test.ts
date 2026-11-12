@@ -4,6 +4,7 @@ import {
   boardView,
   cardBlocks,
   cardRow,
+  briefParts,
   cardSections,
   inProgress,
   cardNote,
@@ -327,9 +328,21 @@ describe("a card's ladder", () => {
 
 describe("a card's sections and its run", () => {
   it('names the probes only once a run drew some', () => {
-    expect(cardSections({ probes: [] }).map((one) => one.id)).toEqual(['trigger', 'brief', 'ladder', 'templates']);
-    expect(cardSections({ probes: [{}] as never }).map((one) => one.id)).toContain('probes');
+    const card = { brief: 'Read this first.\n\n## Core idea\n\nA boundary.\n\n## Ladder\n\nNot the ladder.' };
+    expect(cardSections({ probes: [], card }).map((one) => one.id)).toEqual([
+      'trigger',
+      'brief',
+      'brief-core-idea',
+      'brief-ladder',
+      'ladder',
+      'templates',
+    ]);
+    expect(cardSections({ probes: [{}] as never, card }).map((one) => one.id)).toContain('probes');
     expect(cardSections(null)).toEqual([]);
+  });
+
+  it('reads a brief opening on a heading as its headings alone', () => {
+    expect(briefParts('## Core idea\n\nA boundary.').map((one) => one.title)).toEqual(['Core idea']);
   });
 
   it('names a refused start rather than reading it as started', async () => {

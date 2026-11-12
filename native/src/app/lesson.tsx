@@ -22,7 +22,7 @@ import {
 } from '@algo-coach/core';
 import { useStore } from '@/lib/store';
 import { Blank, BottomBar, fromCopy, Loaded, styles, Press, ScreenHeader } from '@/ui/common';
-import { CodeRenderer, InlineCode, type InlineCodeProps, markdownOptions } from '@/ui/markdown';
+import { BLOCK_GAP, CodeRenderer, InlineCode, type InlineCodeProps, markdownOptions } from '@/ui/markdown';
 import { Heading } from '@/ui/rows';
 import { PageSection, type Sections, SectionBar, useSections } from '@/ui/sections';
 import { space } from '@/ui/tokens';
@@ -67,7 +67,7 @@ function Chunk(props: { text: string; renderer: LessonRenderer; at: (view: HostI
   const theme = useTheme();
   const elements = useMarkdown(props.text, markdownOptions(theme, props.renderer));
   return (
-    <View ref={props.at} collapsable={false}>
+    <View ref={props.at} collapsable={false} style={{ gap: BLOCK_GAP }}>
       {elements.map((el, i) => (
         <Fragment key={i}>{el}</Fragment>
       ))}
@@ -79,7 +79,7 @@ function Chunk(props: { text: string; renderer: LessonRenderer; at: (view: HostI
 function Chunks(props: { text: string; renderer: LessonRenderer; of: Sections }) {
   const chunks = useMemo(() => sections(props.text), [props.text]);
   return (
-    <>
+    <View style={{ gap: BLOCK_GAP }}>
       {chunks.map((chunk, i) => (
         <Chunk
           key={i}
@@ -88,7 +88,7 @@ function Chunks(props: { text: string; renderer: LessonRenderer; of: Sections })
           at={chunk.anchor ? props.of.register(chunk.anchor) : () => {}}
         />
       ))}
-    </>
+    </View>
   );
 }
 

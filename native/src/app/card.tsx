@@ -20,7 +20,7 @@ import {
   runStartRefused,
   OF,
   CARD_TRIGGER,
-  CARD_BRIEF,
+  briefParts,
   CARD_TEMPLATES,
   HIDE_FORM,
   cardNote,
@@ -84,9 +84,11 @@ export default function CardScreen() {
               <PageSection of={sections} id="trigger" title={CARD_TRIGGER}>
                 <Markdown>{data.card.trigger}</Markdown>
               </PageSection>
-              <PageSection of={sections} id="brief" title={CARD_BRIEF}>
-                <Markdown>{data.card.brief}</Markdown>
-              </PageSection>
+              {briefParts(data.card.brief).map((part) => (
+                <PageSection key={part.id} of={sections} id={part.id} title={part.title}>
+                  <Markdown>{part.text}</Markdown>
+                </PageSection>
+              ))}
               <Ladder studied={data} of={sections} />
               {data.probes.length > 0 ? <Probes studied={data} of={sections} /> : null}
               <PageSection
@@ -94,7 +96,6 @@ export default function CardScreen() {
                 id="templates"
                 title={CARD_TEMPLATES}
                 count={data.card.templates.length}
-                body="bare"
               >
                 {data.card.templates.map((template) => (
                   <TemplateCard
@@ -236,7 +237,7 @@ function Ladder({ studied, of }: { studied: Studied; of: Sections }) {
   const view = ladderView(studied);
   const muted = { color: theme.colors.onSurfaceVariant };
   return (
-    <PageSection of={of} id="ladder" title={LADDER_TITLE} count={view.count} aside={view.aside} body="bare">
+    <PageSection of={of} id="ladder" title={LADDER_TITLE} count={view.count} aside={view.aside}>
       {view.rows.length > 0 || view.gaps.length > 0 ? (
         <PickPanel>
           {[
@@ -283,7 +284,6 @@ function Probes({ studied, of }: { studied: Studied; of: Sections }) {
       title={PROBES_TITLE}
       count={studied.probes.length}
       aside={PROBES_ASIDE}
-      body="bare"
     >
       <PickPanel>
         {studied.probes.map((one) => (

@@ -11,6 +11,9 @@ import { font, space, textSize } from '@/ui/tokens';
 
 const CODE_SCALE = 0.85;
 
+// the space between two blocks of authored prose
+export const BLOCK_GAP = space[4];
+
 export interface InlineCodeProps {
   text: string;
   style: TextStyle;
@@ -30,7 +33,13 @@ const soft = (text: string | ReactNode[]) => (typeof text === 'string' ? text.re
 /** Code blocks in the app's monospace block, wrapped by the language the fence names. */
 export class CodeRenderer extends Renderer {
   code(text: string, language?: string, _container?: ViewStyle, _style?: TextStyle): ReactNode {
-    return <CodeBlock key={this.getKey()} code={text} verbatim wrap={codeWraps(language)} />;
+    return <CodeBlock key={this.getKey()} code={text} verbatim wrap={codeWraps(language)} flush />;
+  }
+
+  // the library returns a list's items as a fragment, which the gap between
+  // blocks would space apart: the list is one block
+  list(ordered: boolean, li: ReactNode[], listStyle?: ViewStyle, textStyle?: TextStyle, startIndex?: number): ReactNode {
+    return <View key={this.getKey()}>{super.list(ordered, li, listStyle, textStyle, startIndex)}</View>;
   }
 
   // monospace reads larger than body text at the same size
@@ -67,9 +76,12 @@ export class CodeRenderer extends Renderer {
 
 function markdownStyles(theme: MD3Theme): MarkedStyles {
   return {
-    h1: { ...theme.fonts.headlineSmall, color: theme.colors.onSurface, marginVertical: space[2] },
-    h2: { ...theme.fonts.titleLarge, color: theme.colors.onSurface, marginVertical: space[1.5] },
-    h3: { ...theme.fonts.titleMedium, color: theme.colors.onSurface, marginVertical: space[1] },
+    // a block carries no spacing of its own: the gap between blocks spaces them,
+    // so a section's first block sits as far under the heading as any other
+    paragraph: { paddingVertical: 0 },
+    h1: { ...theme.fonts.headlineSmall, color: theme.colors.onSurface, marginVertical: 0, marginTop: space[2] },
+    h2: { ...theme.fonts.titleLarge, color: theme.colors.onSurface, marginVertical: 0, marginTop: space[1.5] },
+    h3: { ...theme.fonts.titleMedium, color: theme.colors.onSurface, marginVertical: 0, marginTop: space[1] },
     text: { ...theme.fonts.bodyLarge, color: theme.colors.onSurface },
     li: { ...theme.fonts.bodyLarge, color: theme.colors.onSurface },
     codespan: { fontFamily: font.mono, fontStyle: 'normal', backgroundColor: theme.colors.surfaceVariant },
@@ -97,7 +109,7 @@ export function Markdown({ children }: { children: string }) {
   const renderer = useMemo(() => new CodeRenderer(), []);
   const elements = useMarkdown(withMath(children), markdownOptions(theme, renderer));
   return (
-    <View>
+    <View style={{ gap: BLOCK_GAP }}>
       {elements.map((el, i) => (
         <Fragment key={i}>{el}</Fragment>
       ))}

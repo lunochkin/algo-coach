@@ -10,7 +10,7 @@ import {
   runStartLabel,
   runStartRefused,
   CARD_TRIGGER,
-  CARD_BRIEF,
+  briefParts,
   CARD_TEMPLATES,
   BACK_CARDS,
   OF,
@@ -100,9 +100,17 @@ export function CardPage() {
                 <Markdown>{studied.card.trigger}</Markdown>
               </Section>
 
-              <Section id="brief" title={CARD_BRIEF} closed={closed('brief')} onToggle={toggle}>
-                <Markdown>{studied.card.brief}</Markdown>
-              </Section>
+              {briefParts(studied.card.brief).map((part) => (
+                <Section
+                  key={part.id}
+                  id={part.id}
+                  title={part.title}
+                  closed={closed(part.id)}
+                  onToggle={toggle}
+                >
+                  <Markdown>{part.text}</Markdown>
+                </Section>
+              ))}
 
               <LadderView
                 studied={studied}

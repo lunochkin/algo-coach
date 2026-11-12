@@ -25,11 +25,25 @@ import { font, palette, radius, space, textSize } from '@/ui/tokens';
  * indent behind a mark, and otherwise the block scrolls sideways (diagrams).
  * `verbatim` keeps the common indent.
  */
-export function CodeBlock({ code, verbatim = false, wrap = false }: { code: string; verbatim?: boolean; wrap?: boolean }) {
+export function CodeBlock({
+  code,
+  verbatim = false,
+  wrap = false,
+  flush = false,
+}: {
+  code: string;
+  verbatim?: boolean;
+  wrap?: boolean;
+  // inside prose, where the gap between blocks spaces it
+  flush?: boolean;
+}) {
   const theme = useTheme();
   const text = verbatim ? code.replace(/\s+$/, '') : block(code);
   const mono = [styles.mono, { color: theme.colors.onSurfaceVariant }];
-  const shape = [styles.code, { borderRadius: radius(theme).lg, backgroundColor: theme.colors.surfaceVariant }];
+  const shape = [
+    flush ? null : styles.code,
+    { borderRadius: radius(theme).lg, backgroundColor: theme.colors.surfaceVariant },
+  ];
   if (wrap) return <WrappedCode text={text} mono={mono} shape={shape} />;
   return (
     <ScrollView horizontal persistentScrollbar style={shape} contentContainerStyle={styles.codeInner}>

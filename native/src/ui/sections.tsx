@@ -11,7 +11,7 @@ import { useTheme } from 'react-native-paper';
 import Svg, { Defs, LinearGradient, Rect, Stop } from 'react-native-svg';
 
 import { sectionOpened, sectionToggled } from '@algo-coach/core';
-import { Heading, Panel } from '@/ui/rows';
+import { Heading } from '@/ui/rows';
 import { Toggle } from '@/ui/toggle';
 import { space } from '@/ui/tokens';
 
@@ -215,8 +215,8 @@ function Fade({ side, ground }: { side: 'left' | 'right'; ground: string }) {
 }
 
 /**
- * One section of a long screen: its heading closes it, and its body sits in
- * a bordered panel where it is prose, or bare where it brings panels of its own.
+ * One section of a long screen: its heading closes it. Prose reads bare under
+ * it, so a code block is the only box, and a list brings its own panel.
  */
 export function PageSection(props: {
   of: Sections;
@@ -224,7 +224,6 @@ export function PageSection(props: {
   title: string;
   count?: number;
   aside?: ReactNode;
-  body?: 'prose' | 'bare';
   children: ReactNode;
 }) {
   const closed = props.of.closed(props.id);
@@ -237,11 +236,7 @@ export function PageSection(props: {
         closed={closed}
         onToggle={() => props.of.toggle(props.id)}
       />
-      {closed ? null : props.body === 'bare' ? (
-        props.children
-      ) : (
-        <Panel style={{ paddingHorizontal: space[3], paddingVertical: space[1] }}>{props.children}</Panel>
-      )}
+      {closed ? null : props.children}
     </View>
   );
 }
