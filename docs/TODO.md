@@ -705,6 +705,42 @@ user recalls the answer rather than the semantics.
 - [ ] Serve a variant at random on both clients, with the shared fixtures
       passing in both suites
 
+### Covering a book's ground
+
+A module claims to cover a book only where a test the module did not write
+shows it.
+
+- [ ] Write a book's coverage map in the content repository: each section
+      heading mapped to a subtopic and a level, as covered, partly covered or
+      missing. Headings only, since the book's text never enters a repository
+- [ ] Add a coverage reviewer to the module pipeline, naming each mapped
+      section no group covers and each group whose questions test recognition
+      alone
+- [ ] Write a held-out question set from a book's table of contents, apart
+      from the module, and score a reader before and after the module. The
+      certification exams sample the module's own questions, so they cannot
+      show coverage
+
+### Training judgement
+
+A judgement question has no fixed answer: the context decides which option
+fits.
+
+- [ ] Write the decision question into `knowledge.md`: a scenario and its
+      constraints, the options, and the reasons and the traps as its key.
+      Judgement is choosing by context, which a fact question does not ask
+- [ ] Decide whether a variant may flip a decision question's right answer by
+      changing a constraint, and write the rule beside the variants. Without
+      the flip the user memorises the choice rather than the rule
+- [ ] Run both options of a decision question where execution tells them
+      apart, and show the timing or the failure as feedback. A choice checked
+      by running is a fact rather than an opinion
+- [ ] Show the user's calibration per subtopic: stated confidence against
+      correct answers. The guess flag already records the confidence
+- [ ] Add an authored field naming the subtopics a subtopic is confused with,
+      and interleave those subtopics within a queue. Interleaving pays where
+      categories are confusable, and taking turns across modules gains little
+
 ### Questions served by the engine
 
 - [ ] Serve the next question from the engine. Triggered when a client that
