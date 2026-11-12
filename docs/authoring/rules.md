@@ -171,3 +171,9 @@ The rules come from three review passes over the Python module in November
     `text` scrolls sideways on a phone and hides the end of each long line.
     *check (a `text` block with no box-drawing or tree characters is
     warned)*
+25. **A line of code holds at most 60 characters, and 40 where it holds
+    without a break.** This covers a question's `code` and `example`, a
+    lesson fence naming a language, and an `output` fence. A phone fits some
+    40 characters and wraps a longer line behind a `↪`. In a snippet read for
+    its output, a reader can take that wrap for a line break. *check (a block
+    with a line over 60 is warned)*

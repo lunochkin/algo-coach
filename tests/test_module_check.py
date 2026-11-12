@@ -165,11 +165,30 @@ def test_a_section_no_question_points_at_is_warned(tmp_path):
 def test_a_text_block_drawing_nothing_is_warned(tmp_path):
     """Rule 24: a phone keeps a `text` block whole, so output fenced as
     `text` scrolls sideways where `output` would wrap."""
-    text = LESSON + "\n```text\n42\n```\n\n```text\n┌─┐\n└─┘\n```\n\n```output\n42\n```\n"
+    drawn = ["┌─┐\n└─┘", "eq=True    unhashable", "x[0]\n ~^^^", "DEBUG < INFO < ERROR"]
+    blocks = ["```text\n42\n```", *(f"```text\n{d}\n```" for d in drawn), "```output\n42\n```"]
+    text = LESSON + "\n" + "\n\n".join(blocks) + "\n"
     root = written(tmp_path, [question("a")], lessons={"les": (["sub@0"], text)})
 
     assert found(checked(root).warnings, 24) == [
         "[24] lessons/les.md line 7: a text block draws nothing: fence output as `output`"
+    ]
+
+
+def test_a_line_wider_than_a_phone_is_warned(tmp_path):
+    """Rule 25: a phone wraps a line past some 40 characters, and a wrap in
+    a snippet read for its output can pass for a line break. A `text`
+    block is a drawing, kept whole, and is not counted."""
+    wide = "print(" + "x" * 60 + ")\n"
+    q = question("a", kind="output", code=wide, detail={"mechanism": "m", "example": wide})
+    fences = "".join(f"\n```{lang}\n{wide}```\n" for lang in ("python", "output", "text"))
+    root = written(tmp_path, [q], lessons={"les": (["sub@0"], LESSON + fences)})
+
+    assert found(checked(root).warnings, 25) == [
+        "[25] banks/t/sub.toml a code: 1 line over 60 characters, the longest 67",
+        "[25] banks/t/sub.toml a example: 1 line over 60 characters, the longest 67",
+        "[25] lessons/les.md line 7: 1 line over 60 characters, the longest 67",
+        "[25] lessons/les.md line 11: 1 line over 60 characters, the longest 67",
     ]
 
 

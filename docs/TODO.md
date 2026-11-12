@@ -601,9 +601,9 @@ rewraps the lines these items name.
       A program's output fenced as `text` is kept whole for a drawing, and
       scrolls sideways
 - [x] Warn under rule 24 on a lesson's `text` block holding no box-drawing
-      or tree characters, and accept `output` where rule 2 and rule 15 read a
-      block's shown output. The Python module carries 479 such blocks
-- [ ] Add a module check warning for a code line over 60 characters, in a
+      or tree characters, or columns aligned by spaces, and accept `output`
+      where rule 2 and rule 15 read a block's shown output
+- [x] Add a module check warning for a code line over 60 characters, in a
       question's `code` and `example`, in a lesson fence naming a language and
       in an `output` fence, and write its rule into `docs/authoring/rules.md`
 - [ ] Write the width into `docs/authoring/modules.md` beside the diagram
