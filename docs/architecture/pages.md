@@ -238,6 +238,12 @@ platforms.
   Clearing asks first, since aiming a focus again takes several presses on a
   module's page, as archiving a module asks first. A strict focus names the
   reviews waiting outside it, and a press serves them as a review queue.
+- **The home's focus opens what the focus covers.** A focus on a module, a
+  topic or a subtopic opens the module's map, centred on the subtopic or the
+  topic the focus names. The map draws the focus in the flame, so the reader
+  sees where the focus sits among its prerequisites. A certification's focus
+  opens the certification's conditions. The web names the map tab as
+  `?tab=map` on the module's path.
 - **The home names a lesson ready to read and a certification ready for its
   exam**, each as a link above the focus. Each link is the next step the
   rules would take, and a reader who never opens the lessons still meets it.

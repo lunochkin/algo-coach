@@ -17,6 +17,7 @@ import {
   type EmptyContinue,
   EXAM_LINK,
   type Focus,
+  focusOpens,
   FOCUS_CERT,
   FOCUS_NEXT,
   focusLabel,
@@ -50,7 +51,7 @@ import { Button } from '@/components/ui/button'
 import { Toggle } from '@/components/ui/toggle'
 import { useKnowledge } from '@/knowledge/context'
 import { useLearner } from '@/knowledge/learner'
-import { CERTIFICATIONS, EXAM, KNOWLEDGE } from '@/knowledge/paths'
+import { CERTIFICATIONS, EXAM, KNOWLEDGE, modulePath } from '@/knowledge/paths'
 
 // the focus bar reads in the flame for what is held, mastered then learning.
 // What is owed reads neutral, since the flame is progress and a review is not
@@ -65,6 +66,13 @@ const PART_TONE: Record<FocusPart, string> = {
 // Continue, the press starting the next queue. The knowledge home holds it
 // with the focus's presses, and the board holds it as a reading whose panel
 // opens the home: `pages.md`, Sections
+// a certification focus opens its conditions, any other its module's map
+function focusPath(f: Focus): string {
+  const to = focusOpens(f)
+  if ('cert' in to) return `${CERTIFICATIONS}?${new URLSearchParams({ open: to.cert })}`
+  return `${modulePath(to.module)}?tab=map`
+}
+
 export function KnowledgeNext({ controls }: { controls: boolean }) {
   const k = useKnowledge()
   const { catalog, focus, board, newLimit, certExams, now } = useLearner()
@@ -104,12 +112,22 @@ export function KnowledgeNext({ controls }: { controls: boolean }) {
   const reading = focus && panel && (
     <>
       <div className="flex flex-wrap items-center gap-stack">
-        <p className="flex-1 font-medium">{focusTitle(focusLabel(focus, catalog))}</p>
+        <p className="flex-1 font-medium">
+          {controls ? (
+            // the focus opens what it covers, and the whole panel is the link: `pages.md`, The knowledge pages
+            <Link to={focusPath(focus)} className="after:absolute after:inset-0 after:rounded-xl">
+              {focusTitle(focusLabel(focus, catalog))}
+            </Link>
+          ) : (
+            focusTitle(focusLabel(focus, catalog))
+          )}
+        </p>
         {controls && (
           <>
             <Toggle
               size="sm"
               variant="outline"
+              className="relative z-10"
               pressed={!!focus.strict}
               onPressedChange={(strict) => setFocus({ ...focus, strict })}
               aria-label={strictLabel(!!focus.strict)}
@@ -119,7 +137,7 @@ export function KnowledgeNext({ controls }: { controls: boolean }) {
             {/* clearing asks first, as archiving a module does */}
             <AlertDialog>
               <AlertDialogTrigger asChild>
-                <Button variant="ghost" size="sm">
+                <Button variant="ghost" size="sm" className="relative z-10">
                   <X />
                   {CLEAR_FOCUS}
                 </Button>
@@ -164,6 +182,7 @@ export function KnowledgeNext({ controls }: { controls: boolean }) {
           <Button
             variant="outline"
             size="sm"
+            className="relative z-10"
             onClick={() => void k.add('raise', newRecord.raise())}
           >
             <Plus />
@@ -188,7 +207,7 @@ export function KnowledgeNext({ controls }: { controls: boolean }) {
     <>
       {reading &&
         (controls ? (
-          <Panel>{reading}</Panel>
+          <Panel className="relative transition-colors hover:bg-accent">{reading}</Panel>
         ) : (
           // a reading on the board: the panel opens the home, where its presses are
           <Link to={KNOWLEDGE} className="block rounded-xl transition-colors hover:bg-accent">

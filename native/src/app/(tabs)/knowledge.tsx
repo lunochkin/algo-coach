@@ -1,10 +1,11 @@
 import { router } from 'expo-router';
 import { useMemo } from 'react';
 import { Pressable, View } from 'react-native';
-import { Button, IconButton, useTheme } from 'react-native-paper';
+import { Button, IconButton, TouchableRipple, useTheme } from 'react-native-paper';
 import ReorderableList, { useReorderableDrag, type ReorderableListReorderEvent } from 'react-native-reorderable-list';
 
 import {
+  focusOpens,
   CERTIFICATIONS_LINK,
   type ModuleRow as ModuleRowView,
   focusLabel,
@@ -27,7 +28,7 @@ import { AccountMenu } from '@/ui/account';
 import { ModuleRow } from '@/ui/modules';
 import { Heading, PanelItem, PickPanel, PickRow } from '@/ui/rows';
 import { usePullSync } from '@/ui/pull';
-import { space } from '@/ui/tokens';
+import { radius, space } from '@/ui/tokens';
 
 export default function Home() {
   const st = useStore();
@@ -98,16 +99,28 @@ export default function Home() {
           </PickPanel>
         ) : null}
         {focused && cont ? (
-          <FocusCard
-            label={focusLabel(focused, st.catalog)}
-            focus={focused}
-            b={cont.b}
-            queue={cont.queue}
-            exams={st.catalog?.certExams ?? []}
-            onClear={() => void st.setFocus(null)}
-            onStrict={() => void st.setFocus({ ...focused, strict: !focused.strict })}
-            onMoreNew={() => void st.raiseNew()}
-          />
+          // the focus opens what it covers: `pages.md`, The knowledge pages
+          <TouchableRipple
+            onPress={() => {
+              const to = focusOpens(focused);
+              if ('cert' in to) router.push({ pathname: '/certs', params: { open: to.cert } });
+              else router.push({ pathname: '/module', params: { course: to.module, tab: 'map' } });
+            }}
+            accessibilityRole="link"
+            borderless
+            style={{ borderRadius: radius(theme).xl }}
+          >
+            <FocusCard
+              label={focusLabel(focused, st.catalog)}
+              focus={focused}
+              b={cont.b}
+              queue={cont.queue}
+              exams={st.catalog?.certExams ?? []}
+              onClear={() => void st.setFocus(null)}
+              onStrict={() => void st.setFocus({ ...focused, strict: !focused.strict })}
+              onMoreNew={() => void st.raiseNew()}
+            />
+          </TouchableRipple>
         ) : null}
       </View>
       {body}

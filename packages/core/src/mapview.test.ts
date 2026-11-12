@@ -57,6 +57,19 @@ describe("the map's opening", () => {
     const at = mapOpening(Board.build(catalog, []), c, layout.nodes, { w: 300, h: 600 }, 1)!;
     expect(at).toEqual({ left: a.x + MAP_DIMS.nodeW / 2 - 150, top: a.y + MAP_DIMS.nodeH / 2 - 200 });
   });
+
+  it("opens on the focus's subtopic, or on its topic's first node", () => {
+    const layout = layoutClusters(c, c.graph!, MAP_DIMS);
+    const b = Board.build(catalog, []);
+    const centred = (sub: string) => {
+      const n = layout.nodes.find((x) => x.sub === sub)!;
+      return { left: n.x + MAP_DIMS.nodeW / 2 - 150, top: n.y + MAP_DIMS.nodeH / 2 - 200 };
+    };
+    const view = { w: 300, h: 600 };
+    expect(mapOpening(b, c, layout.nodes, view, 1, { course: 'm', topic: 't', sub: 'c' })).toEqual(centred('c'));
+    expect(mapOpening(b, c, layout.nodes, view, 1, { course: 'm', topic: 'u', sub: null })).toEqual(centred('x'));
+    expect(mapOpening(b, c, layout.nodes, view, 1, { course: 'other', topic: 'u', sub: null })).toEqual(centred('a'));
+  });
 });
 
 describe('the map', () => {

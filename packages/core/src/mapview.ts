@@ -8,9 +8,10 @@ import type { Course } from './types';
 import { alsoNeedsLine, levelLine, MODULE_FOCUS_HERE, MODULE_FOCUSED } from './words/module';
 
 /**
- * Where a map opens: the first group with new work, centred across the view
- * and a third of the way down it, as a scroll offset at `scale`. Null where
- * no group has new work, and the map is then fitted whole.
+ * Where a map opens: the focus's subtopic or topic where it aims inside the
+ * module, else the first group with new work, centred across the view and a
+ * third of the way down it, as a scroll offset at `scale`. Null where no node
+ * is found, and the map is then fitted whole.
  */
 export function mapOpening(
   b: Board,
@@ -18,14 +19,28 @@ export function mapOpening(
   nodes: readonly PlacedNode[],
   view: { w: number; h: number },
   scale: number,
+  focus: Focus | null = null,
 ): { left: number; top: number } | null {
-  const first = b.frontier(c)[0];
-  const n = first ? nodes.find((one) => one.sub === first.sub) : undefined;
+  const n = nodes.find((one) => one.kind === 'quiz' && one.sub === openingSub(b, c, nodes, focus));
   if (!n) return null;
   return {
     left: (n.x + MAP_DIMS.nodeW / 2) * scale - view.w / 2,
     top: (n.y + MAP_DIMS.nodeH / 2) * scale - view.h / 3,
   };
+}
+
+// the focus's subtopic, the first group with new work inside its topic, or the module's first
+function openingSub(b: Board, c: Course, nodes: readonly PlacedNode[], focus: Focus | null): string | undefined {
+  const frontier = b.frontier(c);
+  if (focus?.course === c.slug && !focus.cert) {
+    if (focus.sub) return focus.sub;
+    if (focus.topic)
+      return (
+        frontier.find((g) => g.topic === focus.topic)?.sub ??
+        nodes.find((n) => n.kind === 'quiz' && n.topic === focus.topic)?.sub
+      );
+  }
+  return frontier[0]?.sub;
 }
 
 /** The sizes a module's map is laid out at, on both clients. */

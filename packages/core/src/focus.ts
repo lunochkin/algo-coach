@@ -85,3 +85,7 @@ export function aimedAt(f: Focus | null, course: string, topic: string | null, s
 export function aimFocus(current: Focus | null, f: Focus): Focus {
   return { ...f, strict: !!current?.strict };
 }
+
+/** Where the focus opens from the knowledge home: its certification, or its module's map. */
+export const focusOpens = (f: Focus): { cert: string } | { module: string } =>
+  f.cert ? { cert: f.cert } : { module: f.course };

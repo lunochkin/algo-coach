@@ -100,11 +100,11 @@ export function ModuleMap({ c, b, focus, certExams, onStart, onAim }: Props) {
   const paths = useMemo(() => edgePaths(layout), [layout])
   const scale = ZOOMS[zoom]
 
-  // opens on the first group with new work, as the phone's map does
+  // opens on the focus, else the first group with new work, as the phone's map does
   useEffect(() => {
     const el = box.current
     const opening =
-      el && mapOpening(b, c, layout.nodes, { w: el.clientWidth, h: el.clientHeight }, scale)
+      el && mapOpening(b, c, layout.nodes, { w: el.clientWidth, h: el.clientHeight }, scale, focus)
     if (!el || !opening) return
     el.scrollLeft = opening.left
     el.scrollTop = opening.top

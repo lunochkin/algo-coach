@@ -77,9 +77,9 @@ export default function ModuleScreen() {
   const pull = usePullSync();
   const theme = useTheme();
   const insets = useSafeAreaInsets();
-  const p = useLocalSearchParams<{ course?: string }>();
+  const p = useLocalSearchParams<{ course?: string; tab?: string }>();
   const c = st.catalog?.courses.find((x) => x.slug === p.course);
-  const [tab, setTab] = useState<'groups' | 'map'>('groups');
+  const [tab, setTab] = useState<'groups' | 'map'>(p.tab === 'map' ? 'map' : 'groups');
   const [lessonsOn, setLessonsOn] = useState(false); // ~190 lesson nodes clutter the map; opt in
   const withLessons = lessonsOn && !!c?.graph?.lessons.length;
   const { board } = st;
@@ -254,7 +254,7 @@ function CourseMap(props: { c: Course; b: Board; withLessons: boolean }) {
     if (placedOnce.current) return;
     placedOnce.current = true;
     // start on the first group with new work, at full size
-    const opening = mapOpening(b, c, nodes, view.current, 1);
+    const opening = mapOpening(b, c, nodes, view.current, 1, st.focus);
     if (!opening) return fit();
     scale.value = 1;
     tx.value = -opening.left;

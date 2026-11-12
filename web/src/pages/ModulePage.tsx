@@ -75,11 +75,12 @@ const CELL_TONE: Record<CellState, string> = {
 export function ModulePage() {
   const { module = '' } = useParams()
   // a module opened from the board returns there: `pages.md`, Sections
-  const from = useSearchParams()[0].get('from')
+  const [params] = useSearchParams()
+  const from = params.get('from')
   const k = useKnowledge()
   const navigate = useNavigate()
   const { catalog, focus, board, now, certExams } = useLearner()
-  const [tab, setTab] = useState<'groups' | 'map'>('groups')
+  const [tab, setTab] = useState<'groups' | 'map'>(params.get('tab') === 'map' ? 'map' : 'groups')
   const [archiving, setArchiving] = useState(false)
   const [starting, setStarting] = useState<Scope | null>(null)
 
