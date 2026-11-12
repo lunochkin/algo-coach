@@ -65,10 +65,15 @@ those steps at low fidelity.
 - **The knowledge part reads from the device's copy**, ahead of the engine's
   answer and without it. The board then works offline as the knowledge home
   does, and a phone opened on a train shows a page that works.
-- **The board holds the focus as a reading and Continue as its act.** The
-  focus's presses, Strict, Clear and the raise, stay on the knowledge home,
-  and the focus's panel opens it. Exam stays there too, as the home's second
-  way in. A press living on two pages drifts apart.
+- **The board holds the focus as a reading, with Continue inside its
+  panel.** The board names several studies, so a press in the page's bottom
+  bar would not say which of them it continues. Continue serves the focus,
+  so it sits in the focus's panel, or in a panel of its own where no focus
+  is aimed. The panel leaves out the counts line the focus already reads.
+- **The focus's other presses stay on the knowledge home**: Strict, Clear and
+  the raise. The focus's panel on the board opens the home. Exam stays there
+  too, as the home's second way in. A press living on two pages drifts
+  apart.
 - **Each module on the board reads as its row on the knowledge home**, and
   opens the module, whose way back then names the board. The board offers no
   order press, since ordering the modules belongs to the knowledge home.
@@ -618,6 +623,8 @@ difference it found. No row is marked `to fix` today.
   the bar at the bottom of the screen, where the thumb rests, and the web
   holds it in the page. A second way in reads at a lower weight, as the
   knowledge home's Exam does beside Continue.
+  The board is the exception, since it holds several studies, and its
+  Continue sits in the focus's panel, as `## Sections` gives.
 - **The body reads in one column of at most 56rem.** A line of prose wider than
   that is hard to track back to the next line's start.
 - **The sitting is the exception, and reads in two columns.** The statement and

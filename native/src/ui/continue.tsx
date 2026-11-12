@@ -1,7 +1,7 @@
 import { router } from 'expo-router';
 import { useMemo, useState } from 'react';
 import { View } from 'react-native';
-import { Snackbar, Text, TouchableRipple, useTheme } from 'react-native-paper';
+import { Button, Snackbar, Text, TouchableRipple, useTheme } from 'react-native-paper';
 
 import {
   CONTINUE,
@@ -72,45 +72,12 @@ export function useContinue() {
 export type Next = ReturnType<typeof useContinue>;
 
 /**
- * Continue in the bar at the bottom, with its counts above it, as both the
- * knowledge home and Practice hold it. The home adds Exam beside it, at a
- * lower weight: `pages.md`, A page's areas.
+ * Continue in the bar at the bottom, with its counts above it, as the
+ * knowledge home holds it. The home adds Exam beside it, at a lower weight: `pages.md`, A page's areas.
  */
 export function ContinueBar({ next, exam = false }: { next: Next; exam?: boolean }) {
-  const theme = useTheme();
-  const { counts, focus } = next;
   return (
-    <BottomBar
-      bottom={0}
-      row
-      above={
-        counts ? (
-          <View style={[styles.row, { justifyContent: 'center', flexWrap: 'wrap', minHeight: 24 }]}>
-            <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant }}>
-              {continueLine(counts, !!focus?.strict)}
-            </Text>
-            {counts.outside > 0 ? (
-              <TouchableRipple
-                onPress={next.reviewOutside}
-                borderless
-                accessibilityRole="link"
-                accessibilityLabel={waitingOutside(counts.outside)}
-                style={{
-                  minHeight: 48,
-                  justifyContent: 'center',
-                  paddingHorizontal: space[1],
-                  borderRadius: radius(theme).lg,
-                }}
-              >
-                <Text variant="bodySmall" style={{ color: theme.colors.primary, textDecorationLine: 'underline' }}>
-                  {` · ${waitingOutside(counts.outside)}`}
-                </Text>
-              </TouchableRipple>
-            ) : null}
-          </View>
-        ) : null
-      }
-    >
+    <BottomBar bottom={0} row above={<CountsLine next={next} />}>
       {exam ? (
         <Press
           mode="contained-tonal"
@@ -125,6 +92,64 @@ export function ContinueBar({ next, exam = false }: { next: Next; exam?: boolean
         {CONTINUE}
       </Press>
     </BottomBar>
+  );
+}
+
+/** What Continue serves, with the press serving the reviews a strict focus leaves out. */
+// `bare` drops the counts the focus card already reads, and keeps the press
+// serving the reviews a strict focus leaves out
+function CountsLine({ next, bare = false, start = false }: { next: Next; bare?: boolean; start?: boolean }) {
+  const theme = useTheme();
+  const { counts, focus } = next;
+  if (!counts || (bare && counts.outside === 0)) return null;
+  return (
+    <View style={[styles.row, { justifyContent: start ? 'flex-start' : 'center', flexWrap: 'wrap', minHeight: 24 }]}>
+      {bare ? null : (
+        <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant }}>
+          {continueLine(counts, !!focus?.strict)}
+        </Text>
+      )}
+      {counts.outside > 0 ? (
+        <TouchableRipple
+          onPress={next.reviewOutside}
+          borderless
+          accessibilityRole="link"
+          accessibilityLabel={waitingOutside(counts.outside)}
+          style={{
+            minHeight: 48,
+            justifyContent: 'center',
+            paddingHorizontal: space[1],
+            borderRadius: radius(theme).lg,
+          }}
+        >
+          <Text variant="bodySmall" style={{ color: theme.colors.primary, textDecorationLine: 'underline' }}>
+            {bare ? waitingOutside(counts.outside) : ` · ${waitingOutside(counts.outside)}`}
+          </Text>
+        </TouchableRipple>
+      ) : null}
+    </View>
+  );
+}
+
+/**
+ * Continue inside the focus's panel, as the board holds it: the board names
+ * several studies, so its bottom bar holds no press. `pages.md`, Sections.
+ */
+export function ContinueInPanel({ next, inFocus = false }: { next: Next; inFocus?: boolean }) {
+  return (
+    <View style={{ gap: space[1] }}>
+      {/* a panel press reads at a lower weight than a page's act */}
+      <Button
+        mode="contained-tonal"
+        icon="play"
+        style={{ alignSelf: 'flex-start' }}
+        disabled={!next.ready}
+        onPress={next.start}
+      >
+        {CONTINUE}
+      </Button>
+      <CountsLine next={next} bare={inFocus} start />
+    </View>
   );
 }
 

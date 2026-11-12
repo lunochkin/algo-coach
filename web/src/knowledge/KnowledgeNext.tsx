@@ -113,14 +113,14 @@ export function KnowledgeNext({ controls }: { controls: boolean }) {
     <>
       <div className="flex flex-wrap items-center gap-stack">
         <p className="flex-1 font-medium">
-          {controls ? (
-            // the focus opens what it covers, and the whole panel is the link: `pages.md`, The knowledge pages
-            <Link to={focusPath(focus)} className="after:absolute after:inset-0 after:rounded-xl">
-              {focusTitle(focusLabel(focus, catalog))}
-            </Link>
-          ) : (
-            focusTitle(focusLabel(focus, catalog))
-          )}
+          {/* the whole panel is the link: on the home the focus opens what it
+              covers, and on the board it opens the home, where its presses are */}
+          <Link
+            to={controls ? focusPath(focus) : KNOWLEDGE}
+            className="after:absolute after:inset-0 after:rounded-xl"
+          >
+            {focusTitle(focusLabel(focus, catalog))}
+          </Link>
         </p>
         {controls && (
           <>
@@ -149,7 +149,9 @@ export function KnowledgeNext({ controls }: { controls: boolean }) {
                 </AlertDialogHeader>
                 <AlertDialogFooter>
                   <AlertDialogCancel>{CLEAR_FOCUS_KEEP}</AlertDialogCancel>
-                  <AlertDialogAction onClick={() => setFocus(null)}>{CLEAR_FOCUS}</AlertDialogAction>
+                  <AlertDialogAction onClick={() => setFocus(null)}>
+                    {CLEAR_FOCUS}
+                  </AlertDialogAction>
                 </AlertDialogFooter>
               </AlertDialogContent>
             </AlertDialog>
@@ -203,60 +205,74 @@ export function KnowledgeNext({ controls }: { controls: boolean }) {
     </>
   )
 
-  return (
-    <>
-      {reading &&
-        (controls ? (
-          <Panel className="relative transition-colors hover:bg-accent">{reading}</Panel>
-        ) : (
-          // a reading on the board: the panel opens the home, where its presses are
-          <Link to={KNOWLEDGE} className="block rounded-xl transition-colors hover:bg-accent">
-            <Panel>{reading}</Panel>
-          </Link>
-        ))}
-      <div className="space-y-1">
-        <div className="flex gap-stack">
-          <Button
-            disabled={!continueOffered(counts)}
-            onClick={() => continueOffered(counts) && start(counts)}
-          >
-            {CONTINUE}
+  // the board holds Continue in the focus it serves, and the counts the
+  // focus already reads are left out there: `pages.md`, Sections
+  const inFocus = !controls && !!reading
+  const go = (
+    <div className="space-y-1">
+      <div className="flex gap-stack">
+        <Button
+          // a panel press reads at a lower weight than a page's act
+          variant={controls ? 'default' : 'secondary'}
+          className={inFocus ? 'relative z-10' : undefined}
+          disabled={!continueOffered(counts)}
+          onClick={() => continueOffered(counts) && start(counts)}
+        >
+          {CONTINUE}
+        </Button>
+        {/* the second way in, at a lower weight, on the knowledge home: `pages.md`, The knowledge pages */}
+        {controls && (
+          <Button variant="outline" asChild>
+            <Link to={EXAM}>{EXAM_LINK}</Link>
           </Button>
-          {/* the second way in, at a lower weight, on the knowledge home: `pages.md`, The knowledge pages */}
-          {controls && (
-            <Button variant="outline" asChild>
-              <Link to={EXAM}>{EXAM_LINK}</Link>
+        )}
+      </div>
+      {counts && (!inFocus || counts.outside > 0) && (
+        <p className="text-meta text-muted-foreground">
+          {!inFocus && continueLine(counts, !!focus?.strict)}
+          {counts.outside > 0 && (
+            <>
+              {!inFocus && ' · '}
+              {/* a press serves the reviews a strict focus leaves out */}
+              <Link
+                to="/knowledge/queue?mode=review"
+                className="relative z-10 font-medium underline-offset-4 hover:underline"
+              >
+                {waitingOutside(counts.outside)}
+              </Link>
+            </>
+          )}
+        </p>
+      )}
+      {empty && (
+        <div className="flex flex-wrap items-center gap-stack text-meta" role="status">
+          <span>{empty.notice}</span>
+          {empty.action && (
+            <Button
+              variant="outline"
+              size="sm"
+              className="relative z-10"
+              onClick={() => void act(empty.action!.kind)}
+            >
+              {empty.action.label}
             </Button>
           )}
         </div>
-        {counts && (
-          <p className="text-meta text-muted-foreground">
-            {continueLine(counts, !!focus?.strict)}
-            {counts.outside > 0 && (
-              <>
-                {' · '}
-                {/* a press serves the reviews a strict focus leaves out */}
-                <Link
-                  to="/knowledge/queue?mode=review"
-                  className="font-medium underline-offset-4 hover:underline"
-                >
-                  {waitingOutside(counts.outside)}
-                </Link>
-              </>
-            )}
-          </p>
-        )}
-        {empty && (
-          <div className="flex flex-wrap items-center gap-stack text-meta" role="status">
-            <span>{empty.notice}</span>
-            {empty.action && (
-              <Button variant="outline" size="sm" onClick={() => void act(empty.action!.kind)}>
-                {empty.action.label}
-              </Button>
-            )}
-          </div>
-        )}
-      </div>
+      )}
+    </div>
+  )
+
+  if (!controls)
+    return (
+      <Panel className={reading ? 'relative transition-colors hover:bg-accent' : undefined}>
+        {reading}
+        {go}
+      </Panel>
+    )
+  return (
+    <>
+      {reading && <Panel className="relative transition-colors hover:bg-accent">{reading}</Panel>}
+      {go}
     </>
   )
 }

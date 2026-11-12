@@ -1,5 +1,5 @@
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { useMemo, useState } from 'react';
+import { type ReactNode, useMemo, useState } from 'react';
 import { View } from 'react-native';
 import { Button, IconButton, Text, useTheme } from 'react-native-paper';
 
@@ -43,6 +43,7 @@ interface Props {
   exams: CertRecord[];
   onClear?: () => void;
   onStrict?: () => void;
+  footer?: ReactNode; // the board's Continue, held in the focus it serves
 }
 
 /** The focus as a card: what it covers, how far along it is, and what comes next. */
@@ -158,6 +159,7 @@ export function FocusCard(props: Props) {
             {info.cert}
           </Text>
         ) : null}
+        {props.footer}
       </View>
     </Panel>
   );

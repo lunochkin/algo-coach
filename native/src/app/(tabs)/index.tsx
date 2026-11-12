@@ -25,7 +25,7 @@ import { useEngine } from '@/lib/useEngine';
 import { AccountMenu } from '@/ui/account';
 import { CardPanel } from '@/ui/cards';
 import { Loaded, styles, ScreenHeader } from '@/ui/common';
-import { ContinueBar, ContinueNotice, useContinue } from '@/ui/continue';
+import { ContinueInPanel, ContinueNotice, useContinue } from '@/ui/continue';
 import { FocusCard } from '@/ui/focuscard';
 import { ModuleRow } from '@/ui/modules';
 import { Heading, Panel, PickPanel, PickRow } from '@/ui/rows';
@@ -63,8 +63,7 @@ export default function PracticeScreen() {
   return (
     <View style={{ flex: 1, backgroundColor: theme.colors.background }}>
       <ScreenHeader title={BOARD_TITLE} back={null} aside={<AccountMenu />} />
-      {/* room under the last row for the bar over it */}
-      <ScrollView refreshControl={pull} contentContainerStyle={[styles.page, { paddingBottom: insets.bottom + 160 }]}>
+      <ScrollView refreshControl={pull} contentContainerStyle={[styles.page, { paddingBottom: insets.bottom + 32 }]}>
         <Text variant="bodyMedium" style={{ color: theme.colors.onSurfaceVariant }}>
           {BOARD_NOTE}
         </Text>
@@ -83,8 +82,13 @@ export default function PracticeScreen() {
               b={next.cont.b}
               queue={next.cont.queue}
               exams={st.catalog?.certExams ?? []}
+              footer={<ContinueInPanel next={next} inFocus />}
             />
           </TouchableRipple>
+        ) : modules.length > 0 ? (
+          <Panel padded>
+            <ContinueInPanel next={next} />
+          </Panel>
         ) : null}
         {modules.length > 0 ? (
           <>
@@ -113,7 +117,6 @@ export default function PracticeScreen() {
           {(x) => <BoardBody board={x.board} cards={x.cards} />}
         </Loaded>
       </ScrollView>
-      <ContinueBar next={next} />
       <ContinueNotice next={next} />
     </View>
   );
