@@ -28,14 +28,37 @@ A module is one subject: Python first, then algorithms and system design.
   problem's difficulty is a different field, on a different record.
 - **A group is one subtopic at one level.** Gating, coverage and the frontier
   are all counted per group.
-- **A module is authored in files and seeded into Postgres**, as a card is. The
-  authoring format lives beside the files in the private content repository.
+- **A module is authored in files and seeded into Postgres**, as a card is.
   This file gives the rules the engine and the clients apply to what is
-  seeded.
+  seeded, and `## Authoring` gives where the rules for writing the files live.
 - **A module, a topic, a subtopic, a question and a lesson each carry an
   engine-minted id**, and the seed matches each by its authored slug. A log
   record then references a minted id, as `README.md` requires of every
   append-only record.
+
+## Authoring
+
+A module's files are written to rules this repo holds, and checked by code
+this repo holds. The content repository holds the modules alone.
+
+- **The authoring rules live in `docs/authoring/`.** `modules.md` gives how a
+  module is authored, the level definitions among it. `rules.md` gives the
+  numbered rules every bank and lesson holds, and how each rule is checked. A
+  writer session reads both without reading another module's files.
+- **Each module keeps its own rules beside its files**, in the content
+  repository. They are the module's `CLAUDE.md`, the `requirements.txt` its
+  snippets import from, and the skip list `check.toml`. A skip names a
+  question or a lesson, so the skip list is content.
+- **Two checks read a module, and they stay apart.** The seed refuses a module
+  whose files break the format, and executes nothing. `algo-coach module
+  check <slug>` runs every snippet and every lesson block, and judges each
+  rule a program can judge. The seed then runs without the module's libraries
+  installed.
+- **The module check installs the module's libraries for its run alone.** A
+  library a snippet imports is no dependency of the engine, so a module adds
+  nothing to the engine's lock file.
+- **An authoring file keeps learn's word for a module, `course`**, in
+  `course.toml`. The word names the file and nothing else.
 
 ## Seeding
 

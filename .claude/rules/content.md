@@ -4,7 +4,7 @@ paths:
   - "src/algo_coach/techniques/**"
   - "src/algo_coach/matches/**"
   - "src/algo_coach/ladder.py"
-  - "content/**"
+  - "content/cards/**"
 ---
 
 Read `docs/architecture/content.md` before changing this code. It gives

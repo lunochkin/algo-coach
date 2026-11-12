@@ -474,7 +474,39 @@ Measured:
 - A release build of the app after a TypeScript change took 25 s against
   177 s, once the Android project is regenerated only when its inputs change.
 
-## Phase 16 — Scheduling and mastery (current)
+## Phase 19 — Modules written by a pipeline (current)
+
+A knowledge module written, checked and revised by a pipeline of Claude Code
+sessions, with the pipeline's reviewers measured before a module is trusted to
+them. Planned on 2026-11-11, after three review passes by hand over the Python
+module left 23 numbered rules.
+
+- The authoring rules, the level definitions, the skills and the checker in
+  this repo. The content repository holds the modules, and each module's own
+  rules and skip list.
+- The content repository's `check.py` ported into the engine as a tested
+  command. The seed's own gate stays apart from it, since the gate executes
+  no snippet.
+- A writer session per subtopic level, working through the module's coverage
+  map.
+- **Blind reviewers, each a fresh session asked one question.** One answers
+  without the key, one picks from the choices alone, one assigns a level from
+  the definitions, one checks each fact against the module's named sources,
+  and one reads a lesson's prose against its example.
+- A fixer that is not the reviewer, and a findings file per module naming the
+  rule, the question and the outcome of each finding.
+- **The reviewers scored before they are used.** The Python module as it stood
+  before the three passes is the test set, and the defects those passes fixed
+  are its labels.
+- A module names how each kind of question is proved: by running code, by
+  arithmetic, or by a dated source. Python's proof is the interpreter, and a
+  System Design question has none.
+- System Design as the first module written this way. AI Engineering follows,
+  and Machine Learning is a candidate after it.
+- Exit: the reviewers carry a recall per rule against the three passes, and
+  the System Design module is seeded with every finding closed.
+
+## Phase 16 — Scheduling and mastery
 
 Per-technique skill state derived from the log, a scheduler that says what is
 due, and a comparison of that scheduler against a simpler policy.
@@ -554,38 +586,6 @@ tools add to it.
   `gap` scores well on a corpus of gaps.
 - Exit: the call carries a per-mode score, and each tool carries the
   difference it made.
-
-## Phase 19 — Modules written by a pipeline
-
-A knowledge module written, checked and revised by a pipeline of Claude Code
-sessions, with the pipeline's reviewers measured before a module is trusted to
-them. Planned on 2026-11-11, after three review passes by hand over the Python
-module left 23 numbered rules.
-
-- The authoring rules, the level definitions, the skills and the checker in
-  this repo. The content repository holds the modules, and each module's own
-  rules and skip list.
-- The content repository's `check.py` ported into the engine as a tested
-  command. The seed's own gate stays apart from it, since the gate executes
-  no snippet.
-- A writer session per subtopic level, working through the module's coverage
-  map.
-- **Blind reviewers, each a fresh session asked one question.** One answers
-  without the key, one picks from the choices alone, one assigns a level from
-  the definitions, one checks each fact against the module's named sources,
-  and one reads a lesson's prose against its example.
-- A fixer that is not the reviewer, and a findings file per module naming the
-  rule, the question and the outcome of each finding.
-- **The reviewers scored before they are used.** The Python module as it stood
-  before the three passes is the test set, and the defects those passes fixed
-  are its labels.
-- A module names how each kind of question is proved: by running code, by
-  arithmetic, or by a dated source. Python's proof is the interpreter, and a
-  System Design question has none.
-- System Design as the first module written this way. AI Engineering follows,
-  and Machine Learning is a candidate after it.
-- Exit: the reviewers carry a recall per rule against the three passes, and
-  the System Design module is seeded with every finding closed.
 
 ## Further developments
 

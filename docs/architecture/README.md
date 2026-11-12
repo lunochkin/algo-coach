@@ -353,7 +353,7 @@ times. Each record class is specified in one of the files beside it.
 | [`flows.md`](flows.md) | Generating a problem, the states it is written through, replaying a site, the drill loop, starting a card run, solving a rung, recalling a template, adjudicating the eval set |
 | [`pages.md`](pages.md) | The web app's sections and pages, every screen of both clients and how the two differ, a page's areas, the design system |
 | [`wireframes.md`](wireframes.md) | Each page drawn at low fidelity |
-| [`knowledge.md`](knowledge.md) | Modules, questions, lessons, the schedule, the queues, certifications, and the user's knowledge log |
+| [`knowledge.md`](knowledge.md) | Modules, where their authoring rules live, questions, lessons, the schedule, the queues, certifications, and the user's knowledge log |
 
 ## Data classes
 

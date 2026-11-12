@@ -2,6 +2,7 @@
 paths:
   - "packages/core/**"
   - "src/algo_coach/knowledge/**"
+  - "content/modules/**"
 ---
 
 Read `docs/architecture/knowledge.md` before changing this code. It gives
