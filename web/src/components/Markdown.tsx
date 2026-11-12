@@ -4,7 +4,8 @@ import rehypeKatex from 'rehype-katex'
 import remarkGfm from 'remark-gfm'
 import remarkMath from 'remark-math'
 import type { Components } from 'react-markdown'
-import { codeWraps } from '@algo-coach/core'
+import type { ReactNode } from 'react'
+import { codeWraps, EXTERNAL_HINT, EXTERNAL_MARK, isExternal } from '@algo-coach/core'
 
 import { WrappedText } from '@/components/PythonCode'
 
@@ -16,13 +17,25 @@ export function Markdown({ children }: { children: string }) {
       <ReactMarkdown
         remarkPlugins={[remarkGfm, remarkMath]}
         rehypePlugins={[rehypeKatex]}
-        components={{ pre: CodeFence }}
+        components={{ pre: CodeFence, a: ProseLink }}
       >
         {children}
       </ReactMarkdown>
     </div>
   )
 }
+
+// a link leaving the app opens a tab and carries the mark: `pages.md`, The design system
+export const ProseLink = ({ href = '', children }: { href?: string; children?: ReactNode }) =>
+  isExternal(href) ? (
+    <a href={href} target="_blank" rel="noreferrer">
+      {children}
+      <span aria-hidden>{EXTERNAL_MARK}</span>
+      <span className="sr-only"> ({EXTERNAL_HINT.toLowerCase()})</span>
+    </a>
+  ) : (
+    <a href={href}>{children}</a>
+  )
 
 type Hast = { type: string; tagName?: string; value?: string; properties?: { className?: unknown }; children?: Hast[] }
 

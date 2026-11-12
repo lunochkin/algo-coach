@@ -182,3 +182,7 @@ export const SIGN_IN_CANCELLED = 'Sign-in was cancelled.';
 export const SIGN_IN_NO_CODE = 'Sign-in returned no code.';
 /** A lesson's node on a module's map, named for whoever reads the map aloud. */
 export const mapLessonLabel = (title: string) => `Lesson: ${title}`;
+/** A link leaving the app carries the mark after its text: `pages.md`, The design system. */
+export const EXTERNAL_MARK = ' ↗';
+export const EXTERNAL_HINT = 'Opens in the browser';
+export const isExternal = (href: string) => /^https?:\/\//i.test(href);

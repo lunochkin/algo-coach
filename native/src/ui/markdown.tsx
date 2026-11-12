@@ -1,9 +1,9 @@
 import { cloneElement, Fragment, isValidElement, useMemo, type ReactElement, type ReactNode } from 'react';
-import { View, type TextStyle, type ViewStyle } from 'react-native';
+import { Linking, View, type TextStyle, type ViewStyle } from 'react-native';
 import { Renderer, useMarkdown, type MarkedStyles } from 'react-native-marked';
 import { Text, useTheme, type MD3Theme } from 'react-native-paper';
 
-import { codeWraps } from '@algo-coach/core';
+import { codeWraps, EXTERNAL_HINT, EXTERNAL_MARK, isExternal } from '@algo-coach/core';
 
 import { withMath } from '@/lib/math';
 import { CodeBlock } from '@/ui/common';
@@ -61,6 +61,23 @@ export class CodeRenderer extends Renderer {
 
   strong(children: string | ReactNode[], style?: TextStyle): ReactNode {
     return super.strong(soft(children), style);
+  }
+
+  // the library labels every link "Link", which hides its text from a screen reader
+  link(children: string | ReactNode[], href: string, style?: TextStyle, _title?: string): ReactNode {
+    const external = isExternal(href);
+    return (
+      <Text
+        key={this.getKey()}
+        accessibilityRole="link"
+        accessibilityHint={external ? EXTERNAL_HINT : undefined}
+        onPress={() => void Linking.openURL(href)}
+        style={style}
+      >
+        {children}
+        {external ? EXTERNAL_MARK : null}
+      </Text>
+    );
   }
 
   heading(children: string | ReactNode[], style?: TextStyle): ReactNode {

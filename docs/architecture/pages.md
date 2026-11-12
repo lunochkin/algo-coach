@@ -765,6 +765,11 @@ difference it found. No row is marked `to fix` today.
   scale and a palette of its own, and each of its variables is bound to a
   token. A document's own title reads at the title role, and its headings at
   the heading role.
+- **A link in authored prose that leaves the app carries a `↗` after its
+  text, on both clients.** A lesson's links to the Python docs read like its
+  links to other lessons, and a reader pressing one leaves the lesson
+  unwarned. The web opens such a link in a new tab, and the phone in the
+  browser.
 - **The web opens in the browser's colour-scheme and carries a switch.** The
   switch writes the chosen scheme to the browser, and a reader who never
   presses it follows their browser for as long as they never press it. No
