@@ -504,6 +504,27 @@ tests less than writing the solution does.
 - [ ] Compare tracing with the knowledge module's `output` questions, and
       write into `knowledge.md` whether a traced output is one of them
 
+### Tables and diagrams on a phone
+
+A table or a diagram drawn with box-drawing characters scrolls sideways on a
+phone, where a reader sees a third of it at a time. The content repository's
+`modules/TODO.md` converts them to markdown tables and Mermaid, and waits on
+the items below.
+
+- [ ] Write into `pages.md` how a markdown table reads on both clients: its
+      cells wrap, and a table wider than the screen reads each row as lines of
+      header and value. The phone's markdown library holds every column at a
+      fixed width and scrolls
+- [ ] Render a markdown table that way, with the phone's own renderer and the
+      web's below the phone's width
+- [ ] Decide how a Mermaid diagram reaches the clients, and write the choice
+      into `knowledge.md`: drawn to SVG at seed time, in both schemes, and
+      carried in the snapshot. The snapshot then stops equalling learn's
+      format 6, which that file states today
+- [ ] Draw a ` ```mermaid ` block and a `diagram` field holding Mermaid as the
+      seed's image, on both clients. Triggered when the content repository
+      converts its first diagram
+
 ### Audio
 
 Practice with the screen off: questions read aloud and answered by voice, on
@@ -589,6 +610,9 @@ against library names still holds.
       reads before retiring the problem by hand. Problems are served to every
       user, so no user retires one directly. Triggered when someone other than
       the author sits
+- [ ] Print the seed's progress to stderr as it runs: one line per stage,
+      modules, questions, lessons, cards, with its count. A seed through the
+      tunnel runs for minutes and prints nothing before its closing summary
 
 ### Docs
 
