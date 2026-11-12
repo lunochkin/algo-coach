@@ -37,13 +37,11 @@ See `README.md` for what this is; `docs/ROADMAP.md` for the phase plan.
   both. The page is at the address Vite prints.
 
 @docs/architecture/README.md
-@docs/architecture/content.md
-@docs/architecture/corpus.md
-@docs/architecture/log.md
-@docs/architecture/machine.md
-@docs/architecture/flows.md
-@docs/architecture/pages.md
-@docs/architecture/knowledge.md
+
+The other files in `docs/architecture/` are not loaded at start. Before
+changing what one of them governs, read that file: the map in its README names
+which file holds what. A rule in `.claude/rules/` names the file for the code
+it covers.
 
 ## Where knowledge lives
 
