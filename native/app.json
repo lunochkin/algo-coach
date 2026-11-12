@@ -27,6 +27,7 @@
       "expo-notifications",
       "./plugins/with-pinned-keystore",
       "./plugins/with-dev-variant",
+      "./plugins/with-hidden-keyboard",
       [
         "expo-splash-screen",
         {
