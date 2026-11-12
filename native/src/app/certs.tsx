@@ -81,6 +81,7 @@ export default function CertsScreen() {
             refreshControl={pull}
             ref={sections.scroll}
             onScroll={sections.onScroll}
+            onScrollBeginDrag={sections.onScrollBeginDrag}
             scrollEventThrottle={32}
             contentContainerStyle={[styles.page, { paddingBottom: insets.bottom + 24 }]}
           >

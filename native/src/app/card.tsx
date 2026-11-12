@@ -72,6 +72,7 @@ export default function CardScreen() {
         refreshControl={pull}
         ref={sections.scroll}
         onScroll={sections.onScroll}
+        onScrollBeginDrag={sections.onScrollBeginDrag}
         scrollEventThrottle={32}
         // room under the last template for the run's press over it
         contentContainerStyle={[styles.page, { paddingBottom: insets.bottom + (studied.data ? 140 : 24) }]}

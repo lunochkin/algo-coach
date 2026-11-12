@@ -13,13 +13,18 @@ export function useCurrent(ids: string[]): string | null {
   useEffect(() => {
     const named = key.split(',')
     const visible = new Set<string>()
+    // at the end the last section is read, though its top never reaches the band
+    const atEnd = () =>
+      window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 2
+    const read = () =>
+      setCurrent(atEnd() ? (named.at(-1) ?? null) : (named.find((id) => visible.has(id)) ?? null))
     const observer = new IntersectionObserver(
       (entries) => {
         for (const entry of entries) {
           if (entry.isIntersecting) visible.add(entry.target.id)
           else visible.delete(entry.target.id)
         }
-        setCurrent(named.find((id) => visible.has(id)) ?? null)
+        read()
       },
       // the band under the bar: a section counts as current while its top
       // third of the window holds it
@@ -29,7 +34,11 @@ export function useCurrent(ids: string[]): string | null {
       const element = document.getElementById(id)
       if (element) observer.observe(element)
     }
-    return () => observer.disconnect()
+    window.addEventListener('scroll', read, { passive: true })
+    return () => {
+      observer.disconnect()
+      window.removeEventListener('scroll', read)
+    }
   }, [key])
 
   return current
@@ -41,14 +50,27 @@ export function useCurrent(ids: string[]): string | null {
 // the reader closes it, and a reload opens every one again
 export function useSections(items: Item[]) {
   const [closed, setClosed] = useState<string[]>([])
-  const current = useCurrent(items.map((item) => item.id))
+  const read = useCurrent(items.map((item) => item.id))
+  // the section pressed stays marked until the reader scrolls by hand: a jump
+  // near the end lands where the end rule would mark the last section instead
+  const [jumped, setJumped] = useState<string | null>(null)
+  useEffect(() => {
+    if (!jumped) return
+    const release = () => setJumped(null)
+    const events = ['wheel', 'touchstart', 'keydown'] as const
+    for (const e of events) window.addEventListener(e, release, { passive: true })
+    return () => {
+      for (const e of events) window.removeEventListener(e, release)
+    }
+  }, [jumped])
   return {
     items,
-    current,
+    current: jumped ?? read,
     closed: (id: string) => closed.includes(id),
     toggle: (id: string) => setClosed((was) => sectionToggled(was, id)),
     jump: (id: string) => {
       setClosed((was) => sectionOpened(was, id))
+      setJumped(id)
       requestAnimationFrame(() =>
         document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' }),
       )

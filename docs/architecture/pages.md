@@ -655,6 +655,17 @@ difference it found. No row is marked `to fix` today.
 - **A page longer than a screen carries a bar naming its sections.** The bar
   stays at the top of the window while the page scrolls, and it marks the
   section the reader is in. A press on it jumps to that section.
+- **The bar scrolls sideways to keep the marked section in view**, as the
+  navigation does at phone width. A phone holds two or three of a lesson's
+  sections, and a mark the reader cannot see says nothing.
+- **An edge of the bar fades where more sections lie past it.** A row cut at
+  the screen's edge reads as a row that ends there.
+- **At the end of the page the bar marks the last section.** The last section
+  is often shorter than the screen, so its heading never reaches the top, and
+  the mark would otherwise stay on the section before it.
+- **A section pressed on the bar stays marked until the reader scrolls by
+  hand.** A jump near the end lands at the end of the page, where the rule
+  above would mark the last section rather than the one pressed.
 - **A section collapses from its own heading**, and every section is open until
   the reader closes it. The count beside the heading stays readable while the
   section is closed.

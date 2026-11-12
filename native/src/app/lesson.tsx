@@ -151,6 +151,7 @@ export default function LessonScreen() {
           <ScrollView
             ref={sections.scroll}
             onScroll={sections.onScroll}
+            onScrollBeginDrag={sections.onScrollBeginDrag}
             scrollEventThrottle={32}
             contentContainerStyle={[styles.page, { paddingBottom: insets.bottom + 128 }]}
           >

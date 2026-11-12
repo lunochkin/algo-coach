@@ -159,6 +159,7 @@ export default function ModuleScreen() {
             refreshControl={pull}
             ref={sections.scroll}
             onScroll={sections.onScroll}
+            onScrollBeginDrag={sections.onScrollBeginDrag}
             scrollEventThrottle={32}
             // room under the last topic for the bar over it
             contentContainerStyle={[styles.page, { paddingBottom: insets.bottom + 96 }]}
