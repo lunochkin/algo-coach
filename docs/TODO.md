@@ -572,6 +572,38 @@ against library names still holds.
       decision with its numbers into `docs/architecture/README.md`, beside
       the editor's latency measurement
 
+### Steering the knowledge queues
+
+The next queue aims at one focus, so a user studying two subjects at once
+re-aims it by hand. Nothing aims the next focus once the current one is done.
+
+- [ ] Write the focus set into `knowledge.md`: several targets, each with a
+      weight, and the share of the next queue's new questions each target
+      receives. One focus per user stands across devices today
+- [ ] Decide how a focus set is stored, and write the record into
+      `knowledge.md` `## The records`. `focuses` is append-only, so the shape
+      is fixed once the first set is stored
+- [ ] Write the `focus` line's form for a set into `knowledge.md` `## The
+      wire`. A line carrying one target is learn's format, which both clients
+      still read
+- [ ] Mix the next queue's new questions by the set's weights in
+      `packages/core`, with fixtures generated from the Python side passing in
+      both suites
+- [ ] Add, remove and reweight a target on both clients, from the knowledge
+      home and a module's page, with a row per act in `pages.md` `### Acts`
+- [ ] Write into `knowledge.md` when a focus target counts as done, for each
+      of the four kinds: module, topic, subtopic and certification. A route
+      advances on that rule, and the focus has none today
+- [ ] Write the route into `knowledge.md`: an ordered list of focus targets,
+      the next aimed once the one before is done, with gating unchanged
+- [ ] Decide whether a route fills one target of a focus set or the whole
+      set, and write the choice into `knowledge.md`
+- [ ] Decide how a route is stored, and write the record into `knowledge.md`
+      `## The records`. The table is append-only, so the shape is fixed once
+      the first route is stored
+- [ ] Create, reorder and clear a route on both clients, from a page under
+      Knowledge, with its rows in `pages.md` `### Screens` and `### Acts`
+
 ### Questions served by the engine
 
 - [ ] Serve the next question from the engine. Triggered when a client that
