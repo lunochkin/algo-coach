@@ -22,8 +22,8 @@ export interface CertConditions {
   checks: CertCheck[];
   short: { sub: string; topic: string; line: string }[]; // the groups below coverage
   scope: string;
-  targeted: boolean;
-  offersTarget: boolean; // the focus can aim at it
+  focused: boolean;
+  offersFocus: boolean; // the focus can aim at it
   offersExam: boolean; // every other condition holds
 }
 
@@ -84,8 +84,8 @@ export function certConditions(
       line: `${subTitle(c, g.sub)}: ${g.passed}/${g.total}`,
     })),
     scope: `${levelName(b.rules, x.level)} · ${x.scope === COURSE_SCOPE ? 'whole module' : x.scope}`,
-    targeted: focus?.cert === id,
-    offersTarget: status.state !== 'earned' && status.state !== 'empty',
+    focused: focus?.cert === id,
+    offersFocus: status.state !== 'earned' && status.state !== 'empty',
     offersExam: status.state === 'ready',
   };
 }

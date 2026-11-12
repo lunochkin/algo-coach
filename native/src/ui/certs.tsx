@@ -7,9 +7,9 @@ import {
   type Board,
   CERT_START,
   CERT_TAKE_EXAM,
-  CERT_TARGET,
+  CERT_FOCUS,
   CERT_TO_COVER,
-  CERT_UNTARGET,
+  CERT_UNFOCUS,
   certConditions,
   certFocus,
   type CertState,
@@ -121,10 +121,10 @@ export function CertSheet(props: {
       actions={
         <>
           <Button onPress={onClose}>{CLOSE}</Button>
-          {v.offersTarget ? (
-            v.targeted ? (
+          {v.offersFocus ? (
+            v.focused ? (
               <Button mode="outlined" icon="crosshairs-gps" onPress={() => void st.setFocus(null)}>
-                {CERT_UNTARGET}
+                {CERT_UNFOCUS}
               </Button>
             ) : (
               <Button
@@ -136,7 +136,7 @@ export function CertSheet(props: {
                   onClose();
                 }}
               >
-                {CERT_TARGET}
+                {CERT_FOCUS}
               </Button>
             )
           ) : null}

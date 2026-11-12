@@ -73,8 +73,8 @@ export const CERTS_NONE = 'No module carries certifications yet.';
 export const CERT_TO_COVER = 'To cover';
 export const CERT_START = 'Start';
 export const CERT_TAKE_EXAM = 'Take exam';
-export const CERT_TARGET = 'Target';
-export const CERT_UNTARGET = 'Untarget';
+export const CERT_FOCUS = 'Focus here';
+export const CERT_UNFOCUS = 'Clear focus';
 
 export function certCell(title: string, s: CertStatus): string {
   return `${title}: ${s.state === 'not_certified' ? `practice only, ${s.passed} of ${s.questions} passed` : STATE_LABEL[s.state]}`;

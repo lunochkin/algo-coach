@@ -4,9 +4,9 @@ import { Link } from 'react-router'
 import {
   CERT_START,
   CERT_TAKE_EXAM,
-  CERT_TARGET,
+  CERT_FOCUS,
   CERT_TO_COVER,
-  CERT_UNTARGET,
+  CERT_UNFOCUS,
   certConditions,
   certFocus,
   type Board,
@@ -100,14 +100,14 @@ export function CertDialog({
                   </Link>
                 </Button>
               )}
-              {v.offersTarget &&
-                (v.targeted ? (
+              {v.offersFocus &&
+                (v.focused ? (
                   <Button
                     variant="outline"
                     onClick={() => void k.add('focus', newRecord.focus(null))}
                   >
                     <Crosshair />
-                    {CERT_UNTARGET}
+                    {CERT_UNFOCUS}
                   </Button>
                 ) : (
                   <Button
@@ -119,7 +119,7 @@ export function CertDialog({
                     }}
                   >
                     <Crosshair />
-                    {CERT_TARGET}
+                    {CERT_FOCUS}
                   </Button>
                 ))}
             </DialogFooter>

@@ -30,7 +30,7 @@ describe("a certification's conditions", () => {
     const states = certStates(b, c, exams);
     const [id] = [...states].find(([, s]) => s.state === 'ready')!;
     const v = certConditions(b, c, id, states, null)!;
-    expect([v.label, v.offersExam, v.offersTarget]).toEqual(['Ready for exam', true, true]);
+    expect([v.label, v.offersExam, v.offersFocus]).toEqual(['Ready for exam', true, true]);
     expect(
       v.checks.filter((x) => x.text.startsWith('Coverage') || x.text.startsWith('Retention')).every((x) => x.ok),
     ).toBe(true);
@@ -50,7 +50,7 @@ describe("a certification's conditions", () => {
     const states = certStates(b, c, exams);
     const [id] = [...states][0];
     const focus = certFocus(c, id, false);
-    expect(certConditions(b, c, id, states, focus)!.targeted).toBe(true);
+    expect(certConditions(b, c, id, states, focus)!.focused).toBe(true);
   });
 });
 
