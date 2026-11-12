@@ -255,6 +255,13 @@ platforms.
 - **The modules read below as rows, one per module not archived.** A row names
   the group next up with its passed share, and the reviews due, and opens the
   module's page. A paused module says so on its row.
+- **The home reads the reviews ahead below the modules**: a column per
+  learning day for fourteen days, `knowledge.md` giving what each counts. The
+  count is printed on today and on the busiest day alone. Hover on the web, or
+  a press on the phone, names any other day.
+- **The forecast reads neutral, with today in ink.** A load owed is not
+  progress, so it carries no flame. The forecast asks for no act, so it sits
+  below the rows the home's act and its modules need.
 - **The home raises today's limit and never sets the daily limit.** A raise
   answers today's practice, so the home offers it beside the focus. The daily
   limit is a standing choice, set on the settings page.

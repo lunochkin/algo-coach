@@ -317,6 +317,10 @@ without redefining them. Grouped by the file that specifies the record.
 - **Module status**: active, paused or archived, set by the user.
 - **Certification**: one scope, a topic or a whole module, at one level. Earned
   on coverage, retention, an exam and its prerequisites.
+- **Projection**: a reading of the user's knowledge log forward, derived on
+  every read and never stored.
+- **Review forecast**: the projection counting the reviews each of the next
+  fourteen learning days will hold, every review assumed to pass.
 - **Outbox**: the knowledge records a client holds that the engine has not
   acknowledged, kept in the client's copy of the user's log.
 

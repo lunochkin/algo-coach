@@ -295,6 +295,40 @@ certification.
 - **An exam is offered only once everything else in its certification
   holds.** A certification exam passed is stored as its own record.
 
+## Projections
+
+A projection reads the user's log forward: the practice the schedule will ask
+for if the user keeps answering. A projection is derived on every read and
+never stored, as a question state is.
+
+- **The review forecast counts the reviews each learning day will hold**, over
+  the next fourteen days. A learning day starts at 04:00 local time, as the
+  daily limit's day does.
+- **Each review in the forecast is assumed to pass.** The forecast replays a
+  question with a Good rating at each due time, and counts the due time that
+  rating sets as well. Any other assumption needs a failure rate the log has
+  not measured.
+- **The forecast is therefore a lower bound on the load.** A failed review adds
+  a relearning step and shortens the next interval, and the forecast counts
+  neither.
+- **An overdue review counts on the first day.** The review is owed now, and a
+  forecast dropping it would show less than the review queue serves.
+- **Only questions already seen are counted.** A new question enters the load
+  on the day the user first answers it, and the user chooses that day. The
+  page says so under the forecast.
+- **The forecast reads the modules the review queue serves.** A paused module
+  and an archived one add nothing.
+- **The focus does not narrow the forecast.** A strict focus defers the
+  reviews outside it and removes none, so those reviews still fall due.
+- **A day counts 24 hours from its start.** A shift to or from summer time
+  moves one boundary of the fourteen by an hour, and that is accepted.
+
+Deferred, since only use answers each:
+
+- When a certification is reached at the user's own pace. The pace needs a rule
+  for which stretch of the log it is read from.
+- A forecast per module, on the module's page.
+
 ## The records
 
 Nine append-only tables hold the user's knowledge log, one per kind of event.

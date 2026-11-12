@@ -17,6 +17,8 @@ import {
   moveUp,
   moveDown,
   knowledgeHome,
+  forecastView,
+  reviewForecast,
 } from '@algo-coach/core'
 
 import { ErrorLine } from '@/components/ErrorLine'
@@ -24,6 +26,7 @@ import { Loaded } from '@/components/Loaded'
 import { PageHeader } from '@/components/PageHeader'
 import { PickPanel, PickRow } from '@/components/PickRow'
 import { KnowledgeNext } from '@/knowledge/KnowledgeNext'
+import { ReviewForecast } from '@/knowledge/ReviewForecast'
 import { ModuleRow } from '@/knowledge/ModuleRow'
 import { SectionHeading } from '@/components/SectionHeading'
 import { Button } from '@/components/ui/button'
@@ -38,7 +41,10 @@ export function KnowledgePage() {
   const home = useMemo(() => {
     const all = board(null)
     if (!catalog || !all) return undefined
-    return knowledgeHome(all, order, certExams, now)
+    return {
+      ...knowledgeHome(all, order, certExams, now),
+      forecast: forecastView(reviewForecast(all, now)),
+    }
   }, [catalog, board, order, certExams, now])
 
   function move(rows: ModuleRowView[], from: number, to: number) {
@@ -68,7 +74,7 @@ export function KnowledgePage() {
         blank={NO_MODULES}
         blankWhen={(h) => h.rows.length === 0}
       >
-        {({ rows, toRead, toTake }) => (
+        {({ rows, toRead, toTake, forecast }) => (
           <>
             {/* the next steps the rules would take, for a reader who never opens
                 the lessons or the certifications: rows, since each opens a page */}
@@ -125,6 +131,7 @@ export function KnowledgePage() {
                 ))}
               </PickPanel>
             </section>
+            <ReviewForecast view={forecast} />
           </>
         )}
       </Loaded>

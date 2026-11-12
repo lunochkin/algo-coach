@@ -604,6 +604,18 @@ re-aims it by hand. Nothing aims the next focus once the current one is done.
 - [ ] Create, reorder and clear a route on both clients, from a page under
       Knowledge, with its rows in `pages.md` `### Screens` and `### Acts`
 
+### Projections
+
+`knowledge.md` gives the review forecast the knowledge home reads.
+
+- [ ] Write into `knowledge.md` the pace a certification's date is projected
+      from: which stretch of the log it reads, and what it counts. Triggered
+      when a certification is the focus for a week of practice
+- [ ] Show the date a focused certification is projected to be reached, on
+      its conditions on both clients
+- [ ] Show a module's own forecast on its page. Triggered when the home's
+      forecast reads two modules' load and the user asks which one it is
+
 ### Questions served by the engine
 
 - [ ] Serve the next question from the engine. Triggered when a client that

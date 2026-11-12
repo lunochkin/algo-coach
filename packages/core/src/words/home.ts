@@ -35,7 +35,7 @@ export const CLEAR_FOCUS = 'Clear';
 // clearing asks first, since aiming a focus takes several presses on a module's page
 export const clearFocusTitle = (label: string) => `Clear the focus on ${label}?`;
 export const CLEAR_FOCUS_BODY =
-  'Continue then serves every active module again. A focus is aimed again from a module\'s page or a certification.';
+  "Continue then serves every active module again. A focus is aimed again from a module's page or a certification.";
 export const CLEAR_FOCUS_KEEP = 'Keep it';
 export const DUE_NOW = 'to review now';
 export const LEARNING = 'learning';
@@ -118,3 +118,13 @@ export const refusal = (code: string) => REFUSALS[code] ?? REFUSALS.incomplete;
 // the privacy policy, linked from both clients' login
 export const PRIVACY_NOTE = 'The app stores what you attempt and what a model says about it.';
 export const PRIVACY_LINK = 'Privacy policy';
+
+// the review forecast
+export const FORECAST_HEADING = 'Reviews ahead';
+export const FORECAST_TODAY = 'Today';
+export const FORECAST_NOTE = 'If every review passes. Questions not yet seen add more.';
+export const forecastSummary = (sum: number, days: number, today: number) =>
+  `${sum} over ${days} days · ${today} today`;
+export const forecastBarLabel = (day: string, reviews: number) =>
+  `${day}: ${reviews} ${reviews === 1 ? 'review' : 'reviews'}`;
+

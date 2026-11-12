@@ -453,6 +453,18 @@ problem's path reads as its record, as "Every problem" gives.
 | | System design                          paused    ^ v   |             |
 | | next up: Caching . Basics, Foundation  0/6             |             |
 | +--------------------------------------------------------+             |
+|                                                                        |
+| Reviews ahead                                                          |
+| +--------------------------------------------------------+             |
+| | 31 over 14 days . 6 today                              |             |
+| |  6                9                                    |             |
+| |  #                #                                    |             |
+| |  #  #     #    #  #     #           #                  |             |
+| |  #  #  #  #    #  #  #  #     #     #     #            |             |
+| | Today                                       Wed 25 Nov |             |
+| | If every review passes. Questions not yet seen add     |             |
+| | more.                                                  |             |
+| +--------------------------------------------------------+             |
 +------------------------------------------------------------------------+
 ```
 
@@ -472,6 +484,8 @@ problem's path reads as its record, as "Every problem" gives.
   where none is set. "5 more new today" raises today's limit.
 - The daily limit is set on the settings page the account menu links.
 - A module row opens the module's page. An archived module has no row.
+- A column of the forecast names its day and its count on hover. Only today
+  and the busiest day print their count.
 
 ## A module
 

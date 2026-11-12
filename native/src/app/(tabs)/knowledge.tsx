@@ -19,11 +19,14 @@ import {
   SECTION_KNOWLEDGE,
   moved,
   knowledgeHome,
+  forecastView,
+  reviewForecast,
 } from '@algo-coach/core';
 import { useStore } from '@/lib/store';
 import { fromCopy, Loaded, styles, SyncBanner, SyncLine, ScreenHeader } from '@/ui/common';
 import { ContinueBar, ContinueNotice, useContinue } from '@/ui/continue';
 import { FocusCard } from '@/ui/focuscard';
+import { ReviewForecast } from '@/ui/forecast';
 import { AccountMenu } from '@/ui/account';
 import { ModuleRow } from '@/ui/modules';
 import { Heading, PanelItem, PickPanel, PickRow } from '@/ui/rows';
@@ -43,6 +46,7 @@ export default function Home() {
   const certExams = st.catalog?.certExams;
   const home = useMemo(() => (b ? knowledgeHome(b, order, certExams ?? [], now) : null), [b, order, certExams, now]);
   const rows = home?.rows ?? [];
+  const forecast = useMemo(() => (b ? forecastView(reviewForecast(b, now)) : null), [b, now]);
   const { toRead = null, toTake: certToTake = null } = home ?? {};
   const onReorder = ({ from, to }: ReorderableListReorderEvent) => {
     void st.setCourseOrder(
@@ -138,9 +142,12 @@ export default function Home() {
         onReorder={onReorder}
         ListHeaderComponent={header}
         ListFooterComponent={
-          <Pressable onPress={() => st.requestSync(0)} accessibilityLabel={SYNC_NOW} style={{ marginTop: space[3] }}>
-            <SyncLine sync={st.sync} showError={false} />
-          </Pressable>
+          <>
+            {forecast && rows.length ? <ReviewForecast view={forecast} /> : null}
+            <Pressable onPress={() => st.requestSync(0)} accessibilityLabel={SYNC_NOW} style={{ marginTop: space[3] }}>
+              <SyncLine sync={st.sync} showError={false} />
+            </Pressable>
+          </>
         }
         // room under the last row for the bar over it
         contentContainerStyle={{ padding: space[4], paddingBottom: 160 }}
