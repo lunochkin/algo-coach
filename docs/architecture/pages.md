@@ -759,10 +759,10 @@ difference it found. No row is marked `to fix` today.
   mono families reads three kinds of thing.
 - **A long line of code wraps, and continues under its own indent.** This
   holds for a question's code, a detail's example, a template's form and a
-  fenced block whose fence names a language or `output`, on both clients. A phone fits
-  some forty characters, and a block scrolled sideways hides the end of a
-  line, which is often the part a question asks about. The indent keeps the
-  structure readable across the wrap, as the editor does.
+  fenced block whose fence names a language or `output`, on both clients. A
+  phone fits some forty characters, and a block scrolled sideways hides the
+  end of a line, which is often the part a question asks about. The indent
+  keeps the structure readable across the wrap, as the editor does.
 - **A wrapped part opens on a dim `↪`, which no copy carries.** Without the
   mark a reader cannot tell a wrap from a new line, and in a question about
   what code prints the difference is the answer. Python has no symbol for a

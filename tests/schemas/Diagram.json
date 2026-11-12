@@ -1,0 +1,45 @@
+{
+  "description": "One Mermaid source drawn to SVG in both schemes, by the drawing tool's\nversion: `knowledge.md`, Diagrams.",
+  "properties": {
+    "dark": {
+      "minLength": 1,
+      "title": "Dark",
+      "type": "string"
+    },
+    "drawn_at": {
+      "format": "date-time",
+      "title": "Drawn At",
+      "type": "string"
+    },
+    "light": {
+      "minLength": 1,
+      "title": "Light",
+      "type": "string"
+    },
+    "source": {
+      "minLength": 1,
+      "title": "Source",
+      "type": "string"
+    },
+    "source_hash": {
+      "minLength": 1,
+      "title": "Source Hash",
+      "type": "string"
+    },
+    "tool": {
+      "minLength": 1,
+      "title": "Tool",
+      "type": "string"
+    }
+  },
+  "required": [
+    "source_hash",
+    "source",
+    "tool",
+    "light",
+    "dark",
+    "drawn_at"
+  ],
+  "title": "Diagram",
+  "type": "object"
+}

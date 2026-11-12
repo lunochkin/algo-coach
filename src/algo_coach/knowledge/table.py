@@ -112,6 +112,20 @@ lessons = Table(
 )
 
 
+# a drawing per Mermaid source, redrawn when the tool's version moves; no log
+# record references one: `knowledge.md`, Diagrams
+diagrams = Table(
+    "diagrams",
+    metadata,
+    Column("source_hash", Text, primary_key=True),
+    Column("source", Text, nullable=False),
+    Column("tool", Text, nullable=False),
+    Column("light", Text, nullable=False),
+    Column("dark", Text, nullable=False),
+    Column("drawn_at", timestamp(), nullable=False),
+)
+
+
 # the knowledge log: append-only, each record minted by the client too, so a
 # retried upload writes nothing twice: `knowledge.md`, The records
 def _logged(name: str, *columns: Column[Any] | CheckConstraint) -> Table:

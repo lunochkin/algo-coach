@@ -35,6 +35,7 @@ from algo_coach.drafts.table import (
 from algo_coach.knowledge.table import (
     answers,
     certification_exams,
+    diagrams,
     focuses,
     lesson_marks,
     lessons,
@@ -82,6 +83,7 @@ from algo_coach.schema import (
     CertificationExam,
     ClaimSource,
     Diagnosis,
+    Diagram,
     Draft,
     DraftCase,
     Focus,
@@ -194,6 +196,7 @@ STORED: list[Stored] = [
     Stored(Subtopic, subtopics),
     Stored(Question, questions),
     Stored(Lesson, lessons),
+    Stored(Diagram, diagrams),
     Stored(Answer, answers),
     Stored(Stint, stints),
     Stored(ModuleStatusChange, module_status_changes),

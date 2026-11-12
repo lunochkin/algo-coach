@@ -9,6 +9,14 @@ from sqlalchemy import ColumnElement, Connection, Table, insert, select, update
 
 from algo_coach.ids import new_id
 from algo_coach.knowledge.check import COLUMNS, refusals
+from algo_coach.knowledge.diagrams import (
+    Drawer,
+    DrawError,
+    MermaidCli,
+    mermaid_sources,
+    store,
+    undrawn,
+)
 from algo_coach.knowledge.files import ModuleSource
 from algo_coach.knowledge.table import lessons, modules, questions, subtopics, topics
 from algo_coach.schema import Module, Question
@@ -20,17 +28,34 @@ class ModuleSeedResult(BaseModel):
     subtopics: int = 0
     questions: int = 0
     lessons: int = 0
+    diagrams: int = 0  # drawn by this seed, the rest drawn before
     retired: int = 0
     refused: list[str] = []
 
 
-def seed_module(source: ModuleSource, *, root: Database) -> ModuleSeedResult:
-    """Checks the module whole, then refreshes every row by slug, minting ids
-    for the new ones and retiring the ones the files no longer hold."""
+def seed_module(
+    source: ModuleSource, *, root: Database, drawer: Drawer | None = None
+) -> ModuleSeedResult:
+    """Checks the module whole, draws each Mermaid source not yet drawn, then
+    refreshes every row by slug, minting ids for the new ones and retiring the
+    ones the files no longer hold."""
     if found := refusals(source):
         return ModuleSeedResult(refused=found)
-    result = ModuleSeedResult()
+    sources = mermaid_sources(source)
+    tool, todo, drawn = "", list[str](), list[tuple[str, str]]()
+    if sources:
+        drawer = drawer or MermaidCli()
+        # drawn before the transaction, since a draw takes about a second
+        try:
+            tool = drawer.version()
+            with root.connect() as conn:
+                todo = undrawn(conn, sources, tool)
+            drawn = drawer.draw(todo) if todo else []
+        except DrawError as error:
+            return ModuleSeedResult(refused=[f"diagrams: {error}"])
+    result = ModuleSeedResult(diagrams=len(todo))
     with root.begin() as conn:
+        store(conn, todo, drawn, tool)
         of_module = select(questions.c.slug, questions.c.retired_at).join(modules)
         retired = {
             row.slug

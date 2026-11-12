@@ -586,7 +586,7 @@ items below.
 - [x] Add `tools/diagrams/`, a script drawing Mermaid sources to the light and
       the dark SVG `knowledge.md` `## Diagrams` prepares, and a `just` recipe
       installing it
-- [ ] Add the `diagrams` table, and draw in the seed every source not yet
+- [x] Add the `diagrams` table, and draw in the seed every source not yet
       drawn
 - [ ] Carry `diagrams` in the snapshot, and draw a ` ```mermaid ` fence and a
       Mermaid `diagram` from it on both clients

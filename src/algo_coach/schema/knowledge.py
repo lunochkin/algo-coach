@@ -157,6 +157,18 @@ class Lesson(Seeded):
     needs: list[str] = Field(default_factory=list[str])
 
 
+class Diagram(BaseModel):
+    """One Mermaid source drawn to SVG in both schemes, by the drawing tool's
+    version: `knowledge.md`, Diagrams."""
+
+    source_hash: str = Field(min_length=1)
+    source: str = Field(min_length=1)
+    tool: str = Field(min_length=1)
+    light: str = Field(min_length=1)
+    dark: str = Field(min_length=1)
+    drawn_at: datetime
+
+
 class KnowledgeRecord(BaseModel):
     """What every record of the knowledge log carries: `knowledge.md`, The
     records."""
