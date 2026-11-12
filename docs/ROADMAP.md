@@ -487,9 +487,9 @@ module left 23 numbered rules. Cards joined on 2026-11-12.
 - The content repository's `check.py` ported into the engine as a tested
   command. The seed's own gate stays apart from it, since the gate executes
   no snippet.
-- The card rules numbered in `docs/authoring/cards.md`, and the card
-  validator ported to `algo-coach card check`, which also runs each
-  template's mutants against its cases.
+- The card rules numbered in a `cards.md` beside `docs/authoring/rules.md`,
+  and the card validator ported to `algo-coach card check`, which also runs
+  each template's mutants against its cases.
 - A writer session per subtopic level, working through the module's coverage
   map, and per card.
 - **Blind reviewers, each a fresh session asked one question.** For a module,

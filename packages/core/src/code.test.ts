@@ -3,8 +3,9 @@ import { describe, expect, it } from 'vitest';
 import { codeLines, codeRows, codeWraps } from './code';
 
 describe('code blocks', () => {
-  it('wraps a named language and keeps a diagram whole', () => {
+  it('wraps a named language and output, and keeps a diagram whole', () => {
     expect(codeWraps('python')).toBe(true);
+    expect(codeWraps('output')).toBe(true);
     expect(codeWraps('text')).toBe(false);
     expect(codeWraps(undefined)).toBe(false);
   });

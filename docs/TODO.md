@@ -35,8 +35,9 @@ Which modules and cards get written is the content repository's `PLAN.md`.
 - [x] Port `content/modules/check.py` to `algo-coach module check <slug>`,
       with a test per rule it checks. Its 1126 lines carry no test today, and
       every later step trusts its verdict
-- [ ] Move the card rules out of the `card-author` skill into
-      `docs/authoring/cards.md`, numbered as `rules.md` numbers a module's.
+- [ ] Move the card rules out of the `card-author` skill into a `cards.md`
+      beside `docs/authoring/rules.md`, numbered as `rules.md` numbers a
+      module's.
       A reviewer cites a rule by its number, and a skill's prose carries none
 - [ ] Port the skill's `validate.py` to `algo-coach card check <slug>`, with a
       test per check, and have the content repository's pre-commit hook run
@@ -596,9 +597,15 @@ its own indent behind a `↪`. In a question about what code prints, the reader
 then has to tell a wrap from a line break. The content repository's `PLAN.md`
 rewraps the lines these items name.
 
+- [x] Wrap an `output` fence on both clients, and pin it in `code.test.ts`.
+      A program's output fenced as `text` is kept whole for a drawing, and
+      scrolls sideways
+- [x] Warn under rule 24 on a lesson's `text` block holding no box-drawing
+      or tree characters, and accept `output` where rule 2 and rule 15 read a
+      block's shown output. The Python module carries 479 such blocks
 - [ ] Add a module check warning for a code line over 60 characters, in a
-      question's `code` and `example` and in a lesson fence naming a language,
-      and write its rule into `docs/authoring/rules.md`
+      question's `code` and `example`, in a lesson fence naming a language and
+      in an `output` fence, and write its rule into `docs/authoring/rules.md`
 - [ ] Write the width into `docs/authoring/modules.md` beside the diagram
       rule: code lines of at most 60 characters, and 40 where a line holds
       without a break

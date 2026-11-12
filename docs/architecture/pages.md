@@ -759,7 +759,7 @@ difference it found. No row is marked `to fix` today.
   mono families reads three kinds of thing.
 - **A long line of code wraps, and continues under its own indent.** This
   holds for a question's code, a detail's example, a template's form and a
-  fenced block whose fence names a language, on both clients. A phone fits
+  fenced block whose fence names a language or `output`, on both clients. A phone fits
   some forty characters, and a block scrolled sideways hides the end of a
   line, which is often the part a question asks about. The indent keeps the
   structure readable across the wrap, as the editor does.
@@ -778,7 +778,8 @@ difference it found. No row is marked `to fix` today.
   not run as it was written.
 - **A diagram keeps its lines whole and scrolls sideways.** A detail's diagram
   and a fence naming `text` or no language may be drawn in characters, and
-  wrapping would break the drawing.
+  wrapping would break the drawing. A program's output is fenced `output`
+  instead, so its long lines wrap as code does.
 - **One mapping colours Python wherever it appears.** The editor and a
   template's form read the same mapping from the language's tags to the five
   code tokens, so a form on a card is coloured as the editor colours it. A

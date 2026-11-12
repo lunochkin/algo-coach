@@ -58,11 +58,12 @@ def test_an_accepted_spelling_passes(tmp_path):
     assert found(ran(root).errors, 3) == []
 
 
-def test_a_lesson_block_matches_its_shown_output(tmp_path):
-    """Rule 2: the block prints 1 and shows 2."""
-    root = written(
-        tmp_path, [question("a")], lessons=lesson("```python\nprint(1)\n```\n```text\n2\n```\n")
-    )
+@pytest.mark.parametrize("fence", ["output", "text"])
+def test_a_lesson_block_matches_its_shown_output(tmp_path, fence):
+    """Rule 2: the block prints 1 and shows 2, fenced either way until the
+    content repository refences its output."""
+    text = f"```python\nprint(1)\n```\n```{fence}\n2\n```\n"
+    root = written(tmp_path, [question("a")], lessons=lesson(text))
 
     assert any("shown '2', got '1'" in e for e in found(ran(root).errors, 2))
 

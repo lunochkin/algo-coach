@@ -162,6 +162,17 @@ def test_a_section_no_question_points_at_is_warned(tmp_path):
     ]
 
 
+def test_a_text_block_drawing_nothing_is_warned(tmp_path):
+    """Rule 24: a phone keeps a `text` block whole, so output fenced as
+    `text` scrolls sideways where `output` would wrap."""
+    text = LESSON + "\n```text\n42\n```\n\n```text\n┌─┐\n└─┘\n```\n\n```output\n42\n```\n"
+    root = written(tmp_path, [question("a")], lessons={"les": (["sub@0"], text)})
+
+    assert found(checked(root).warnings, 24) == [
+        "[24] lessons/les.md line 7: a text block draws nothing: fence output as `output`"
+    ]
+
+
 def test_every_concept_is_covered_and_every_question_filed(tmp_path):
     """Rule 19: a concept with no question at its level, and a question
     under no concept."""

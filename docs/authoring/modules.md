@@ -94,7 +94,8 @@ precedence over this file.
   `pretest` is 2, and 1 for a very short lesson.
 - **A lesson carries a why of one or two sentences, then `##` sections.** It
   carries a diagram or a runnable example with its real output, the common
-  mistakes and a link to the docs.
+  mistakes and a link to the docs. The output sits in an `output` fence right
+  under the example's `python` fence, which rule 2 compares it against.
 - **A lesson links a related lesson inline**, as `[text](lesson:slug#anchor)`.
   `needs = ["lesson:<slug>"]` sets the reading order, and names only lessons
   of the same subtopic.

@@ -162,3 +162,12 @@ The rules come from three review passes over the Python module in November
 23. **A bulk edit is reviewed by a reader other than its author, on its diff,
     before it is seeded.** Each fix pass introduced a new kind of defect, and
     only the next review found it. *review*
+
+## Layout
+
+24. **A program's output is fenced as `output`, and a `text` fence holds a
+    drawing alone.** A phone wraps a long line of an `output` block and keeps
+    a `text` block whole, since a wrap breaks a drawing. Output fenced as
+    `text` scrolls sideways on a phone and hides the end of each long line.
+    *check (a `text` block with no box-drawing or tree characters is
+    warned)*

@@ -9,7 +9,7 @@ from pathlib import Path
 
 from algo_coach.knowledge.authoring.course import Report, load
 from algo_coach.knowledge.authoring.execution import Runs
-from algo_coach.knowledge.authoring.lessons import lessons_run
+from algo_coach.knowledge.authoring.lessons import lessons_run, text_fences
 from algo_coach.knowledge.authoring.likeness import overlaps
 from algo_coach.knowledge.authoring.repeats import repeats
 from algo_coach.knowledge.authoring.snippets import snippets, versions
@@ -36,6 +36,7 @@ STATIC = (
     overlaps,
     repeats,
     lesson_links,
+    text_fences,
     coverage,
     reused_ids,
 )

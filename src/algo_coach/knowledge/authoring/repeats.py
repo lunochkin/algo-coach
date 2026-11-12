@@ -9,7 +9,7 @@ from algo_coach.knowledge.authoring.course import Course, Question, Report, fmt,
 from algo_coach.knowledge.authoring.lessons import BLOCK, as_async
 
 LITERAL = re.compile(r"(?<![\w.])\d+(?:\.\d+)?|'[^']+'|\"[^\"]+\"")
-SHOWN = re.compile(r"```text\n(.*?)```", re.S)
+SHOWN = re.compile(r"```(?:output|text)\n(.*?)```", re.S)
 COMMENT = re.compile(r"#\s*(?:→|->|=>|prints?:?)?\s*(.+)$", re.M)
 EVALUATED = (ast.Call, ast.BinOp, ast.Compare, ast.Subscript)
 # what a snippet wraps its point in, and every snippet shares

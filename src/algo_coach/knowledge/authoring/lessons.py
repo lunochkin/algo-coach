@@ -1,5 +1,5 @@
 """Rule 2: a lesson's code block runs on its own and matches its shown
-output."""
+output. Rule 24: a `text` fence draws."""
 
 import concurrent.futures as cf
 import hashlib
@@ -12,7 +12,8 @@ from algo_coach.knowledge.authoring.course import Course, Report, norm
 from algo_coach.knowledge.authoring.execution import Runs, absent, last_exception
 from algo_coach.knowledge.authoring.snippets import TOOLS
 
-BLOCK = re.compile(r"```python\n(.*?)```(\s*```text\n(.*?)```)?", re.S)
+BLOCK = re.compile(r"```python\n(.*?)```(\s*```(?:output|text)\n(.*?)```)?", re.S)
+TEXT = re.compile(r"^```text\n(.*?)^```", re.S | re.M)
 DIAGRAM = re.compile(r"[─│┌┐└┘├┤┬┴┼▶◀•═║]|^\s+[/\\|]\s", re.M)
 TOOL_OUTPUT = re.compile(r"^(\$ |\S+\.py:\d+(:\d+)?:? |Success: no issues)", re.M)
 AWAIT = re.compile(r"^(await |async (with|for) )", re.M)
@@ -29,6 +30,18 @@ def lesson_blocks(course: Course) -> list[Block]:
         for n, m in enumerate(BLOCK.finditer(text), 1):
             blocks.append((slug, n, m[1], m[3]))
     return blocks
+
+
+def text_fences(course: Course, report: Report) -> None:
+    for slug, text in course.lessons.items():
+        for m in TEXT.finditer(text):
+            if not DIAGRAM.search(m[1]):
+                line = text.count("\n", 0, m.start()) + 1
+                report.warn(
+                    24,
+                    f"lessons/{slug}.md line {line}",
+                    "a text block draws nothing: fence output as `output`",
+                )
 
 
 def as_async(code: str) -> str:

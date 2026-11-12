@@ -1,6 +1,7 @@
 /**
  * Whether a code block wraps its long lines, by the language its fence names.
- * A `text` block or an unnamed one may be a diagram, which wrapping breaks.
+ * A `text` block or an unnamed one may be a diagram, which wrapping breaks;
+ * a program's output is fenced `output`, and wraps.
  */
 export function codeWraps(lang: string | null | undefined): boolean {
   return !!lang && lang !== 'text';
