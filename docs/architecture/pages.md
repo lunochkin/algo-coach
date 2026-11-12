@@ -710,6 +710,28 @@ difference it found. No row is marked `to fix` today.
 - **Code reads in one mono family, named as a token.** The editor, a template's
   form and a failing case's arguments are all code, and a reader who sees three
   mono families reads three kinds of thing.
+- **A long line of code wraps, and continues under its own indent.** This
+  holds for a question's code, a detail's example, a template's form and a
+  fenced block whose fence names a language, on both clients. A phone fits
+  some forty characters, and a block scrolled sideways hides the end of a
+  line, which is often the part a question asks about. The indent keeps the
+  structure readable across the wrap, as the editor does.
+- **A wrapped part opens on a dim `↪`, which no copy carries.** Without the
+  mark a reader cannot tell a wrap from a new line, and in a question about
+  what code prints the difference is the answer. Python has no symbol for a
+  wrap the screen adds, and the backslash would read as Python's own line
+  joining.
+- **`packages/core` cuts the rows, at a column count each client measures.**
+  The phone and the web then break a line at the same place. A line breaks
+  where VS Code breaks one: at a space, after a comma, a dot or a closing
+  bracket, or before an opening bracket. A word is cut only where none of
+  those sits near the edge.
+- **A copy returns the lines as written.** A wrap is drawn and never copied,
+  as in every editor's soft wrap. Code copied with a break at each wrap would
+  not run as it was written.
+- **A diagram keeps its lines whole and scrolls sideways.** A detail's diagram
+  and a fence naming `text` or no language may be drawn in characters, and
+  wrapping would break the drawing.
 - **One mapping colours Python wherever it appears.** The editor and a
   template's form read the same mapping from the language's tags to the five
   code tokens, so a form on a card is coloured as the editor colours it. A

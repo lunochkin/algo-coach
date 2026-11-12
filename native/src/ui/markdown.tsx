@@ -3,6 +3,8 @@ import { View, type TextStyle, type ViewStyle } from 'react-native';
 import { Renderer, useMarkdown, type MarkedStyles } from 'react-native-marked';
 import { Text, useTheme, type MD3Theme } from 'react-native-paper';
 
+import { codeWraps } from '@algo-coach/core';
+
 import { withMath } from '@/lib/math';
 import { CodeBlock } from '@/ui/common';
 import { font, space, textSize } from '@/ui/tokens';
@@ -25,10 +27,10 @@ export function InlineCode({ text, style, size }: InlineCodeProps) {
 
 const soft = (text: string | ReactNode[]) => (typeof text === 'string' ? text.replace(/\n/g, ' ') : text);
 
-/** Code blocks in the app's monospace block, never wrapped. */
+/** Code blocks in the app's monospace block, wrapped by the language the fence names. */
 export class CodeRenderer extends Renderer {
-  code(text: string, _language?: string, _container?: ViewStyle, _style?: TextStyle): ReactNode {
-    return <CodeBlock code={text} verbatim />;
+  code(text: string, language?: string, _container?: ViewStyle, _style?: TextStyle): ReactNode {
+    return <CodeBlock key={this.getKey()} code={text} verbatim wrap={codeWraps(language)} />;
   }
 
   // monospace reads larger than body text at the same size

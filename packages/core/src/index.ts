@@ -12,6 +12,7 @@ export * from './focus';
 export * from './fsrs';
 export * from './queue';
 export * from './detail';
+export * from './code';
 export * from './graph';
 export * from './layout';
 export * from './lessontext';

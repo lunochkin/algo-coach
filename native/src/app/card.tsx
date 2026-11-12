@@ -163,7 +163,7 @@ function TemplateCard({
       )}
       {revealed ? (
         <>
-          <CodeBlock code={template.code} verbatim />
+          <CodeBlock code={template.code} verbatim wrap />
           {template.notes ? <Markdown>{template.notes}</Markdown> : null}
           <Button mode="text" onPress={() => setRevealed(false)} style={{ alignSelf: 'flex-end' }}>
             {HIDE_FORM}

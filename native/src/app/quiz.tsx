@@ -391,7 +391,7 @@ function Head({ q, tag, early = false }: { q: Question; tag: string; early?: boo
       <Text variant="titleMedium" selectable>
         {block(q.prompt)}
       </Text>
-      {q.code ? <CodeBlock code={q.code} /> : null}
+      {q.code ? <CodeBlock code={q.code} wrap /> : null}
     </>
   );
 }
@@ -688,7 +688,7 @@ function Details({ r }: { r: Result }) {
       {sections.map((x) => (
         <Section key={x.title} title={x.title}>
           {'code' in x ? (
-            <CodeBlock code={x.code} verbatim />
+            <CodeBlock code={x.code} verbatim wrap={x.wrap} />
           ) : 'items' in x ? (
             x.items.map((p, i) => (
               <Text key={i} variant="bodyMedium" selectable>

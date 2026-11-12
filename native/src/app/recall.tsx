@@ -148,7 +148,7 @@ function Trainer({ slug, prompt, drawn, bottom }: { slug: string; prompt: Prompt
             <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant }}>
               {hintTaken(one.hint)}
             </Text>
-            {one.hint === 'form' ? <CodeBlock code={one.text} verbatim /> : <Markdown>{one.text}</Markdown>}
+            {one.hint === 'form' ? <CodeBlock code={one.text} verbatim wrap /> : <Markdown>{one.text}</Markdown>}
           </View>
         ))}
       </ScrollView>
@@ -288,7 +288,7 @@ function Ran({
             {REVEAL_FORM}
           </Button>
         ) : (
-          <CodeBlock code={form} verbatim />
+          <CodeBlock code={form} verbatim wrap />
         )}
       </ScrollView>
       {/* the result's act, another recall, with the way back to the card beside it */}

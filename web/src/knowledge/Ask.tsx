@@ -310,7 +310,7 @@ export function Details({
       {sections.map((x) => (
         <Section key={x.title} title={x.title}>
           {'code' in x ? (
-            <PlainCode>{x.code}</PlainCode>
+            <PlainCode wrap={x.wrap}>{x.code}</PlainCode>
           ) : 'items' in x ? (
             <ul className="list-disc space-y-1 pl-5">
               {x.items.map((item, i) => (

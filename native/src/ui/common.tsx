@@ -1,11 +1,13 @@
-import { useState, type ReactNode } from 'react';
-import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import { useMemo, useState, type ReactNode } from 'react';
+import { Pressable, ScrollView, type StyleProp, StyleSheet, type TextStyle, View, type ViewStyle } from 'react-native';
 import { Appbar, Button, type ButtonProps, Text, useTheme } from 'react-native-paper';
 
 import { router } from 'expo-router';
 
 import {
   block,
+  codeRows,
+  WRAP_MARK,
   type ExamPlan,
   type Queue,
   RETRY,
@@ -18,20 +20,59 @@ import {
 import type { QueueSession, Session, SyncState } from '@/lib/store';
 import { font, palette, radius, space, textSize } from '@/ui/tokens';
 
-/** Monospace, horizontally scrollable, never wrapped. `verbatim` keeps leading spaces (diagrams). */
-export function CodeBlock({ code, verbatim = false }: { code: string; verbatim?: boolean }) {
+/**
+ * Monospace. `wrap` breaks a long line into rows that continue under its own
+ * indent behind a mark, and otherwise the block scrolls sideways (diagrams).
+ * `verbatim` keeps the common indent.
+ */
+export function CodeBlock({ code, verbatim = false, wrap = false }: { code: string; verbatim?: boolean; wrap?: boolean }) {
   const theme = useTheme();
+  const text = verbatim ? code.replace(/\s+$/, '') : block(code);
+  const mono = [styles.mono, { color: theme.colors.onSurfaceVariant }];
+  const shape = [styles.code, { borderRadius: radius(theme).lg, backgroundColor: theme.colors.surfaceVariant }];
+  if (wrap) return <WrappedCode text={text} mono={mono} shape={shape} />;
   return (
-    <ScrollView
-      horizontal
-      persistentScrollbar
-      style={[styles.code, { borderRadius: radius(theme).lg, backgroundColor: theme.colors.surfaceVariant }]}
-      contentContainerStyle={styles.codeInner}
-    >
-      <Text selectable style={[styles.mono, { color: theme.colors.onSurfaceVariant }]}>
-        {verbatim ? code.replace(/\s+$/, '') : block(code)}
+    <ScrollView horizontal persistentScrollbar style={shape} contentContainerStyle={styles.codeInner}>
+      <Text selectable style={mono}>
+        {text}
       </Text>
     </ScrollView>
+  );
+}
+
+const PROBE = 'M'.repeat(40);
+
+function WrappedCode(props: { text: string; mono: StyleProp<TextStyle>; shape: StyleProp<ViewStyle> }) {
+  const theme = useTheme();
+  const [width, setWidth] = useState(0);
+  const [char, setChar] = useState(0);
+  // the rows are cut in core, so the phone and the web break a line alike
+  const cols = width && char ? Math.floor(width / char) : Infinity;
+  const rows = useMemo(() => codeRows(props.text, cols), [props.text, cols]);
+  return (
+    <View style={[props.shape, styles.codeInner]}>
+      <Text
+        style={[props.mono, { position: 'absolute', opacity: 0 }]}
+        onTextLayout={(e) => {
+          // the probe wraps in a narrow block, so its first line holds fewer
+          const first = e.nativeEvent.lines[0];
+          if (first?.text.length) setChar(first.width / first.text.length);
+        }}
+      >
+        {PROBE}
+      </Text>
+      <View onLayout={(e) => setWidth(e.nativeEvent.layout.width)}>
+        {rows.map((row, i) => (
+          <View key={i} style={{ flexDirection: 'row' }}>
+            {row.indent ? <Text style={props.mono}>{row.indent}</Text> : null}
+            {row.cont ? <Text style={[props.mono, { color: theme.colors.outline }]}>{WRAP_MARK}</Text> : null}
+            <Text selectable style={[props.mono, { flex: 1 }]}>
+              {row.text || ' '}
+            </Text>
+          </View>
+        ))}
+      </View>
+    </View>
   );
 }
 
