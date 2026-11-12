@@ -194,6 +194,44 @@ questions.
   lesson stops in a row break the queue's flow. A queue with nothing but
   lessons left still offers them one after another.
 
+## Diagrams
+
+A structure drawn as a graph, such as a flow, a state machine, a tree or a
+lookup order, is authored as Mermaid source. It reaches both clients as an
+SVG the seed drew.
+
+- **A diagram is authored as Mermaid source**: a ` ```mermaid ` fence in a
+  lesson, or a question's `diagram` that is one ` ```mermaid ` fence alone.
+  The source stays in the content, so a later seed can draw it again.
+- **The seed draws each source to SVG, once in the light scheme and once in
+  the dark.** On 2026-11-12 one diagram on a Redmi Note 13 Pro 5G showed in
+  about 0.2 s as the seed's SVG. Drawn on the phone instead, Mermaid loaded a
+  5.5 MB library into a WebView and showed the diagram after 2.2 to 2.8 s.
+- **The seed draws with mermaid-cli in headless Chromium, on the author's
+  machine.** The drawing tool lives in `tools/diagrams/`, outside the npm
+  workspace, so installing the engine downloads no browser. A seed that meets
+  a source it has not drawn, without the tool installed, fails.
+- **The seed prepares each SVG for `react-native-svg`, the phone's drawer.**
+  Labels are SVG text rather than HTML, styles are inlined, markers sit in
+  `<defs>`, and each label's words are joined into one span. Entities in text
+  are decoded, and text holding `<` is wrapped in CDATA. The phone drew each
+  of these wrongly when the SVG was left as Mermaid wrote it.
+- **A drawing is stored once per source**, in the `diagrams` table, keyed by
+  the hash of the source and of the drawing tool's version. A re-seed draws
+  only what it has not drawn, since a draw costs about a second.
+- **The snapshot carries the drawings beside the courses**, as `diagrams`,
+  mapping each source to its light and its dark SVG. The format number stays
+  6, since a client reading format 6 alone ignores the field. 160 diagrams
+  add about 1.4 MB to the 4.8 MB snapshot, and 0.35 MB gzipped.
+- **A client draws the SVG of its scheme, scaled to the reading width.** A
+  diagram wider than the screen shrinks rather than scrolls, so a source is
+  laid out top to bottom, with at most three nodes side by side.
+- **A source with no drawing reads as its monospace text**, as a `text` block
+  does. An older client and a snapshot taken before a seed drew the source
+  both meet one.
+- **The drawings use Mermaid's own default and dark themes.** Matching the
+  app's palette is deferred until real use shows the difference matters.
+
 ## Queues
 
 A queue picks each question at the moment it is needed, from what is servable
@@ -431,7 +469,8 @@ translates at its edge, so the store keeps this project's names.
 
 - **The content reaches a client as one snapshot**, learn's `courses.json` at
   format 6. The snapshot rebuilt from Postgres equals learn's own, so the
-  loader in `packages/core` stays as it was.
+  loader in `packages/core` stays as it was. The snapshot adds one field
+  learn's lacks, the drawings `## Diagrams` gives.
 - **A client syncs learn's log lines**: `attempt`, `session`, `status`,
   `focus`, `lesson` and `cert`. Each line carries a `client_id` and names its
   content by slug.

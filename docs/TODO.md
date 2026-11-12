@@ -579,13 +579,17 @@ items below.
 - [x] Read a question's `diagram` that is one markdown table alone as a
       table, in `detailSections` and on both clients, so a question's table
       converts as a lesson's does
-- [ ] Decide how a Mermaid diagram reaches the clients, and write the choice
+- [x] Decide how a Mermaid diagram reaches the clients, and write the choice
       into `knowledge.md`: drawn to SVG at seed time, in both schemes, and
       carried in the snapshot. The snapshot then stops equalling learn's
       format 6, which that file states today
-- [ ] Draw a ` ```mermaid ` block and a `diagram` field holding Mermaid as the
-      seed's image, on both clients. Triggered when the content repository
-      converts its first diagram
+- [ ] Add `tools/diagrams/`, a script drawing Mermaid sources to the light and
+      the dark SVG `knowledge.md` `## Diagrams` prepares, and a `just` recipe
+      installing it
+- [ ] Add the `diagrams` table, and draw in the seed every source not yet
+      drawn
+- [ ] Carry `diagrams` in the snapshot, and draw a ` ```mermaid ` fence and a
+      Mermaid `diagram` from it on both clients
 - [ ] Rewrite the diagram rule in `docs/authoring/modules.md`: a table is a
       markdown table, a structure is Mermaid, and a `text` block holds
       character art alone
