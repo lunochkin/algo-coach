@@ -23,7 +23,7 @@ function version() {
 // labels as SVG text: the phone draws no HTML inside an SVG. A theme passed
 // without a wrapping width breaks a label inside a word, "collections.dequ" over
 // "e", so the width is Mermaid's default named.
-const CONFIG = { htmlLabels: false, flowchart: { htmlLabels: false, wrappingWidth: 200 } };
+const CONFIG = { themeVariables: { useGradient: false, dropShadow: 'none' }, htmlLabels: false, flowchart: { htmlLabels: false, wrappingWidth: 200 } };
 const SCHEMES = { light: 'default', dark: 'dark' };
 
 async function draw(browser, source, theme) {

@@ -231,6 +231,10 @@ SVG the seed drew.
   both meet one.
 - **The drawings use Mermaid's own default and dark themes.** Matching the
   app's palette is deferred until real use shows the difference matters.
+- **The drawings turn off the gradient and the drop shadow.** Mermaid 12's
+  default look, `neo`, strokes each box with a gradient and shadows it, and
+  the gradient reads as a fault on a phone. The `classic` look drops both but
+  lays a flowchart out wider, and 30 diagrams then passed 460 pixels.
 
 ## Queues
 
