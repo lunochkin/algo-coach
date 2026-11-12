@@ -570,11 +570,11 @@ phone, where a reader sees a third of it at a time. The content repository's
 `PLAN.md` converts them to markdown tables and Mermaid, and waits on the
 items below.
 
-- [ ] Write into `pages.md` how a markdown table reads on both clients: its
+- [x] Write into `pages.md` how a markdown table reads on both clients: its
       cells wrap, and a table wider than the screen reads each row as lines of
       header and value. The phone's markdown library holds every column at a
       fixed width and scrolls
-- [ ] Render a markdown table that way, with the phone's own renderer and the
+- [x] Render a markdown table that way, with the phone's own renderer and the
       web's below the phone's width
 - [ ] Decide how a Mermaid diagram reaches the clients, and write the choice
       into `knowledge.md`: drawn to SVG at seed time, in both schemes, and

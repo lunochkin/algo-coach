@@ -26,7 +26,8 @@ export function ProseTable({ header, rows }: { header: ReactNode[][]; rows: Reac
   const [char, setChar] = useState(0);
   const heads = header.map(nodeText);
   const texts = rows.map((r) => r.map(nodeText));
-  const cols = width && char ? Math.floor(width / char) : Infinity;
+  // rows until measured: a grid drawn first would flash, then reflow
+  const cols = width && char ? Math.floor(width / char) : 0;
   const grid = tableShape(heads, texts, cols) === 'grid';
   // each column takes the share of the row its longest cell asks for
   const flex = heads.map((h, i) => Math.max(h.length, ...texts.map((r) => r[i]?.length ?? 0), 1));
