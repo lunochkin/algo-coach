@@ -307,7 +307,8 @@ platforms.
   its presses. The reading time lets the reader choose between Read and Later
   before opening the lesson. Read
   opens the lesson over the running queue, with its minutes, Mark read and
-  its links to other lessons. Closing the lesson returns to the queue.
+  its links to other lessons. Closing the lesson returns to the queue, and
+  so does Mark read.
 - **Reading a lesson ends no queue.** The web opens the lesson in a dialog
   over the queue, and the phone opens it as a screen above the queue. A
   lesson an answer's detail links to opens the same way, so a reader never
@@ -338,6 +339,10 @@ platforms.
 - **A lesson's page reads its text, and Mark read is the act.** A read lesson
   offers Mark unread instead. The lessons the text links to open on the same
   page.
+- **Mark read closes the lesson and returns to the page it was opened from.**
+  Marking it read is the last act the lesson asks for, so a reader left on
+  the page would press back anyway. Mark unread stays on the page, since a
+  reader resetting a lesson is about to read it again.
 - **The certifications page reads each module as a grid of scopes by level.**
   Each cell reads as earned, lapsed, ready for its exam or not yet. A cell
   opens the certification's four conditions, and offers the exam once the

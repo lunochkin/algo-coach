@@ -123,6 +123,11 @@ export default function LessonScreen() {
   const mark = async (status: 'done' | 'undone') => {
     if (!course || !slug) return;
     await st.setLessonState(course, slug, status);
+    // Mark read returns where the lesson was opened from: `pages.md`
+    if (status === 'done') {
+      if (router.canGoBack()) router.back();
+      else router.replace('/lessons');
+    }
   };
 
   return (

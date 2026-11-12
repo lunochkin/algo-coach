@@ -1,6 +1,6 @@
 import { BookCheck, BookX } from 'lucide-react'
 import { useEffect } from 'react'
-import { Link, useLocation, useParams } from 'react-router'
+import { Link, useLocation, useNavigate, useParams } from 'react-router'
 
 import {
   lessonParts,
@@ -34,7 +34,8 @@ import { useSections } from '@/lib/sections'
 // a lesson read in one place, on both clients: `pages.md`, The knowledge pages
 export function LessonPage() {
   const { module = '', lesson = '' } = useParams()
-  const { hash } = useLocation()
+  const { hash, key } = useLocation()
+  const navigate = useNavigate()
   const k = useKnowledge()
   const { catalog } = useLearner()
   const { c, x, body, read, title, note } = lessonPage(catalog, module, lesson)
@@ -60,7 +61,17 @@ export function LessonPage() {
       >
         {({ c, x }) => {
           if (!c || !x) return null
-          return <LessonBody c={c} x={x} body={body} read={read} sectioned />
+          return (
+            <LessonBody
+              c={c}
+              x={x}
+              body={body}
+              read={read}
+              sectioned
+              // a page loaded first holds no history entry to return to
+              onDone={() => (key === 'default' ? navigate(LESSONS) : navigate(-1))}
+            />
+          )
         }}
       </Loaded>
     </article>
@@ -75,11 +86,13 @@ export function LessonBody(props: {
   body: string
   read: boolean
   onLesson?: (slug: string, part?: string) => void
+  // Mark read closes the lesson: `pages.md`, The knowledge pages
+  onDone: () => void
   // on the lesson's own page its parts read as sections; over a queue the
   // text reads whole
   sectioned?: boolean
 }) {
-  const { c, x, body, read, onLesson, sectioned = false } = props
+  const { c, x, body, read, onLesson, onDone, sectioned = false } = props
   const k = useKnowledge()
   const { next, related } = lessonsAround(c, x.slug)
   return (
@@ -133,7 +146,12 @@ export function LessonBody(props: {
             {LESSON_MARK_UNREAD}
           </Button>
         ) : (
-          <Button onClick={() => void k.add('lesson', newRecord.lesson(c.slug, x.slug, 'done'))}>
+          <Button
+            onClick={() => {
+              void k.add('lesson', newRecord.lesson(c.slug, x.slug, 'done'))
+              onDone()
+            }}
+          >
             <BookCheck />
             {LESSON_MARK_READ}
           </Button>

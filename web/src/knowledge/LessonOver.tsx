@@ -40,6 +40,7 @@ export function LessonOver(props: { reading: Reading; onRead: (r: Reading) => vo
               body={body}
               read={read}
               onLesson={(slug, part) => onRead({ course: c.slug, slug, anchor: part })}
+              onDone={() => onRead(null)}
             />
           </>
         ) : null}

@@ -715,7 +715,8 @@ problem's path reads as its record, as "Every problem" gives.
 ```
 
 - The text reads as authored prose, on the design tokens.
-- Mark read is the act, and Mark unread replaces it once the lesson is read.
+- Mark read is the act, and returns to the page the lesson was opened from.
+  Mark unread replaces it once the lesson is read.
 - A link inside the text to another lesson opens that lesson on this page.
 
 ## The certifications
