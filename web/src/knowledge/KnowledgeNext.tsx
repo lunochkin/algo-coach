@@ -4,6 +4,9 @@ import { Link, useNavigate } from 'react-router'
 
 import {
   CLEAR_FOCUS,
+  CLEAR_FOCUS_BODY,
+  CLEAR_FOCUS_KEEP,
+  clearFocusTitle,
   CONTINUE,
   continueCounts,
   continueOffered,
@@ -32,6 +35,17 @@ import {
 } from '@algo-coach/core'
 
 import { Panel } from '@/components/Panel'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog'
 import { Button } from '@/components/ui/button'
 import { Toggle } from '@/components/ui/toggle'
 import { useKnowledge } from '@/knowledge/context'
@@ -102,10 +116,25 @@ export function KnowledgeNext({ controls }: { controls: boolean }) {
             >
               {STRICT}
             </Toggle>
-            <Button variant="ghost" size="sm" onClick={() => setFocus(null)}>
-              <X />
-              {CLEAR_FOCUS}
-            </Button>
+            {/* clearing asks first, as archiving a module does */}
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button variant="ghost" size="sm">
+                  <X />
+                  {CLEAR_FOCUS}
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>{clearFocusTitle(focusLabel(focus, catalog))}</AlertDialogTitle>
+                  <AlertDialogDescription>{CLEAR_FOCUS_BODY}</AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>{CLEAR_FOCUS_KEEP}</AlertDialogCancel>
+                  <AlertDialogAction onClick={() => setFocus(null)}>{CLEAR_FOCUS}</AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
           </>
         )}
       </div>

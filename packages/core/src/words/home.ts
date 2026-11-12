@@ -32,6 +32,11 @@ export const STRICT = 'Strict';
 export const strictLabel = (strict: boolean) =>
   strict ? 'Strict: reviews from the focus alone' : 'Relaxed: reviews from everywhere';
 export const CLEAR_FOCUS = 'Clear';
+// clearing asks first, since aiming a focus takes several presses on a module's page
+export const clearFocusTitle = (label: string) => `Clear the focus on ${label}?`;
+export const CLEAR_FOCUS_BODY =
+  'Continue then serves every active module again. A focus is aimed again from a module\'s page.';
+export const CLEAR_FOCUS_KEEP = 'Keep it';
 export const DUE_NOW = 'to review now';
 export const LEARNING = 'learning';
 export const NEW_LEFT = 'new left today';

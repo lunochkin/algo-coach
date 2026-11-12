@@ -1,5 +1,5 @@
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { View } from 'react-native';
 import { Button, IconButton, Text, useTheme } from 'react-native-paper';
 
@@ -7,6 +7,9 @@ import {
   type Board,
   type CertRecord,
   CLEAR_FOCUS,
+  CLEAR_FOCUS_BODY,
+  CLEAR_FOCUS_KEEP,
+  clearFocusTitle,
   DUE_NOW,
   type Focus,
   FOCUS_CERT,
@@ -24,6 +27,7 @@ import {
 
 import { styles, tones } from './common';
 import { Panel } from './rows';
+import { Sheet } from './sheet';
 import { Toggle } from './toggle';
 import { useStore } from '@/lib/store';
 import { radius, space } from '@/ui/tokens';
@@ -58,8 +62,33 @@ export function FocusCard(props: Props) {
   };
   const muted = { color: theme.colors.onSurfaceVariant };
 
+  const [clearing, setClearing] = useState(false);
+  const clear = (
+    <Sheet
+      visible={clearing}
+      onDismiss={() => setClearing(false)}
+      title={clearFocusTitle(props.label)}
+      note={CLEAR_FOCUS_BODY}
+      actions={
+        <>
+          <Button onPress={() => setClearing(false)}>{CLEAR_FOCUS_KEEP}</Button>
+          <Button
+            mode="contained"
+            onPress={() => {
+              setClearing(false);
+              props.onClear?.();
+            }}
+          >
+            {CLEAR_FOCUS}
+          </Button>
+        </>
+      }
+    />
+  );
+
   return (
     <Panel padded>
+      {clear}
       <View style={{ gap: space[2] }}>
         <View style={[styles.row, { gap: space[1] }]}>
           <MaterialCommunityIcons
@@ -79,7 +108,7 @@ export function FocusCard(props: Props) {
             <IconButton
               icon="close"
               size={20}
-              onPress={props.onClear}
+              onPress={() => setClearing(true)}
               accessibilityLabel={CLEAR_FOCUS}
               style={{ margin: space[0] }}
             />

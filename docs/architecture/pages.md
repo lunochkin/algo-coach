@@ -234,9 +234,10 @@ platforms.
   pages are destinations rather than acts, so each reads as a link, and the
   phone reaches them from its top bar.
 - **The home names the focus above Continue, with three presses**: clear the
-  focus, switch it between strict and relaxed, and raise today's limit. A
-  strict focus names the reviews waiting outside it, and a press serves them
-  as a review queue.
+  focus, switch it between strict and relaxed, and raise today's limit.
+  Clearing asks first, since aiming a focus again takes several presses on a
+  module's page, as archiving a module asks first. A strict focus names the
+  reviews waiting outside it, and a press serves them as a review queue.
 - **The home names a lesson ready to read and a certification ready for its
   exam**, each as a link above the focus. Each link is the next step the
   rules would take, and a reader who never opens the lessons still meets it.
