@@ -6,6 +6,7 @@ from test_seed_knowledge import CHOICE, OPEN, authored, rows
 from algo_coach.knowledge import diagrams as drawing
 from algo_coach.knowledge import read_module, seed_module
 from algo_coach.knowledge.diagrams import DrawError, MermaidCli, mermaid_sources, source_hash
+from algo_coach.knowledge.snapshot import snapshot
 from algo_coach.knowledge.table import diagrams, modules
 
 FLOW = "flowchart TB\n  a --> b"
@@ -111,3 +112,33 @@ def test_the_tool_names_its_install_where_it_is_missing(tmp_path, monkeypatch):
 
     with pytest.raises(DrawError, match="just diagrams-install"):
         MermaidCli().version()
+
+
+def test_the_snapshot_carries_each_live_source_s_drawings(database, tmp_path):
+    """A client finds a fence's drawing by its source, offline."""
+    seed_module(read_module(module(tmp_path)), root=database, drawer=Fake())
+
+    drawn = snapshot(database)["diagrams"]
+
+    assert drawn == {
+        FLOW: {"light": f"<svg>{FLOW} light</svg>", "dark": f"<svg>{FLOW} dark</svg>"},
+        TREE: {"light": f"<svg>{TREE} light</svg>", "dark": f"<svg>{TREE} dark</svg>"},
+    }
+
+
+def test_the_snapshot_leaves_out_a_drawing_no_live_content_holds(database, tmp_path):
+    """A source edited away keeps its row, which the phone downloads no more."""
+    seed_module(read_module(module(tmp_path)), root=database, drawer=Fake())
+    lesson = "# Names\n\n## Binding\n\nA name points.\n"
+    seed_module(
+        read_module(module(tmp_path / "again", lesson=lesson)), root=database, drawer=Fake()
+    )
+
+    assert list(snapshot(database)["diagrams"]) == [TREE]
+
+
+def test_a_snapshot_without_mermaid_holds_no_diagrams(database, tmp_path):
+    """The snapshot then equals learn's format 6."""
+    seed_module(read_module(authored(tmp_path)), root=database, drawer=Fake())
+
+    assert "diagrams" not in snapshot(database)

@@ -5,6 +5,7 @@ from typing import Any
 
 from sqlalchemy import Connection, select
 
+from algo_coach.knowledge.diagrams import diagram_of, drawings, fenced, whole
 from algo_coach.knowledge.table import lessons, modules, questions, subtopics, topics
 from algo_coach.storage import Database
 
@@ -37,7 +38,25 @@ def snapshot(root: Database) -> dict[str, Any]:
             select(modules).where(live).order_by(modules.c.position, modules.c.slug)
         )
         courses = [_course(conn, dict(row)) for row in held.mappings()]
-    return {"format": FORMAT, "rules": RULES, "courses": courses}
+        drawn = drawings(conn, _sources(courses))
+    snap: dict[str, Any] = {"format": FORMAT, "rules": RULES, "courses": courses}
+    if drawn:
+        # absent without Mermaid, so the snapshot equals learn's
+        snap["diagrams"] = drawn
+    return snap
+
+
+def _sources(courses: list[dict[str, Any]]) -> list[str]:
+    found = [
+        one
+        for course in courses
+        for text in course.get("lesson_bodies", {}).values()
+        for one in fenced(text)
+    ]
+    found += [
+        one for course in courses for raw in course["questions"] if (one := whole(diagram_of(raw)))
+    ]
+    return list(dict.fromkeys(found))
 
 
 def _course(conn: Connection, module: dict[str, Any]) -> dict[str, Any]:

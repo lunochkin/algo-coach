@@ -7,6 +7,7 @@ import { codeWraps, EXTERNAL_HINT, EXTERNAL_MARK, isExternal } from '@algo-coach
 
 import { withMath } from '@/lib/math';
 import { CodeBlock } from '@/ui/common';
+import { Diagram } from '@/ui/diagram';
 import { ProseTable } from '@/ui/table';
 import { font, space, textSize } from '@/ui/tokens';
 
@@ -34,6 +35,7 @@ const soft = (text: string | ReactNode[]) => (typeof text === 'string' ? text.re
 /** Code blocks in the app's monospace block, wrapped by the language the fence names. */
 export class CodeRenderer extends Renderer {
   code(text: string, language?: string, _container?: ViewStyle, _style?: TextStyle): ReactNode {
+    if (language === 'mermaid') return <Diagram key={this.getKey()} source={text.replace(/\n+$/, '')} />;
     return <CodeBlock key={this.getKey()} code={text} verbatim wrap={codeWraps(language)} flush />;
   }
 

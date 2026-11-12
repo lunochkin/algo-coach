@@ -780,6 +780,11 @@ difference it found. No row is marked `to fix` today.
   and a fence naming `text` or no language may be drawn in characters, and
   wrapping would break the drawing. A program's output is fenced `output`
   instead, so its long lines wrap as code does.
+- **A Mermaid diagram reads as the drawing the seed made, in the page's
+  scheme**, scaled to the reading width and never wider than drawn.
+  `knowledge.md` `## Diagrams` gives how it is drawn. A source with no drawing
+  reads as its text, which a diagram drawn on the device would replace only
+  after a second or more.
 - **A detail's diagram that is one markdown table alone reads as a table**,
   as a table in a lesson does. A table drawn in characters scrolls sideways on
   a phone, and the reader sees a third of its columns at a time.

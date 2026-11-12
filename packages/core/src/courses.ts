@@ -1,3 +1,4 @@
+import type { Drawing } from './diagram';
 import { DEFAULT_FSRS } from './fsrs';
 import { parseCerts, type CertRecord } from './certs';
 import { parseGraph, type Graph, type RawGraph } from './graph';
@@ -89,6 +90,7 @@ export interface Catalog {
   certExams?: CertRecord[]; // certificate exam results, by time
   courses: Course[]; // sorted by (order, slug)
   questions: Question[]; // curriculum file order: course, topic (by tier), sub
+  diagrams: Record<string, Drawing>; // each Mermaid source's drawing
 }
 
 export function loadSnapshot(snap: Snapshot): Catalog {
@@ -152,7 +154,7 @@ export function loadSnapshot(snap: Snapshot): Catalog {
     fsrs: (snap.format === 3 && snap.rules?.fsrs) || DEFAULT_RULES.fsrs,
     levels: { ...DEFAULT_RULES.levels, ...snap.rules?.levels },
   };
-  return { rules, courses: entries.map((e) => e.course), questions };
+  return { rules, courses: entries.map((e) => e.course), questions, diagrams: snap.diagrams ?? {} };
 }
 
 export function cmp(a: string, b: string): number {

@@ -117,6 +117,12 @@ describe('the detail', () => {
     expect(detailSections(q)[0]).toEqual({ title: 'Diagram', table: diagram });
   });
 
+  it('reads a diagram that is one Mermaid fence as the seed\'s drawing', () => {
+    const diagram = '```mermaid\nflowchart TB\n  a --> b\n```\n';
+    const q = { ...choice, detail: { mechanism: 'm', example: '', pitfalls: [], versions: '', diagram } };
+    expect(detailSections(q)[0]).toEqual({ title: 'Diagram', mermaid: 'flowchart TB\n  a --> b' });
+  });
+
   it('keeps a drawing whose lines open with a bar as monospace', () => {
     const diagram = '│ a │ b │\n├───┼───┤\n│ 1 │ 2 │';
     const q = { ...choice, detail: { mechanism: 'm', example: '', pitfalls: [], versions: '', diagram } };

@@ -1,3 +1,4 @@
+import type { Drawing } from './diagram';
 import type { Certs, RawCerts } from './certs';
 import type { Graph, RawGraph } from './graph';
 
@@ -89,6 +90,7 @@ export interface Snapshot {
     lesson_bodies?: Record<string, string>; // format 5
     certs?: RawCerts; // format 6
   }[];
+  diagrams?: Record<string, Drawing>; // the engine's own, beside format 6
 }
 
 export interface Topic {

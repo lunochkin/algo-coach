@@ -73,6 +73,7 @@ import { useStore, type ExamSession, type QueueSession } from '@/lib/store';
 import { Heading, PickPanel, PickRow } from '@/ui/rows';
 import { BottomBar, CodeBlock, fromCopy, Loaded, Press, ScreenHeader, styles } from '@/ui/common';
 import { KeyPad, PAD_HEIGHT } from '@/ui/keys';
+import { Diagram } from '@/ui/diagram';
 import { Markdown } from '@/ui/markdown';
 import { font, palette, radius, space } from '@/ui/tokens';
 
@@ -697,7 +698,9 @@ function Details({ r }: { r: Result }) {
       ) : null}
       {sections.map((x) => (
         <Section key={x.title} title={x.title}>
-          {'table' in x ? (
+          {'mermaid' in x ? (
+            <Diagram source={x.mermaid} />
+          ) : 'table' in x ? (
             <Markdown>{x.table}</Markdown>
           ) : 'code' in x ? (
             <CodeBlock code={x.code} verbatim wrap={x.wrap} />

@@ -16,6 +16,7 @@ export * from './queue';
 export * from './detail';
 export * from './code';
 export * from './table';
+export * from './diagram';
 export * from './graph';
 export * from './layout';
 export * from './lessontext';

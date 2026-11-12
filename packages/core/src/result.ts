@@ -2,6 +2,7 @@ import { LETTERS } from './courses';
 import { headings } from './lessontext';
 import type { CardFields } from './records';
 import { answerKey, block } from './reply';
+import { mermaidSource } from './diagram';
 import { isTable } from './table';
 import type { Course, Grade, Question } from './types';
 
@@ -104,11 +105,13 @@ export function yourAnswer(r: Result): YourAnswer {
 
 /**
  * One section of a question's detail. Code reads in monospace, and a diagram
- * never wraps, but a diagram that is a markdown table reads as one.
+ * never wraps, but a diagram that is a markdown table reads as one, and a
+ * Mermaid source reads as the seed's drawing.
  */
 export type DetailSection =
   | { title: 'Diagram' | 'Example'; code: string; wrap: boolean }
   | { title: 'Diagram'; table: string }
+  | { title: 'Diagram'; mermaid: string }
   | { title: 'How it works' | 'Versions'; text: string }
   | { title: 'Pitfalls'; items: string[] };
 
@@ -117,7 +120,9 @@ export function detailSections(q: Question): DetailSection[] {
   const d = q.detail;
   if (!d) return [];
   const out: DetailSection[] = [];
-  if (d.diagram)
+  const mermaid = d.diagram ? mermaidSource(d.diagram) : null;
+  if (mermaid) out.push({ title: 'Diagram', mermaid });
+  else if (d.diagram)
     out.push(isTable(d.diagram) ? { title: 'Diagram', table: d.diagram } : { title: 'Diagram', code: d.diagram, wrap: false });
   if (d.mechanism) out.push({ title: 'How it works', text: block(d.mechanism) });
   if (d.example) out.push({ title: 'Example', code: d.example, wrap: true });

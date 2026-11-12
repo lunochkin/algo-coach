@@ -33,6 +33,7 @@ import {
 
 import { Link } from 'react-router'
 
+import { Diagram } from '@/components/Diagram'
 import { Markdown } from '@/components/Markdown'
 import { SectionHeading } from '@/components/SectionHeading'
 import { PlainCode, PythonCode } from '@/components/PythonCode'
@@ -310,7 +311,9 @@ export function Details({
       )}
       {sections.map((x) => (
         <Section key={x.title} title={x.title}>
-          {'table' in x ? (
+          {'mermaid' in x ? (
+            <Diagram source={x.mermaid} />
+          ) : 'table' in x ? (
             <Markdown>{x.table}</Markdown>
           ) : 'code' in x ? (
             <PlainCode wrap={x.wrap}>{x.code}</PlainCode>

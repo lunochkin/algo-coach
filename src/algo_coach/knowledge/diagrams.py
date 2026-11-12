@@ -6,7 +6,7 @@ import re
 import subprocess
 from datetime import UTC, datetime
 from pathlib import Path
-from typing import Protocol, cast
+from typing import Any, Protocol, cast
 
 from sqlalchemy import Connection, select
 from sqlalchemy.dialects.postgresql import insert
@@ -37,19 +37,39 @@ def source_hash(source: str) -> str:
     return hashlib.sha256(source.encode()).hexdigest()
 
 
+def fenced(text: str) -> list[str]:
+    """A lesson's fenced sources, without the last newline a client drops."""
+    return [m[1].rstrip("\n") for m in FENCE.finditer(text)]
+
+
+def whole(diagram: object) -> str | None:
+    """A question's diagram as a source, where one fence is all it holds."""
+    m = WHOLE.match(diagram) if isinstance(diagram, str) else None
+    return m[1].rstrip("\n") if m else None
+
+
+def diagram_of(raw: dict[str, Any]) -> object:
+    detail: object = raw.get("detail")
+    return cast(dict[str, object], detail).get("diagram") if isinstance(detail, dict) else None
+
+
 def mermaid_sources(module: ModuleSource) -> list[str]:
-    """Every source a lesson fences or a question's diagram holds, each once,
-    without the newline ending its last line: a client's parser drops it."""
-    found = [m[1] for text in module.lesson_texts.values() for m in FENCE.finditer(text)]
-    for bank in module.banks:
-        for raw in bank.questions:
-            detail: object = raw.get("detail")
-            diagram: object = (
-                cast(dict[str, object], detail).get("diagram") if isinstance(detail, dict) else None
-            )
-            if isinstance(diagram, str) and (m := WHOLE.match(diagram)):
-                found.append(m[1])
-    return list(dict.fromkeys(one.rstrip("\n") for one in found))
+    """Every source the module's lessons and questions hold, each once."""
+    found = [one for text in module.lesson_texts.values() for one in fenced(text)]
+    found += [
+        one for bank in module.banks for raw in bank.questions if (one := whole(diagram_of(raw)))
+    ]
+    return list(dict.fromkeys(found))
+
+
+def drawings(conn: Connection, sources: list[str]) -> dict[str, dict[str, str]]:
+    """Each drawn source's light and dark SVG, for the snapshot."""
+    held = conn.execute(
+        select(diagrams.c.source, diagrams.c.light, diagrams.c.dark).where(
+            diagrams.c.source_hash.in_([source_hash(one) for one in sources])
+        )
+    )
+    return {row.source: {"light": row.light, "dark": row.dark} for row in held}
 
 
 class MermaidCli:

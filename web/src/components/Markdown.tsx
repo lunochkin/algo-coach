@@ -7,6 +7,7 @@ import type { Components } from 'react-markdown'
 import { Children, isValidElement, type ReactNode } from 'react'
 import { codeWraps, EXTERNAL_HINT, EXTERNAL_MARK, isExternal, tableShape } from '@algo-coach/core'
 
+import { Diagram } from '@/components/Diagram'
 import { WrappedText } from '@/components/PythonCode'
 import { useColumns } from '@/lib/columns'
 
@@ -50,6 +51,7 @@ export const CodeFence: Components['pre'] = ({ node, children }) => {
     .map(String)
     .find((x) => x.startsWith('language-'))
     ?.slice('language-'.length)
+  if (code && lang === 'mermaid') return <Diagram source={textOf(code).replace(/\n+$/, '')} />
   if (!code || !codeWraps(lang)) return <pre>{children}</pre>
   return (
     <pre className="whitespace-pre">

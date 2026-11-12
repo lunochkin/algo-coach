@@ -588,7 +588,7 @@ items below.
       installing it
 - [x] Add the `diagrams` table, and draw in the seed every source not yet
       drawn
-- [ ] Carry `diagrams` in the snapshot, and draw a ` ```mermaid ` fence and a
+- [x] Carry `diagrams` in the snapshot, and draw a ` ```mermaid ` fence and a
       Mermaid `diagram` from it on both clients
 - [ ] Rewrite the diagram rule in `docs/authoring/modules.md`: a table is a
       markdown table, a structure is Mermaid, and a `text` block holds
