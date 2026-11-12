@@ -482,7 +482,7 @@ function Ask(props: {
     // Edge-to-edge Android no longer resizes the window for the keyboard; this keeps the input and bottom bar above it.
     <KeyboardAvoidingView behavior="padding" style={{ flex: 1 }}>
       <ScrollView
-        contentContainerStyle={[styles.page, { paddingBottom: bottom + 96 + (padOpen ? PAD_HEIGHT + 8 : 0) }]}
+        contentContainerStyle={[styles.page, { paddingBottom: bottom + 96 + (padOpen ? PAD_HEIGHT + 8 + space[4] : 0) }]}
         keyboardShouldPersistTaps="handled"
       >
         <Head q={q} tag={tag} early={early} />
@@ -550,7 +550,16 @@ function Ask(props: {
         {result ? <DetailsToggle r={result} open={details} onToggle={() => setDetails(!details)} /> : null}
       </ScrollView>
 
-      <BottomBar bottom={bottom} row above={padOpen ? <KeyPad onKey={onKey} /> : undefined}>
+      <BottomBar bottom={bottom} row above={
+          padOpen ? (
+            // a rule and a gap keep the space bar's thumb off Submit, the wide press under it
+            <View style={{ gap: space[2], paddingBottom: space[1] }}>
+              <KeyPad onKey={onKey} />
+              <Divider />
+            </View>
+          ) : undefined
+        }
+      >
         <Press
           style={{ flex: 1 }}
           disabled={!press.enabled}
