@@ -3,6 +3,7 @@ from sqlalchemy import (
     CheckConstraint,
     Column,
     ForeignKey,
+    ForeignKeyConstraint,
     Index,
     Integer,
     Table,
@@ -75,4 +76,24 @@ template_cases = Table(
     Column("args", JSONB(none_as_null=False), nullable=False),
     Column("expected", JSONB(none_as_null=False), nullable=False),
     CheckConstraint("jsonb_typeof(args) = 'array'", name="args_positional"),
+)
+
+
+# the card graph's edges, each on the requiring card: `content.md`. Slugs, as
+# the record names them. That the required template exists and is core spans
+# two cards, and stays the seed's check
+card_requirements = Table(
+    "card_requirements",
+    metadata,
+    Column("card_id", Text, ForeignKey("cards.id"), primary_key=True),
+    Column("position", Integer, primary_key=True),
+    Column("card", Text, ForeignKey("cards.slug"), nullable=False),  # the required card
+    Column("template", Text, nullable=False),
+    Column("used_by", Text, nullable=False),
+    ForeignKeyConstraint(
+        ["card_id", "used_by"],
+        ["card_templates.card_id", "card_templates.slug"],
+        name="card_requirements_used_by_fkey",
+    ),
+    UniqueConstraint("card_id", "card", "template", "used_by"),
 )

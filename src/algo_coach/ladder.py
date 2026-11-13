@@ -5,7 +5,7 @@ Starting a card is here too, since the start draws the probes the ladder is
 not allowed to hold.
 """
 
-from collections.abc import Iterable
+from collections.abc import Iterable, Set
 from datetime import datetime
 from enum import StrEnum
 
@@ -80,6 +80,21 @@ def card_state(started: bool, rungs: Iterable[Rung]) -> CardState:
     if required and all(rung.solved for rung in required):
         return CardState.CONSOLIDATING
     return CardState.ACQUIRING
+
+
+def met(run: CardRun | None, rungs: Iterable[Rung], attempts: Iterable[Attempt]) -> bool:
+    """Whether a required card is met: `log.md`, Locked cards."""
+    if run is None:
+        return False
+    if card_state(True, rungs) is not CardState.ACQUIRING:
+        return True
+    done = _solved(attempts, run.started_at)
+    return any(one.problem_id in done for one in run.probes)
+
+
+def unmet(card: Card, met: Set[str]) -> list[str]:
+    """The required cards not yet met, by slug: locked while one is left."""
+    return list(dict.fromkeys(one.card for one in card.requires if one.card not in met))
 
 
 def ladder(

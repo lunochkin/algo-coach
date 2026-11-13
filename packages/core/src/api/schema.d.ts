@@ -683,6 +683,8 @@ export interface components {
       /** Templates */
       templates: components['schemas']['Template'][];
       selector: components['schemas']['Selector'];
+      /** Requires */
+      requires?: components['schemas']['Requirement'][];
     };
     /** CardRun */
     CardRun: {
@@ -895,6 +897,8 @@ export interface components {
       /** Templates */
       templates: components['schemas']['Template'][];
       selector: components['schemas']['Selector'];
+      /** Requires */
+      requires?: components['schemas']['Requirement'][];
       /** Family */
       family: string;
       status: components['schemas']['CardStatus'];
@@ -1135,6 +1139,18 @@ export interface components {
        * @default []
        */
       hints: components['schemas']['Hint'][];
+    };
+    /**
+     * Requirement
+     * @description One edge of the card graph: `content.md` gives what it asserts.
+     */
+    Requirement: {
+      /** Card */
+      card: string;
+      /** Template */
+      template: string;
+      /** Used By */
+      used_by: string;
     };
     /**
      * RetirementReason

@@ -3,7 +3,7 @@ from typing import Any
 from sqlalchemy import ColumnElement, Connection, delete, select, update
 from sqlalchemy.dialects.postgresql import insert
 
-from algo_coach.cards.table import card_templates, cards, template_cases
+from algo_coach.cards.table import card_requirements, card_templates, cards, template_cases
 from algo_coach.schema import Card, Template
 from algo_coach.storage import Database
 
@@ -16,16 +16,36 @@ class CardStore:
         self.root = root
 
     def put(self, record: Card) -> None:
-        values = record.model_dump(exclude={"templates", "selector"}) | {
-            f"selector_{name}": value for name, value in record.selector.model_dump().items()
-        }
+        self.put_all([record])
+
+    def put_all(self, records: list[Card]) -> None:
+        """One transaction, the edges last: a card may require another card the
+        same batch adds."""
         with self.root.begin() as conn:
+            # cleared first, so no edge holds a template a re-seed removes
             conn.execute(
-                insert(cards)
-                .values(values)
-                .on_conflict_do_update(index_elements=["id"], set_=values)
+                delete(card_requirements).where(
+                    card_requirements.c.card_id.in_([one.id for one in records])
+                )
             )
-            self._templates(conn, record)
+            for record in records:
+                values = record.model_dump(exclude={"templates", "selector", "requires"}) | {
+                    f"selector_{name}": value
+                    for name, value in record.selector.model_dump().items()
+                }
+                conn.execute(
+                    insert(cards)
+                    .values(values)
+                    .on_conflict_do_update(index_elements=["id"], set_=values)
+                )
+                self._templates(conn, record)
+            for record in records:
+                for position, one in enumerate(record.requires):
+                    conn.execute(
+                        insert(card_requirements).values(
+                            card_id=record.id, position=position, **one.model_dump()
+                        )
+                    )
 
     def get(self, id: str) -> Card | None:
         found = self._read(cards.c.id == id)
@@ -98,6 +118,16 @@ class CardStore:
                 )
                 .order_by(template_cases.c.position)
             ).mappings()
+            edges = conn.execute(
+                select(card_requirements)
+                .where(card_requirements.c.card_id.in_(ids))
+                .order_by(card_requirements.c.position)
+            ).mappings()
+            requires: dict[str, list[dict[str, Any]]] = {id: [] for id in ids}
+            for edge in edges:
+                requires[edge["card_id"]].append(
+                    {"card": edge["card"], "template": edge["template"], "used_by": edge["used_by"]}
+                )
             by_template = {one["id"]: one["cases"] for group in templates.values() for one in group}
             for case in authored:
                 by_template[case["template_id"]].append(
@@ -113,6 +143,7 @@ class CardStore:
                         "size": row["selector_size"],
                     },
                     "templates": templates[row["id"]],
+                    "requires": requires[row["id"]],
                 }
             )
             for row in rows

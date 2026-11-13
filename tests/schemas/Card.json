@@ -9,6 +9,33 @@
       "title": "ProblemDifficulty",
       "type": "string"
     },
+    "Requirement": {
+      "description": "One edge of the card graph: `content.md` gives what it asserts.",
+      "properties": {
+        "card": {
+          "pattern": "^[a-z0-9][a-z0-9-]*$",
+          "title": "Card",
+          "type": "string"
+        },
+        "template": {
+          "pattern": "^[a-z0-9][a-z0-9-]*$",
+          "title": "Template",
+          "type": "string"
+        },
+        "used_by": {
+          "pattern": "^[a-z0-9][a-z0-9-]*$",
+          "title": "Used By",
+          "type": "string"
+        }
+      },
+      "required": [
+        "card",
+        "template",
+        "used_by"
+      ],
+      "title": "Requirement",
+      "type": "object"
+    },
     "Selector": {
       "description": "What a ladder resolves from. Named fields rather than a filter map, so\na new filter is an additive optional field.",
       "properties": {
@@ -147,6 +174,13 @@
     "id": {
       "title": "Id",
       "type": "string"
+    },
+    "requires": {
+      "items": {
+        "$ref": "#/$defs/Requirement"
+      },
+      "title": "Requires",
+      "type": "array"
     },
     "selector": {
       "$ref": "#/$defs/Selector"

@@ -609,6 +609,9 @@ start, and the probes are drawn at it.
 - **The ladder is shown before a run opens.** The ladder names the problems
   studying this card will have the user solve, and the user decides the start on
   that list. Progress against the ladder is shown once a run measures it.
+- **A locked card does not start.** The card reads in full, and the press
+  starting the run names the required cards not yet met. `log.md` gives when a
+  card is locked and how a user who holds the forms meets a required card.
 - **A card with a gap still starts.** A core template no solution displays is
   reported on the card, as `content.md` requires, and the rungs the ladder does
   hold are still worth solving. Refusing the start would leave the user waiting

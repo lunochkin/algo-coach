@@ -58,6 +58,9 @@ those steps at low fidelity.
   keeps its run open and is not in progress, since a graduated card is done.
   Each card in progress reads as its row on the cards list does, and opens the
   card.
+- **The board then names the unlocked cards not yet started**, by depth, the
+  shallowest first. A user with nothing in progress then reads the next study
+  the card graph offers, rather than a list of every technique.
 - **The board is the overview of the user's practice.** It reads the
   knowledge study first: the focus, Continue and the modules. The cards in
   progress and the techniques follow. A user reads every study they declared
@@ -655,19 +658,22 @@ difference it found. No row is marked `to fix` today.
   techniques, a technique's problems and the cards are each such a list. A
   table spreads one pick over four columns, and the reader then joins the
   columns back together to judge the pick.
-- **The cards list groups cards by the technique each is a kind of.** A card
-  on `knapsack` sits under the `dynamic-programming` heading and names its own
-  technique on its row. A reader looking for DP then finds every DP card in
-  one place.
+- **The cards list reads the card graph by depth.** The roots come first, and
+  each depth is a section under its own heading. A row names its card's
+  technique, its card state, and the required cards a locked card waits on. A
+  reader then sees where to start and what each card opens.
+- **The web draws the edges between the rows, and the phone names them on
+  each row.** A drawn graph needs a page's width, and the phone's screen holds
+  one column. The two clients read the same depths, the same rows and the
+  same locks, as `## The two clients` requires.
 - **A list split into sections reads each section under a plain heading with
   its count, above a bordered panel of rows.** The board and the cards list
   split their lists the same way, so a reader learns one shape.
 - **One record reads as one row wherever it is listed.** A card in progress on
   the board is the same row as on the cards list, so a reader never learns a
   second shape for it.
-- **A panel's header strip names a record, and opens it.** A family on the
-  cards list opens its technique. A strip that named a record and opened
-  nothing would be a dead end.
+- **A panel's header strip names a record, and opens it.** A strip that named
+  a record and opened nothing would be a dead end.
 - **A row's counts read as one cluster at its right**, each count beside the
   word it counts. A row with nothing counted says so in one word, since three
   counts of nothing say less than `never` does.

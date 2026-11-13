@@ -1624,6 +1624,13 @@
           },
           "selector": {
             "$ref": "#/components/schemas/Selector"
+          },
+          "requires": {
+            "items": {
+              "$ref": "#/components/schemas/Requirement"
+            },
+            "type": "array",
+            "title": "Requires"
           }
         },
         "type": "object",
@@ -2178,6 +2185,13 @@
           },
           "selector": {
             "$ref": "#/components/schemas/Selector"
+          },
+          "requires": {
+            "items": {
+              "$ref": "#/components/schemas/Requirement"
+            },
+            "type": "array",
+            "title": "Requires"
           },
           "family": {
             "type": "string",
@@ -2801,6 +2815,33 @@
         ],
         "title": "Reproduction",
         "description": "What the trainer sends: the form as typed, and the hints taken before\nit ran."
+      },
+      "Requirement": {
+        "properties": {
+          "card": {
+            "type": "string",
+            "pattern": "^[a-z0-9][a-z0-9-]*$",
+            "title": "Card"
+          },
+          "template": {
+            "type": "string",
+            "pattern": "^[a-z0-9][a-z0-9-]*$",
+            "title": "Template"
+          },
+          "used_by": {
+            "type": "string",
+            "pattern": "^[a-z0-9][a-z0-9-]*$",
+            "title": "Used By"
+          }
+        },
+        "type": "object",
+        "required": [
+          "card",
+          "template",
+          "used_by"
+        ],
+        "title": "Requirement",
+        "description": "One edge of the card graph: `content.md` gives what it asserts."
       },
       "RetirementReason": {
         "type": "string",

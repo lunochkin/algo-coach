@@ -57,11 +57,37 @@ labelled easy, where the platforms call it hard.
       generator writes for. A sweep cannot fill the easy rungs while the
       generator picks the level itself
 - [x] Rate by hand every served problem the list found mislabelled
-- [ ] Run sweeps until every technique of the nine cards serves at least two
-      easy and three medium problems, counting easy only where `corpus.md`
-      admits one. Easy problems on one template differ little from each other
+- [ ] Run sweeps until every card's ladder is full at its selector's
+      difficulty: easy on a root card, medium or hard on the rest. A card
+      deeper than a root serves an easy problem only where `corpus.md` admits
+      one
 - [ ] Read each served problem's difficulty against the author's own sittings
       on it, and list where the two disagree
+
+### The card graph
+
+The nine cards teach forms past the basics, so the easy problems have no card
+to sit on, and a new user has no place to start. `content.md` gives the card
+graph, and `log.md` gives when a card is locked.
+
+- [x] Write the card graph into `content.md`, locked and met into `log.md`,
+      and the graph's reading into `pages.md`
+- [x] Add `requires` to `CardSeed` and a child table of requirements, with
+      the snapshot. The seed refuses a cycle, an unknown slug and an optional
+      template
+- [x] Derive each card's depth, and whether it is locked and met for a user,
+      with a test per rule in `log.md` `## Locked cards`
+- [ ] Refuse a locked card's run in the API, and name the unmet required
+      cards on the press, on both clients
+- [ ] Write each requirement between the nine cards into `content/cards/`
+- [ ] Author the root cards with `card-author`, one at a time: hashing, two
+      pointers, prefix sum, sorting, stack and queue, linked list, tree
+      traversal, breadth-first search and depth-first search. Each is a root
+      or requires another root
+- [ ] Author the middle cards: heap, binary search tree, greedy and intervals
+- [ ] Redraw the `/cards` wireframe by depth, then build it: the web draws
+      the edges, and the phone names the required cards on each row
+- [ ] Name the unlocked cards not yet started on the board, by depth
 
 ### The algorithms module
 

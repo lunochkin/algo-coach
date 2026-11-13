@@ -1,8 +1,9 @@
-from collections.abc import Iterable, Mapping
+from collections.abc import Iterable, Iterator, Mapping
 from typing import Any
 
 from pydantic import BaseModel, ValidationError
 
+from algo_coach.cards.graph import broken
 from algo_coach.cards.store import CardStore
 from algo_coach.ids import new_id
 from algo_coach.schema import Card, CardSeed, Template
@@ -35,6 +36,7 @@ def seed_cards(records: Iterable[Mapping[str, Any]], *, store: CardStore) -> Car
     slug is the idempotency key at both levels, and rejection is per record.
     """
     result = CardSeedResult()
+    accepted: dict[str, tuple[int, CardSeed]] = {}
 
     for index, raw in enumerate(records):
         try:
@@ -51,22 +53,56 @@ def seed_cards(records: Iterable[Mapping[str, Any]], *, store: CardStore) -> Car
                 Rejected(index=index, reason=f"unknown technique code(s): {', '.join(unknown)}")
             )
             continue
+        if seed.slug in accepted:
+            result.rejected.append(Rejected(index=index, reason=f"seeded twice: {seed.slug}"))
+            continue
+        accepted[seed.slug] = (index, seed)
 
-        existing = store.by_slug(seed.slug)
-        minted = {template.slug: template.id for template in existing.templates} if existing else {}
-        card = Card(
-            **seed.model_dump(exclude={"templates"}),
-            id=existing.id if existing else new_id(),
-            templates=[
-                Template(**template.model_dump(), id=minted.get(template.slug) or new_id())
-                for template in seed.templates
-            ],
+    stored = {card.slug: card for card in store.all()}
+    for slug, why in refused(stored, {slug: seed for slug, (_, seed) in accepted.items()}):
+        result.rejected.append(Rejected(index=accepted.pop(slug)[0], reason=why))
+    result.rejected.sort(key=lambda one: one.index)
+
+    minted: list[Card] = []
+    for _, seed in accepted.values():
+        existing = stored.get(seed.slug)
+        ids = {template.slug: template.id for template in existing.templates} if existing else {}
+        minted.append(
+            Card(
+                **seed.model_dump(exclude={"templates"}),
+                id=existing.id if existing else new_id(),
+                templates=[
+                    Template(**template.model_dump(), id=ids.get(template.slug) or new_id())
+                    for template in seed.templates
+                ],
+            )
         )
-
-        store.put(card)
         if existing:
             result.updated += 1
         else:
             result.ingested += 1
+    store.put_all(minted)
 
     return result
+
+
+def refused(stored: Mapping[str, Card], seeds: Mapping[str, CardSeed]) -> Iterator[tuple[str, str]]:
+    """The seeds the card graph refuses, each with why. A refused seed leaves
+    its stored card standing, so the graph is checked again without it."""
+    left = dict(seeds)
+    while True:
+        graph: dict[str, Card | CardSeed] = {**stored, **left}
+        blamed: dict[str, str] = {}
+        for slug, why in broken(graph).items():
+            if slug in left:
+                blamed[slug] = why
+                continue
+            # a stored card the batch broke: the seed it requires is refused
+            for one in graph[slug].requires:
+                if one.card in left:
+                    blamed.setdefault(one.card, f"{slug} requires {one.card}/{one.template}")
+        if not blamed:
+            return
+        for slug, why in blamed.items():
+            del left[slug]
+            yield slug, why

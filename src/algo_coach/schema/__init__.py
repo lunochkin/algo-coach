@@ -8,7 +8,14 @@ from algo_coach.schema.attempt import (
 )
 from algo_coach.schema.authored import CertificationSettings, GraphSettings
 from algo_coach.schema.call import Call
-from algo_coach.schema.card import Card, Selector, Template, TemplateCase, TemplateKind
+from algo_coach.schema.card import (
+    Card,
+    Requirement,
+    Selector,
+    Template,
+    TemplateCase,
+    TemplateKind,
+)
 from algo_coach.schema.card_run import CardRun, Probe
 from algo_coach.schema.case import (
     CaseOutcome,
@@ -117,6 +124,7 @@ __all__ = [
     "Question",
     "QuestionFormat",
     "RecallAttempt",
+    "Requirement",
     "RetirementReason",
     "Selector",
     "SelfLabel",

@@ -3,11 +3,13 @@
 from pydantic import BaseModel, Field, model_validator
 
 from algo_coach.schema.card import (
+    Requirement,
     Selector,
     Slug,
     TemplateCase,
     TemplateKind,
     optional_budget,
+    requirements_are_well_formed,
     unique_slugs,
 )
 
@@ -37,9 +39,12 @@ class CardSeed(BaseModel):
     brief: str = Field(min_length=1)
     templates: list[TemplateSeed] = Field(min_length=1)
     selector: Selector
+    requires: list[Requirement] = Field(default_factory=list[Requirement])
 
     @model_validator(mode="after")
     def _templates_are_well_formed(self) -> CardSeed:
-        unique_slugs([template.slug for template in self.templates])
+        slugs = [template.slug for template in self.templates]
+        unique_slugs(slugs)
         optional_budget([template.optional for template in self.templates])
+        requirements_are_well_formed(self.slug, slugs, self.requires)
         return self

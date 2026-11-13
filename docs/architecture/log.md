@@ -464,6 +464,36 @@ Deferred, since only use answers each:
   core template being a gap.
 - A core template added by a re-seed to a card that already graduated.
 
+## Locked cards
+
+A card is locked for a user until every card it requires is met by that
+user. `content.md` gives the card graph the rule reads.
+
+- **A required card is met when its ladder was solved, or a probe of its run
+  was solved since the run began.** The ladder shows the form was reached with
+  the card in view. A solved probe shows a user who already held the form, who
+  then skips the ladder rather than repeating study the user does not need.
+- **A met card stays met through graduation and a lapse.** A lapse offers the
+  lapsed card again and locks nothing above the lapsed card, since the forms
+  above the lapsed card were studied and stay studied.
+- **Met does not wait for graduation.** Graduation waits for a spacing gap
+  after the ladder, and a path gated on graduation would stall for days at
+  every edge.
+- **Locked and met are derived on every read, never stored.** Each is a fold
+  over the card runs, the attempts and the current graph. An edited graph then
+  moves no record and loses no progress.
+- **A locked card's run does not start.** A user who holds the forms below the
+  locked card starts each required card and solves its probe, which meets the
+  required card at the cost of one problem.
+
+Deferred, since only use answers each:
+
+- Whether a locked card starts on an explicit press that names the cards it
+  skips. A user holding many forms pays one probe per required card first.
+- Whether a card stays met once a re-derived ladder returns it to acquiring.
+  Met reads the ladder as it stands, and the ladder at an earlier read is not
+  kept.
+
 ## Recall attempts
 
 One template reproduced from memory, and how it went.

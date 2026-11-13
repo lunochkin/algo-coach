@@ -41,6 +41,29 @@ def unique_slugs(slugs: list[str]) -> None:
         raise ValueError("template slugs are unique within a card")
 
 
+class Requirement(BaseModel):
+    """One edge of the card graph: `content.md` gives what it asserts."""
+
+    model_config = ConfigDict(frozen=True)
+
+    card: Slug  # the required card
+    template: Slug  # a core template of the required card
+    used_by: Slug  # the template on this card using that form
+
+
+def requirements_are_well_formed(
+    slug: str, templates: list[str], requires: list[Requirement]
+) -> None:
+    """Refuses what one card alone shows wrong: the rest needs the graph."""
+    if any(one.card == slug for one in requires):
+        raise ValueError("a card does not require itself")
+    if len({(one.card, one.template, one.used_by) for one in requires}) != len(requires):
+        raise ValueError("a requirement is named once")
+    unknown = sorted({one.used_by for one in requires} - set(templates))
+    if unknown:
+        raise ValueError(f"used_by names no template of this card: {', '.join(unknown)}")
+
+
 class TemplateCase(BaseModel):
     """One case a reproduced form is checked against. The arguments are
     positional, and `solve` is the function they call."""
@@ -87,9 +110,12 @@ class Card(BaseModel):
     brief: str = Field(min_length=1)  # markdown; what to read before solving
     templates: list[Template] = Field(min_length=1)
     selector: Selector
+    requires: list[Requirement] = Field(default_factory=list[Requirement])  # empty on a root
 
     @model_validator(mode="after")
     def _templates_are_well_formed(self) -> Card:
-        unique_slugs([template.slug for template in self.templates])
+        slugs = [template.slug for template in self.templates]
+        unique_slugs(slugs)
         optional_budget([template.optional for template in self.templates])
+        requirements_are_well_formed(self.slug, slugs, self.requires)
         return self

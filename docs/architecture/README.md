@@ -54,6 +54,17 @@ without redefining them. Grouped by the file that specifies the record.
 - **Rung**: one problem on a ladder. Required when it covers a core template.
 - **Probe**: a problem assigned when a card is started, testing whether the
   form is recognised unprompted. Never drawn from the ladder.
+- **Card graph**: the cards as a directed acyclic graph, each edge from a card
+  to a card it requires. Orders study, and gates card runs alone.
+- **Requirement**: an edge of the card graph, authored on the requiring card.
+  It names the required card, a core template there, and the template here
+  that uses that form.
+- **Root card**: a card requiring no other card.
+- **Depth**: the longest chain of requirements below a card. Zero on a root.
+- **Met**: a required card whose ladder the user solved, or one of whose
+  run's probes the user solved. Never stored.
+- **Locked**: a card some required card of which the user has not met. Its
+  run does not start.
 - **Template match**: a record saying one solution displays one template.
   Written by the generator, the matcher or by hand.
 - **Matcher**: the model call reading a canonical beside its statement and

@@ -235,3 +235,117 @@ def test_the_authored_cards_seed(database):
     assert result.rejected == []
     assert result.ingested == len(list(CONTENT.glob("*.json")))
     assert all(card.templates for card in store.all())
+
+
+def edge(card: str = "union-find", template: str = "dsu-core", used_by: str = "kruskal-mst"):
+    return {"card": card, "template": template, "used_by": used_by}
+
+
+def dsu(**overrides) -> dict:
+    return (
+        record("union-find", technique="union-find", templates=[template("dsu-core")]) | overrides
+    )
+
+
+def kruskal(*requires: dict, **overrides) -> dict:
+    return (
+        record(
+            "minimum-tree",
+            technique="union-find",
+            templates=[template("kruskal-mst")],
+            requires=list(requires),
+        )
+        | overrides
+    )
+
+
+def test_a_requirement_reaches_the_stored_card(database):
+    """The required card may come later in the batch: the edges are written
+    after every card."""
+    store = CardStore(database)
+
+    result = seed_cards([kruskal(edge()), dsu()], store=store)
+
+    assert result.rejected == []
+    card = store.by_slug("minimum-tree")
+    assert card is not None
+    assert [one.model_dump() for one in card.requires] == [edge()]
+
+
+def test_a_requirement_on_an_unknown_card_is_refused(database):
+    result = seed_cards([kruskal(edge())], store=CardStore(database))
+
+    assert [one.reason for one in result.rejected] == ["requires an unknown card: union-find"]
+
+
+def test_a_requirement_on_an_unknown_template_is_refused(database):
+    result = seed_cards([dsu(), kruskal(edge(template="dsu-rank"))], store=CardStore(database))
+
+    assert [one.index for one in result.rejected] == [1]
+    assert "unknown template" in result.rejected[0].reason
+
+
+def test_a_requirement_on_an_optional_template_is_refused(database):
+    """The required card's study set leaves the optional form out, so a card
+    requiring it would wait on a form nobody is asked for."""
+    stretch = dsu(templates=[template("dsu-core", optional=True), template("dsu-plain")])
+
+    result = seed_cards([stretch, kruskal(edge())], store=CardStore(database))
+
+    assert [one.index for one in result.rejected] == [1]
+    assert "optional template" in result.rejected[0].reason
+
+
+def test_a_cycle_refuses_every_card_on_it(database):
+    """A cycle locks each of its cards for every user."""
+    looped = dsu(requires=[edge("minimum-tree", "kruskal-mst", "dsu-core")])
+
+    result = seed_cards([looped, kruskal(edge())], store=CardStore(database))
+
+    assert [one.reason for one in result.rejected] == ["on a cycle of requirements"] * 2
+
+
+def test_used_by_names_a_template_of_the_requiring_card(database):
+    result = seed_cards([dsu(), kruskal(edge(used_by="prim"))], store=CardStore(database))
+
+    assert "used_by names no template" in result.rejected[0].reason
+
+
+def test_a_refused_card_refuses_the_cards_requiring_it(database):
+    """A refused new card is in no graph, so an edge onto it names nothing."""
+    looped = dsu(requires=[edge("union-find", "dsu-core", "dsu-core")])
+
+    result = seed_cards([looped, kruskal(edge())], store=CardStore(database))
+
+    assert [one.index for one in result.rejected] == [0, 1]
+
+
+def test_a_reseed_dropping_a_required_template_is_refused(database):
+    """The stored card requiring that template is not in the batch, so the seed
+    breaking it is the one refused, and the stored card stands."""
+    store = CardStore(database)
+    seed_cards([dsu(), kruskal(edge())], store=store)
+
+    result = seed_cards([dsu(templates=[template("dsu-rank")])], store=store)
+
+    assert result.rejected[0].reason == "minimum-tree requires union-find/dsu-core"
+    card = store.by_slug("union-find")
+    assert card is not None
+    assert [one.slug for one in card.templates] == ["dsu-core"]
+
+
+def test_a_reseed_replaces_the_edges(database):
+    store = CardStore(database)
+    seed_cards([dsu(), kruskal(edge())], store=store)
+
+    seed_cards([kruskal()], store=store)
+
+    card = store.by_slug("minimum-tree")
+    assert card is not None
+    assert card.requires == []
+
+
+def test_a_slug_seeded_twice_in_one_batch_is_refused(database):
+    result = seed_cards([dsu(), dsu()], store=CardStore(database))
+
+    assert [(one.index, one.reason) for one in result.rejected] == [(1, "seeded twice: union-find")]

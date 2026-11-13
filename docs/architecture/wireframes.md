@@ -356,8 +356,8 @@ problem's path reads as its record, as "Every problem" gives.
 
 - The page is the user's dashboard of cards. The cards with a run open read
   first, under "Studying", the most recently active first. The rest read under
-  "Not started", grouped by family as before. A family's header strip opens
-  its technique.
+  "Not started", by depth in the card graph, as `pages.md` gives. The drawing
+  above still groups them by family, and is redrawn with the graph's page.
 - A started card's row reads its progress: when the run began, the ladder's
   solved rungs, the required rungs among them, and when the card was last
   active. The trigger gives way to that line, since the user already chose the
