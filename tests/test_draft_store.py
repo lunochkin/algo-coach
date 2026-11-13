@@ -149,3 +149,15 @@ def test_a_revised_draft_holds_only_its_latest_cases(database):
     store.put(make_draft(cases=[settled([[3]], 3)]))
 
     assert [one.args for one in store.get("w1").cases] == [[[3]]]
+
+
+def test_a_declared_string_answer_reads_back(database):
+    """The generator sends an answer as JSON text, and a string answer must
+    not be decoded a second time when the draft is read back."""
+    store = DraftStore(database)
+    draft = make_draft(
+        declared=[{"args": '[["ab"]]', "expected": '"ba"'}, {"args": "[[]]", "expected": '""'}]
+    )
+    store.put(draft)
+
+    assert store.get("w1") == draft
