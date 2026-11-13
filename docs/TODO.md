@@ -19,8 +19,30 @@ from the second block on.
 
 ### The Python module, finished
 
+`python` is rewritten as `py`, by concept, and replaced by it once `py` covers
+it. `docs/authoring/concepts.md` gives the order and the stages.
+
 - [ ] Close the open findings of the content repository's review of the Python
       module, as its `PLAN.md` gives, and seed the result
+- [x] Write the order of authoring by concept into `docs/authoring/concepts.md`,
+      and the brief of each stage into the `concept-author` skill
+- [x] Check a module written by concept: rules 26 to 29, misconception ids,
+      names shared with a section, and every refusal the seed makes
+- [x] Write `py`'s `core/control-flow`, levels 0 and 1, through the three
+      stages, and seed it with nothing refused: 61 questions
+- [x] Write `py`'s `core/functions`, levels 0 and 1, by the skill alone, and
+      seed it with nothing refused: 48 questions
+- [x] Render inline code in a question's text on the phone and the web
+- [ ] Practise `core/functions` on the phone, and fix what reading it there
+      shows
+- [ ] Write `py`'s remaining subtopics by the skill, one at a time, until `py`
+      covers every subtopic `python` holds
+- [ ] Run each lesson block on every supported build, as each witness runs.
+      Rule 2 runs a block on the project's interpreter alone
+- [ ] Show the misconception a wrong choice embodies in its feedback, on the
+      phone and the web. The bank records it, and no client reads it
+- [ ] Write into `concepts.md` when `py` replaces `python`, and what happens
+      to a user's answers in `python` then
 
 ### Problem difficulty
 
