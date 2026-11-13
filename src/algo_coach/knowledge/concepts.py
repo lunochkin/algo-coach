@@ -51,6 +51,11 @@ def texts(concept: dict[str, Any]) -> list[str]:
     return [m["text"] for m in concept["misconceptions"]]
 
 
+def sources(concept: dict[str, Any]) -> list[str]:
+    found = concept.get("source", [])
+    return [found] if isinstance(found, str) else list(found)
+
+
 def rendered(slug: str, text: str, concepts: dict[str, dict[str, Any]]) -> str:
     """The lesson as served: an intro from its headings, then the authored
     sections, then the mistakes and links of the concepts it teaches."""
@@ -59,8 +64,8 @@ def rendered(slug: str, text: str, concepts: dict[str, dict[str, Any]]) -> str:
         return text
     intro = f"This lesson covers {_listed(HEADING.findall(text))}."
     mistakes = "".join(f"- Wrong: {m}\n" for c in taught for m in texts(c))
-    sources = dict.fromkeys(c["source"] for c in taught)
-    links = "".join(f"- [{_label(url)}]({url})\n" for url in sources)
+    urls = dict.fromkeys(url for c in taught for url in sources(c))
+    links = "".join(f"- [{_label(url)}]({url})\n" for url in urls)
     return (
         f"{intro}\n\n{text.rstrip()}\n\n## Common mistakes\n\n{mistakes}\n## Go deeper\n\n{links}"
     )

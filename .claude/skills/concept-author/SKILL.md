@@ -34,16 +34,28 @@ Every agent runs code from the engine repo root with `uv run`, and runs
 
 ## Stage 1: concepts
 
-1. **Write.** Brief: write `concepts/<topic>/<sub>.toml` from the sources the
-   module's `CLAUDE.md` names. Each concept holds every field of the record in
-   `concepts.md`, and a witness whose output the check confirms on every
-   build. Apply the stage 1 checklist to each concept before reporting.
+1. **Write.** Brief, with its checklist:
+   - Write `concepts/<topic>/<sub>.toml` from the sources the module's
+     `CLAUDE.md` names. Each concept holds every field of the record in
+     `concepts.md`, and a witness whose output the check confirms on every
+     build. Apply the stage 1 checklist to each concept before reporting.
+   - Lay out the lessons. Add the subtopic to `course.toml` (`subs`,
+     `sub_titles`) and to `graph.toml` (`needs`, and a `[lesson.<slug>]` per
+     lesson, one lesson per level and cluster of concepts). Write each lesson
+     file as its `##` headings alone, one per section a `taught_by` names.
+   - Order the concepts so each term is defined before its use. A concept of
+     a subtopic this one needs counts as defined.
+   - Report each scope you chose that a reviewer could dispute, with a
+     recommendation.
 2. **Review.** Brief: check each concept against the stage 1 checklist. Run
-   one more case each claim's wording covers. Sort each finding as WRONG
-   (false), GAP (a clause or misconception missing) or STYLE.
+   one more case each claim's wording covers. Check that each misconception's
+   text is false in every case the claim's scope reaches, and that each
+   witness uses only the baseline and earlier concepts. Sort each finding as
+   WRONG (false), GAP (a clause or misconception missing) or STYLE.
 3. **Fix**, then repeat 2 with a fresh reviewer until a review finds no
    WRONG. Bring the disputed scopes to the user, then ask for approval.
-   Record the approval in the file's header.
+   Record the approval in the file's header, with its date and the scopes
+   the user decided.
 
 ## Stage 2: lessons
 

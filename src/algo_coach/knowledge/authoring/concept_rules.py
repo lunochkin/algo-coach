@@ -9,6 +9,7 @@ from typing import Any, cast
 
 from algo_coach.knowledge.authoring.course import Course, Report, where
 from algo_coach.knowledge.authoring.static import anchor
+from algo_coach.knowledge.concepts import sources
 
 REQUIRED = ("id", "level", "claim", "source", "misconceptions", "taught_by")
 HEADING = re.compile(r"^## (.+)$", re.M)
@@ -34,8 +35,8 @@ def records(course: Course, report: Report) -> None:
             report.error(27, at, "a witness with no output")
         if "witness" not in concept and "quote" not in concept:
             report.error(27, at, "neither a witness nor a quote")
-        if "#" not in concept.get("source", "#"):
-            report.error(27, at, "the source names no section")
+        if any("#" not in url for url in sources(concept)):
+            report.error(27, at, "a source names no section")
         if concept.get("level") not in (0, 1, 2, 3):
             report.error(27, at, f"level {concept.get('level')!r}")
         _misconceptions(report, at, concept)

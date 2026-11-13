@@ -104,3 +104,16 @@ def test_a_module_without_concepts_reads_as_before(tmp_path):
     source = read_module(base)
 
     assert source.lesson_texts["flow-loops"] == "## `while`\n\nProse.\n"
+
+
+def test_a_concept_with_two_sources_links_both(tmp_path):
+    """One section may not cover every clause of a claim."""
+    two = CONCEPTS.replace(
+        'source = "https://docs.python.org/3/reference/compound_stmts.html#the-while-statement"',
+        'source = ["https://docs.python.org/3/reference/compound_stmts.html#the-while-statement",'
+        ' "https://docs.python.org/3/library/sys.html#sys.getrecursionlimit"]',
+    )
+
+    text = read_module(module(tmp_path, concepts=two)).lesson_texts["flow-loops"]
+
+    assert "(https://docs.python.org/3/library/sys.html#sys.getrecursionlimit)" in text

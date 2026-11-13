@@ -51,7 +51,7 @@ the coverage map for a module written by concept.
 | `level` | The concept's level. Its questions sit at the same level. |
 | `claim` | One or two sentences. The only place the fact is stated in full. |
 | `versions` | The supported versions the claim holds on. Absent means all. |
-| `source` | A URL with an anchor, to the documentation or the specification. |
+| `source` | A URL with an anchor, to the documentation or the specification, or a list of them where one section does not cover every clause. |
 | `witness` | Code whose output shows the claim holds. |
 | `output` | The witness's output, the same on every supported build. |
 | `quote` | The source's sentence the claim rests on, where no witness can run. |
@@ -145,6 +145,13 @@ is approved.
    stage 1 checklist below, and the author of the module approves the list
    after that review. A list of about thirty claims reads in minutes, and an
    error caught here reaches no lesson and no question.
+   - Stage 1 also lays out the subtopic's lessons, since each `taught_by`
+     names a lesson and a section. It adds the subtopic to `course.toml` and
+     to `graph.toml`, with the subtopics it needs, and writes each lesson
+     file as its `##` headings alone. The check then holds every `taught_by`
+     to a section, and stage 2 writes under the approved headings.
+   - The approval is recorded in the concept file's header, with its date
+     and the scopes the author decided.
 2. **Lessons.** The sections are written from the approved concepts. A
    reviewer checks each section against its concepts: every claim taught,
    and no sentence beyond them. Stage 2 ends as stage 1 does: an independent
@@ -184,6 +191,16 @@ back to a concept in the pilot broke one of them.
 - **Every term the claim uses is defined in the claim, in a concept the
   subtopic orders earlier, or in the module's baseline.** "Iterable",
   "iterator" and "generator" were each used before any claim defined them.
+  The subtopic orders its concepts as its file lists them. A concept of a
+  subtopic this one `needs` counts as earlier.
+- **Every misconception's text is false wherever the claim's scope reaches.**
+  A misconception that is true in one case teaches that case wrong. In
+  `core/functions`, four wrong claims were misconceptions that a `:=`, a
+  `+=` or arithmetic on None made true.
+- **A witness uses only the baseline and the concepts ordered before its
+  own.** It catches an exception it shows and prints the exception's type,
+  since the message of an uncaught one differs between builds. A witness
+  shows a `SyntaxError` through `compile()`.
 - **The claim's wording holds beyond its witness.** A witness proves what it
   prints. The reviewer tries one more case the wording covers, and runs it.
   A claim that "a capture pattern is allowed only in the last case" passed its
@@ -234,9 +251,13 @@ with its section.
 
 - **The pilot writes `py`'s `core/control-flow` subtopic, levels 0 and 1,**
   through all three stages.
-- **The pilot exits on an independent review of its result**, counting
-  defects per hundred questions against the same subtopic of `python` in the
-  review of 2026-11-13.
+- **The pilot closed on 2026-11-13, and the order is adopted** for every new
+  module and subtopic. Each layer is written from the layer above it, so a
+  defect is traced to one layer and fixed there, and each rule the pilot
+  added is checked or briefed for the next subtopic. A comparison of
+  defect counts against `python` was dropped: `python`'s latest review
+  looked for false statements alone, so its count measures a different
+  thing, and the order is kept even where a first subtopic scores worse.
 
 ## Deferred
 
