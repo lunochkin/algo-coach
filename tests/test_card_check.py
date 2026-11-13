@@ -134,3 +134,15 @@ def test_an_acceptance_no_survivor_matches_is_stale(tmp_path):
 
     stale = "line 9: 0 → 1 is accepted as equivalent, and no mutant survives as it"
     assert ("stale", stale) in findings(tmp_path)
+
+
+def test_two_mutants_making_one_change_on_one_line_are_named_apart(tmp_path):
+    """`1 + 1` holds two constants: shifting either one makes the same change,
+    and an acceptance must name the one it means. Unused, so both survive."""
+    form = "def solve(xs):\n    unused = 1 + 1\n    return len(xs)\n"
+    cases = [{"args": [[]], "expected": 0}]
+    written(tmp_path, card(templates=[template(code=form, cases=cases)]))
+
+    named = [message for check, message in findings(tmp_path) if check == "mutant"]
+    assert len(named) == len(set(named))
+    assert any("(2nd)" in message for message in named)

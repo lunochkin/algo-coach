@@ -16,6 +16,9 @@ from algo_coach.techniques import is_known
 # the sitting's cap: a recall is judged under it
 CAP_MS = 2000
 
+# a repeated mutant name is numbered from its second occurrence
+ORDINALS = {2: "nd", 3: "rd"}
+
 
 class Finding(BaseModel):
     card: str  # the file's stem, so a card that does not parse is still named
@@ -81,10 +84,8 @@ def _template(template: TemplateSeed, *, mutate: bool) -> list[tuple[str, str]]:
     if failed or not mutate:
         return failed
     slowest = max((one.elapsed_ms or 0 for one in ran), default=0)
-    standing = [
-        f"line {one.line}: {one.change}"
-        for one in _survivors(template, cap_ms=pace(slowest, cap_ms=CAP_MS))
-    ]
+    survivors = _survivors(template, cap_ms=pace(slowest, cap_ms=CAP_MS))
+    standing = [names[one] for one in survivors] if (names := _names(template.code)) else []
     accepted = set(template.equivalent)
     return [("mutant", f"{one} survives every case") for one in standing if one not in accepted] + [
         ("stale", f"{one} is accepted as equivalent, and no mutant survives as it")
@@ -104,6 +105,22 @@ def _survivors(template: TemplateSeed, *, cap_ms: int) -> list[Mutant]:
         ):
             standing.append(mutant)
     return standing
+
+
+def _names(code: str) -> dict[Mutant, str]:
+    """Each mutant's name in a report and in `equivalent`. Two mutants can make
+    the same change on one line, so a repeat is numbered in tree order."""
+    seen: dict[str, int] = {}
+    named: dict[Mutant, str] = {}
+    for one in mutants(code):
+        base = f"line {one.line}: {one.change}"
+        seen[base] = seen.get(base, 0) + 1
+        named[one] = base if seen[base] == 1 else f"{base} ({_ordinal(seen[base])})"
+    return named
+
+
+def _ordinal(n: int) -> str:
+    return f"{n}{ORDINALS.get(n, 'th')}"
 
 
 def _passes(ran: CaseRun, expected: Json, template: TemplateSeed) -> bool:
