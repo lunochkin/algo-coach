@@ -117,3 +117,24 @@ def test_a_concept_with_two_sources_links_both(tmp_path):
     text = read_module(module(tmp_path, concepts=two)).lesson_texts["flow-loops"]
 
     assert "(https://docs.python.org/3/library/sys.html#sys.getrecursionlimit)" in text
+
+
+def test_a_choice_may_name_another_concepts_misconception(tmp_path):
+    """A wrong choice can embody a belief another concept holds."""
+    other = CONCEPTS + CONCEPTS.replace('id = "while-retests"', 'id = "for-each"').replace(
+        'id = "body-runs-once"', 'id = "skips-last"'
+    )
+    bank = QUESTION + 'misconception = { B = "for-each#skips-last" }\n'
+
+    source = read_module(module(tmp_path, bank, concepts=other))
+
+    assert source.unread == []
+
+
+def test_a_choice_naming_an_unknown_concepts_misconception_is_unread(tmp_path):
+    """`concept#id` resolves like an id of the question's own concept."""
+    bank = QUESTION + 'misconception = { B = "nope#x" }\n'
+
+    source = read_module(module(tmp_path, bank))
+
+    assert source.unread == ["core/flow:w-zero: no misconception x in concept nope"]

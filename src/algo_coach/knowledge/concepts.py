@@ -36,15 +36,25 @@ def derive(where: str, raw: dict[str, Any], concepts: dict[str, dict[str, Any]])
     if restated := [field for field in DERIVED if field in raw]:
         return [f"{at}: {field} is derived from concept {name}" for field in restated]
     concept = concepts[name]
-    ids = {m["id"] for m in concept["misconceptions"]}
     # a choice's letter to the misconception it embodies, by its stable id
-    targeted = raw.get("misconception", {})
-    if unknown := sorted(set(targeted.values()) - ids):
-        return [f"{at}: no misconception {i} in concept {name}" for i in unknown]
+    unknown: list[str] = []
+    for ref in raw.get("misconception", {}).values():
+        other, wrong = owner(ref, name)
+        if wrong not in {m["id"] for m in concepts.get(other, {}).get("misconceptions", [])}:
+            unknown.append(f"{at}: no misconception {wrong} in concept {other}")
+    if unknown:
+        return sorted(unknown)
     raw["lesson"] = concept["taught_by"]
     raw["level"] = concept["level"]
     raw["detail"] = {"mechanism": concept["claim"], "pitfalls": texts(concept)}
     return []
+
+
+def owner(ref: str, name: str) -> tuple[str, str]:
+    """The concept and the id a choice's `misconception` names: `id` for the
+    question's own concept, `concept#id` for another."""
+    other, _, wrong = ref.rpartition("#")
+    return (other or name, wrong)
 
 
 def texts(concept: dict[str, Any]) -> list[str]:

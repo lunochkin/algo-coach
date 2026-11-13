@@ -134,11 +134,17 @@ the coverage map for a module written by concept.
   questions by subtopic and level, never by lesson, so a question of the
   conditions lesson may use a `for` loop taught at the same level.
 - **A wrong choice names the misconception it embodies, by its id**, as
-  `misconception = { B = "<id>" }`. An id stays when the misconception's text
-  is reworded. A removed or renamed misconception makes the check refuse
-  every question still naming it, where an index would shift silently onto
-  another belief. The lesson's common mistakes follow the concept at the next
-  seed, since the seed renders them.
+  `misconception = { B = "<id>" }`, or as `"<concept>#<id>"` for a
+  misconception of another concept. A good distractor can embody another
+  concept's belief, and naming it lets rule 19 count that belief as tested.
+  An id stays when the misconception's text is reworded. A removed or
+  renamed misconception makes the check refuse every question still naming
+  it, where an index would shift silently onto another belief. The lesson's
+  common mistakes follow the concept at the next seed, since the seed
+  renders them.
+- **A question asks its own concept's claim, and may use another concept's
+  fact as a step.** Rule 14 counts the fact a question asks, not every fact
+  its code relies on.
 - **The kind called `concept` in `python` is called `principle` in a module
   written by concept.** A kind and a record would otherwise share one name.
 
@@ -179,6 +185,16 @@ In every stage, the stopping rule waives a full review of the fixed layer,
 not rule 23: a second reader reviews the last fix pass on its diff. In stage
 3, the first fix pass rewrote 19 questions with no false statement and
 seven new defects, which only a review of its diff found.
+
+- **After the first full review that finds nothing wrong, each round is a
+  review of the last fix pass's diff.** The stage ends when a diff review
+  finds nothing wrong and no defect, and its style findings are applied
+  without a further review. A fresh full review after each fix pass found
+  one wrong claim each time in prose the fix pass had just written, and a
+  review of the diff finds that prose too.
+- **A finding about an approved layer does not pause the stage.** The stage
+  goes on without the change, and the author decides the finding at its
+  end.
 
 Each stage is written by one agent and reviewed by another, which wrote
 nothing it reviews. The `concept-author` skill in `.claude/skills/` holds the

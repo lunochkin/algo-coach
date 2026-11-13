@@ -34,9 +34,11 @@ Every agent runs code from the engine repo root with `uv run`, and runs
 `uv run algo-coach module check <module>` before it reports. A reviewer
 judges no prose line's width, since markdown reflows prose.
 
-Each stage ends on `concepts.md`'s stopping rule: a review finds nothing
-WRONG, the other findings are fixed in place, and a second reader reviews the
-last fix pass on its diff (rule 23).
+Each stage ends on `concepts.md`'s stopping rule: a full review finds nothing
+WRONG, the other findings are fixed in place, and each later round reviews
+the last fix pass on its diff (rule 23), until a diff review finds nothing
+WRONG and no DEFECT. Keep a copy of the layer before each fix pass, and the
+reports, in a scratchpad folder of the stage's own.
 
 ## Stage 1: concepts
 
@@ -85,7 +87,9 @@ last fix pass on its diff (rule 23).
    - Write `banks/<topic>/<sub>.toml` from the concepts. Read the lessons only
      to avoid them. Never write `lesson`, `level` or `detail`.
    - Every concept has a question, and every misconception is named by a
-     wrong choice whose prediction it really produces for that code.
+     wrong choice whose prediction it really produces for that code. A
+     choice embodying another concept's misconception names it as
+     `"<concept>#<id>"`.
    - Rule 15: before each question, read its concept's section. The question
      shares no name, value, output, helper function or shape with it, and
      restates no expression of the claim with new values. The witness is
@@ -100,13 +104,13 @@ last fix pass on its diff (rule 23).
    - Each `why` is true and explains its own choice. No `why` claims more than
      the concept states, and none opens with "Right:" or "Wrong:", since the
      client marks each choice.
-   - Report a rule 15 table: each question, its section, what differs.
 2. **Review.** Brief: check every question against rules 1–25, the question
    bullets of `concepts.md` and the writer's checklist. Run every snippet.
-   Compare each question with its section yourself, not by the writer's
-   table. For each rule 15 finding, name a new task. Sort findings as WRONG,
-   DEFECT or STYLE, with concept findings apart.
-3. **Fix** in place from the review. A concept finding goes to the user
-   first, since it changes stage 1. In the pilot, the review's new task per
+   Compare each question with its section yourself. For each rule 15
+   finding, name a new task, and check that task against the section too:
+   two proposed tasks repeated a section in the pilot. Sort findings as
+   WRONG, DEFECT or STYLE, with concept and lesson findings apart.
+3. **Fix** in place from the review. A concept or lesson finding goes to the
+   user at the end of the stage, which goes on without the change. In the pilot, the review's new task per
    question removed every repeated example that two fresh generations had
    kept.

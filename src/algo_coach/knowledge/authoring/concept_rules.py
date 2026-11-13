@@ -9,7 +9,7 @@ from typing import Any, cast
 
 from algo_coach.knowledge.authoring.course import Course, Report, where
 from algo_coach.knowledge.authoring.static import anchor
-from algo_coach.knowledge.concepts import sources
+from algo_coach.knowledge.concepts import owner, sources
 
 REQUIRED = ("id", "level", "claim", "source", "misconceptions", "taught_by")
 HEADING = re.compile(r"^## (.+)$", re.M)
@@ -72,7 +72,9 @@ def filed(course: Course, report: Report) -> None:
     question, and every misconception a wrong choice embodying it. A question
     is filed by its `concept`, which rule 27 resolves."""
     asked = {q.get("concept") for q in course.questions}
-    targeted = {(q.get("concept"), i) for q in course.questions for i in _targets(q).values()}
+    targeted = {
+        owner(ref, q.get("concept", "")) for q in course.questions for ref in _targets(q).values()
+    }
     for name, concept in course.concepts.items():
         at = f"{concept['_file']} {name}"
         if name not in asked:

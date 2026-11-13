@@ -224,3 +224,15 @@ def test_a_snippet_over_12_lines_is_warned(tmp_path):
     warnings = found(check(module(tmp_path, q=q), run=False).report.warnings, 25)
 
     assert warnings == ["[25] banks/t/sub.toml w code: 13 lines, over 12"]
+
+
+def test_another_concepts_misconception_counts_as_embodied(tmp_path):
+    """Rule 19: a choice naming `concept#id` covers that concept's belief."""
+    other = concept(
+        id="until-stops", taught_by="les#while", misconceptions=[{"id": "x", "text": "X."}]
+    )
+    q = asking() | {"misconception": {"B": "body-runs-once", "C": "until-stops#x"}}
+
+    warnings = found(check(module(tmp_path, concept(), other, q=q), run=False).report.warnings, 19)
+
+    assert not any("misconception x" in w for w in warnings)
