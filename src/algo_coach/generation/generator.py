@@ -58,8 +58,12 @@ Produce four things.
    label. Judge the problem you wrote, not the form.
    - Easy: one basic form applied unchanged, or a direct approach that fits
      the limits. The basic forms are a binary search over a sorted array, a
-     running sum or minimum, a window of fixed width over sums, and a
-     recurrence on the two previous terms. The statement asks the form's own
+     running sum or minimum, a window of fixed width over sums, a recurrence
+     on the two previous terms, a lookup or a count in a hash map, two
+     pointers over sorted input or compacting in place, a table of prefix
+     sums, a sort then one scan, matching brackets on a stack, rewiring a
+     linked list, an in-order or level-order tree walk, and a plain
+     breadth-first or depth-first reach over a graph. The statement asks the form's own
      question about the input as given, so a solver who holds the form adapts
      only names and the return value.
    - Medium: one standard technique plus one step the statement does not

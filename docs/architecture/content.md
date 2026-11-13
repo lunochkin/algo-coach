@@ -23,7 +23,7 @@ The vocabulary the append-only log references.
 - **A kind reaches both readers as its test, never as its name.** The label
   helps only a reader who already knows what the kind selects. A reader who
   does not will judge a structure on whether the structure was performed. The
-  four tests live with the kind, so twenty-seven entries state them once.
+  four tests live with the kind, so the entries state them once.
 - **A code is claimed beside the narrower ones, never instead of them.** A
   solution's approach is true at several levels: a backtracking search
   descends, and a search tree is a binary tree. An exclusive rule would need a

@@ -119,11 +119,10 @@ fits is the label. Each criterion counts the steps a solution takes beyond one
 template's form, so two raters reading one statement reach one label.
 
 - **Easy: the solution is one basic form applied unchanged, or a direct
-  approach that fits the limits.** The basic forms are a binary search over a
-  sorted array, a running sum or minimum, a window of fixed width over sums,
-  and a recurrence on the two previous terms. The statement asks the form's own
-  question about the input as given. A solver who holds the form types it and
-  adapts only names and the return value.
+  approach that fits the limits.** The basic forms are the templates the table
+  below names, most of them on the root cards of the card graph. The statement
+  asks the form's own question about the input as given. A solver who holds
+  the form types it and adapts only names and the return value.
 - **Medium: one standard technique, plus one step the statement does not
   name.** The step transforms the input, chooses a state, or derives the
   predicate a search runs on. A search for the smallest feasible capacity is
@@ -148,7 +147,19 @@ templates alone.
 | `binary-search` | `predicate-first-true`, `answer-space` |
 | `sliding-window` | `fixed-window-match` |
 | `dp-1d-linear` | `two-prev-pick-skip`, `running-aggregate` |
+| `hashing` | `complement-lookup`, `count-then-query` |
+| `two-pointers` | `compact-in-place`, `merge-sorted-heads`, `converge-sorted-pair` |
+| `prefix-sum` | `range-sum-table` |
+| `sorting` | `sort-then-sweep`, `composite-key` |
+| `stack` | `match-nesting`, `collapse-adjacent`, `evaluate-postfix` |
+| `linked-list` | `reverse-in-place`, `fast-slow-middle`, `merge-two-sorted` |
+| `tree-traversal` | `inorder-stack`, `inorder-neighbours`, `level-order` |
+| `breadth-first-search` | `unweighted-distance` |
+| `depth-first-search` | `component-count`, `grid-flood-area` |
 
+- **`converge-sorted-pair` admits easy only in its plainest uses**: a
+  palindrome check, squaring a sorted array. A pair sum on a sorted array is
+  medium on the platforms.
 - **`answer-space` admits easy only where the predicate is given**, as in an
   integer square root. A predicate the solver has to derive makes the problem
   medium, by the criteria above.
