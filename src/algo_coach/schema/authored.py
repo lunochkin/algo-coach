@@ -23,7 +23,8 @@ class Detail(Authored):
 
     mechanism: Text
     example: Text | None = None
-    pitfalls: list[Text] | None = Field(default=None, min_length=1, max_length=4)
+    # six: a module written by concept derives them from its misconceptions
+    pitfalls: list[Text] | None = Field(default=None, min_length=1, max_length=6)
     versions: Text | None = None
     diagram: Text | None = None
 

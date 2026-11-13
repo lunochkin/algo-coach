@@ -23,6 +23,9 @@ Each rule names how it is checked:
     the machine's load, and a finding it causes names `--fresh`.
   - The content repository's pre-commit hook runs the check when a module is
     staged, and `just seed-module` runs it before seeding.
+  - The check also runs every refusal the seed makes, reported as `[0]
+    seed`, so a module the check passes is one the seed takes. A question's
+    derived detail once passed the check and was refused by the seed.
 - **script**: a program could check it, and none does yet.
 - **review**: it needs a reader's judgement.
 

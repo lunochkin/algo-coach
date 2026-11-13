@@ -66,7 +66,7 @@ precedence over this file.
 
 - **A detail is structured, under `[q.detail]`.** `mechanism` is required:
   how the feature works and why, in one to four sentences. `example`,
-  `pitfalls` (one to four), `versions` and `diagram` are optional. An example
+  `pitfalls` (one to six), `versions` and `diagram` are optional. An example
   is verbatim code or a concrete case, run before it is published.
 - **An open question adds `key_detail` and `traps_detail`**, one entry per
   point and one per trap.

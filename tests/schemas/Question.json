@@ -128,7 +128,7 @@
                 "pattern": "\\S",
                 "type": "string"
               },
-              "maxItems": 4,
+              "maxItems": 6,
               "minItems": 1,
               "type": "array"
             },

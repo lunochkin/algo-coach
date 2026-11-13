@@ -236,3 +236,13 @@ def test_another_concepts_misconception_counts_as_embodied(tmp_path):
     warnings = found(check(module(tmp_path, concept(), other, q=q), run=False).report.warnings, 19)
 
     assert not any("misconception x" in w for w in warnings)
+
+
+def test_a_question_the_seed_would_refuse_is_refused(tmp_path):
+    """A module the check passes is one the seed takes, derived fields too."""
+    many = [{"id": f"m{i}", "text": f"Belief {i}."} for i in range(7)]
+    q = asking() | {"misconception": {"B": "m0", "C": "m1"}}
+
+    errors = check(module(tmp_path, concept(misconceptions=many), q=q), run=False).report.errors
+
+    assert any(e.startswith("[0] seed: ") and "pitfalls" in e for e in errors)

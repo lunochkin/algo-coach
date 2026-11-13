@@ -30,6 +30,8 @@ from algo_coach.knowledge.authoring.static import (
 )
 from algo_coach.knowledge.authoring.tools import tool_outputs, transcripts
 from algo_coach.knowledge.authoring.witnesses import witnesses
+from algo_coach.knowledge.check import refusals
+from algo_coach.knowledge.files import read_module
 
 # kept beside the module, and gitignored by the content repository
 CACHE = ".check-cache.json"
@@ -83,5 +85,10 @@ def check(
         kept.write_text(json.dumps(runs.cache))
     for rule in STATIC + (BY_CONCEPT if course.concepts else (records, coverage)):
         rule(course, report)
+    # a module the check passes is one the seed takes
+    source = read_module(root)
+    for line in refusals(source):
+        if line not in source.unread:
+            report.error(0, "seed", line)
     checked.executed = len(runs.executed)
     return checked
