@@ -235,3 +235,22 @@ def test_a_run_carries_no_path_and_no_callable():
     request = {"code": DOUBLE, "args": [1], "cap_ms": 1000}
 
     assert json.loads(json.dumps(request)) == request
+
+
+DEEP = """import sys
+
+
+def solve():
+    sys.setrecursionlimit(200000)
+
+    def down(n):
+        return down(n + 1)
+
+    return down(0)
+"""
+
+
+def test_a_crash_reported_past_the_cap_is_still_a_crash():
+    """Formatting a deep traceback outlasts a short cap. The timer firing
+    inside the crash report must not leave the child with nothing to write."""
+    assert only(DEEP, cap_ms=50).outcome in (RunOutcome.CRASHED, RunOutcome.TIMEOUT)

@@ -68,6 +68,7 @@ def execute(code: str, args: list[Any], cap_ms: int, repeats: int = 1) -> dict[s
     signal.setitimer(signal.ITIMER_REAL, cap_ms / 1000)
     elapsed = 0.0
     value = None
+    raised: BaseException | None = None
     try:
         for _ in range(repeats):
             # a fresh module per call, so a memo left in a global cannot answer
@@ -82,11 +83,15 @@ def execute(code: str, args: list[Any], cap_ms: int, repeats: int = 1) -> dict[s
     except Expired:
         return {"outcome": TIMEOUT, "value": None, "elapsed_ms": round(elapsed * 1000)}
     except BaseException as error:
-        return crashed(round(elapsed * 1000), described(error, code))
+        raised = error
     finally:
         signal.setitimer(signal.ITIMER_REAL, 0)
 
     measured = round(elapsed * 1000)
+    # reported once the timer is off: formatting a deep traceback outlasts a
+    # short cap, and the cap firing inside the report left no result at all
+    if raised is not None:
+        return crashed(measured, described(raised, code))
     try:
         encoded = encode(value)
     except TypeError, ValueError:
