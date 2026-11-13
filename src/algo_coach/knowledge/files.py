@@ -6,6 +6,8 @@ from typing import Any
 
 from pydantic import BaseModel
 
+from algo_coach.knowledge.concepts import derive, read_concepts, rendered
+
 
 class Bank(BaseModel):
     topic: str
@@ -40,13 +42,17 @@ def read_module(base: Path) -> ModuleSource:
             unread.append(f"{where}: {error}")
             continue
         banks.append(Bank(topic=path.parent.name, sub=path.stem, questions=raws))
+    concepts = read_concepts(base, unread)
+    for bank in banks:
+        for raw in bank.questions:
+            unread += derive(f"{bank.topic}/{bank.sub}", raw, concepts)
     graph = _optional(base / "graph.toml")
     texts: dict[str, str] = {}
     authored: dict[str, dict[str, Any]] = (graph or {}).get("lesson", {})
     for slug, lesson in authored.items():
         path = base / lesson.get("file", "")
         if path.is_file():
-            texts[slug] = path.read_text()
+            texts[slug] = rendered(slug, path.read_text(), concepts)
         else:
             unread.append(f"lesson {slug}: file {lesson.get('file')} not found")
     return ModuleSource(
