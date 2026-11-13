@@ -22,8 +22,10 @@ from the second block on.
 `python` is rewritten as `py`, by concept, and replaced by it once `py` covers
 it. `docs/authoring/concepts.md` gives the order and the stages.
 
-- [ ] Close the open findings of the content repository's review of the Python
+- [x] Close the open findings of the content repository's review of the Python
       module, as its `PLAN.md` gives, and seed the result
+- [ ] Fix the false statements among the 28 defects left after the fact
+      review, which `modules/python/review/facts-2026-11-13.md` lists
 - [x] Write the order of authoring by concept into `docs/authoring/concepts.md`,
       and the brief of each stage into the `concept-author` skill
 - [x] Check a module written by concept: rules 26 to 29, misconception ids,
