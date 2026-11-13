@@ -1297,6 +1297,8 @@ export interface components {
       recall: components['schemas']['Recalled'][];
       /** Probes */
       probes: components['schemas']['Probed'][];
+      /** Waiting */
+      waiting: components['schemas']['Waiting'][];
     };
     /** Submission */
     Submission: {
@@ -1477,6 +1479,16 @@ export interface components {
       input?: unknown;
       /** Context */
       ctx?: Record<string, never>;
+    };
+    /**
+     * Waiting
+     * @description A required card a locked card waits on, named as its page names it.
+     */
+    Waiting: {
+      /** Slug */
+      slug: string;
+      /** Title */
+      title: string;
     };
   };
   responses: never;

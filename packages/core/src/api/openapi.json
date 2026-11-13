@@ -3213,6 +3213,13 @@
             },
             "type": "array",
             "title": "Probes"
+          },
+          "waiting": {
+            "items": {
+              "$ref": "#/components/schemas/Waiting"
+            },
+            "type": "array",
+            "title": "Waiting"
           }
         },
         "type": "object",
@@ -3222,7 +3229,8 @@
           "rungs",
           "gaps",
           "recall",
-          "probes"
+          "probes",
+          "waiting"
         ],
         "title": "Studied",
         "description": "A card as its page reads it. The ladder, the progress and the recall\nstate are folds, and `content.md` gives why none of them is stored."
@@ -3591,6 +3599,25 @@
           "type"
         ],
         "title": "ValidationError"
+      },
+      "Waiting": {
+        "properties": {
+          "slug": {
+            "type": "string",
+            "title": "Slug"
+          },
+          "title": {
+            "type": "string",
+            "title": "Title"
+          }
+        },
+        "type": "object",
+        "required": [
+          "slug",
+          "title"
+        ],
+        "title": "Waiting",
+        "description": "A required card a locked card waits on, named as its page names it."
       }
     }
   }

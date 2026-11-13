@@ -16,6 +16,7 @@ import {
   PROBES_TITLE,
   probeState,
   RUN_START_NOTE,
+  runLock,
   runStartLabel,
   runStartRefused,
   OF,
@@ -114,7 +115,12 @@ export default function CardScreen() {
       {studied.data?.run ? (
         <NextRung studied={studied.data} bottom={insets.bottom} />
       ) : studied.data ? (
-        <RunStart slug={slug} bottom={insets.bottom} onStarted={studied.reload} />
+        <RunStart
+          slug={slug}
+          lock={runLock(studied.data.waiting)}
+          bottom={insets.bottom}
+          onStarted={studied.reload}
+        />
       ) : null}
     </View>
   );
@@ -301,8 +307,19 @@ function Probes({ studied, of }: { studied: Studied; of: Sections }) {
 }
 
 // the card's act before a run: the press opening one, in the bar at the
-// bottom with the note on what it measures. Starting draws the probes
-function RunStart({ slug, bottom, onStarted }: { slug: string; bottom: number; onStarted: () => void }) {
+// bottom with the note on what it measures. Starting draws the probes. A locked
+// card names what it waits on there instead, and its press stays disabled
+function RunStart({
+  slug,
+  lock,
+  bottom,
+  onStarted,
+}: {
+  slug: string;
+  lock: string | null;
+  bottom: number;
+  onStarted: () => void;
+}) {
   const theme = useTheme();
   const st = useStore();
   const [starting, setStarting] = useState(false);
@@ -321,12 +338,12 @@ function RunStart({ slug, bottom, onStarted }: { slug: string; bottom: number; o
       bottom={bottom}
       above={
         <Text variant="bodySmall" style={{ color: refused ? theme.colors.error : theme.colors.onSurfaceVariant }}>
-          {refused ? runStartRefused(refused) : RUN_START_NOTE}
+          {refused ? runStartRefused(refused) : (lock ?? RUN_START_NOTE)}
         </Text>
       }
     >
-      <Press onPress={() => void start()} disabled={starting}>
-        {runStartLabel(starting)}
+      <Press onPress={() => void start()} disabled={starting || lock !== null}>
+        {runStartLabel(starting, lock !== null)}
       </Press>
     </BottomBar>
   );

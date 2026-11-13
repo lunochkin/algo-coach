@@ -7,6 +7,7 @@ import {
   RECALL_TITLE,
   probeState,
   RUN_START_NOTE,
+  runLock,
   runStartLabel,
   runStartRefused,
   CARD_TRIGGER,
@@ -85,7 +86,12 @@ export function CardPage() {
               {studied.run ? (
                 <Progress studied={studied} />
               ) : (
-                <Start onStart={study} starting={starting} refused={refused} />
+                <Start
+                  onStart={study}
+                  starting={starting}
+                  refused={refused}
+                  lock={runLock(studied.waiting)}
+                />
               )}
 
               <SectionBar items={items} current={current} onJump={jump} />
@@ -189,21 +195,25 @@ function Progress({ studied }: { studied: Studied }) {
   )
 }
 
+// a locked card reads the cards it waits on in place of the start note, and
+// its press stays disabled until they are met
 function Start({
   onStart,
   starting,
   refused,
+  lock,
 }: {
   onStart: () => void
   starting: boolean
   refused: string | null
+  lock: string | null
 }) {
   return (
     <Panel>
       <div className="flex flex-wrap items-center gap-stack">
-        <p className="text-meta text-muted-foreground">{RUN_START_NOTE}</p>
-        <Button onClick={onStart} disabled={starting}>
-          {runStartLabel(starting)}
+        <p className="text-meta text-muted-foreground">{lock ?? RUN_START_NOTE}</p>
+        <Button onClick={onStart} disabled={starting || lock !== null}>
+          {runStartLabel(starting, lock !== null)}
         </Button>
       </div>
       {refused && <ErrorLine>{runStartRefused(refused)}</ErrorLine>}

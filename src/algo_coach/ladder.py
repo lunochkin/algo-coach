@@ -92,6 +92,40 @@ def met(run: CardRun | None, rungs: Iterable[Rung], attempts: Iterable[Attempt])
     return any(one.problem_id in done for one in run.probes)
 
 
+class Locked(Exception):
+    """A start refused: `log.md`, Locked cards."""
+
+    def __init__(self, waiting: list[Card]) -> None:
+        super().__init__(f"locked until met: {', '.join(one.title for one in waiting)}")
+        self.waiting = waiting
+
+
+def locked_by(
+    card: Card,
+    cards: Iterable[Card],
+    runs: CardRunLog,
+    problems: Iterable[Problem],
+    solutions: Iterable[Solution],
+    matches: Iterable[TemplateMatch],
+    attempts: Iterable[Attempt],
+    *,
+    user_id: str,
+) -> list[Card]:
+    """The required cards the user has not met, in the order `card` names."""
+    by_slug = {one.slug: one for one in cards}
+    problems, solutions = list(problems), list(solutions)
+    matches, attempts = list(matches), list(attempts)
+    found: set[str] = set()
+    for slug in dict.fromkeys(one.card for one in card.requires):
+        required = by_slug[slug]  # the seed refused a requirement on no card
+        run = runs.started(user_id, required.id)
+        since = run.started_at if run else None
+        rungs = ladder(required, problems, solutions, matches, attempts, since=since).rungs
+        if met(run, rungs, attempts):
+            found.add(slug)
+    return [by_slug[slug] for slug in unmet(card, found)]
+
+
 def unmet(card: Card, met: Set[str]) -> list[str]:
     """The required cards not yet met, by slug: locked while one is left."""
     return list(dict.fromkeys(one.card for one in card.requires if one.card not in met))
@@ -187,6 +221,7 @@ def _offered(card: Card, problems: Iterable[Problem], attempts: Iterable[Attempt
 def start(
     runs: CardRunLog,
     card: Card,
+    cards: Iterable[Card],
     problems: Iterable[Problem],
     solutions: Iterable[Solution],
     matches: Iterable[TemplateMatch],
@@ -198,12 +233,17 @@ def start(
 
     The ladder is measured from the start, so a run reaches the store carrying
     what the start drew. A card already started is returned rather than started
-    again: `flows.md` leaves a second run deferred.
+    again: `flows.md` leaves a second run deferred. A locked card raises
+    `Locked`.
     """
     open_already = runs.started(user_id, card.id)
     if open_already is not None:
         return open_already
-    problems, attempts = list(problems), list(attempts)
+    problems, solutions = list(problems), list(solutions)
+    matches, attempts = list(matches), list(attempts)
+    waiting = locked_by(card, cards, runs, problems, solutions, matches, attempts, user_id=user_id)
+    if waiting:
+        raise Locked(waiting)
     resolved = ladder(card, problems, solutions, matches, attempts)
     run = card_run(user_id, card.id, probes(card, resolved, problems, attempts))
     runs.append(run)

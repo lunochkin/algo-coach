@@ -11,7 +11,7 @@ from pydantic import BaseModel, Field
 from algo_coach.api.context import Root, UserId
 from algo_coach.cards import CardStore
 from algo_coach.cases import CaseLog
-from algo_coach.ladder import start
+from algo_coach.ladder import Locked, start
 from algo_coach.log import AttemptLog, CardRunLog, RecallLog, SittingStore
 from algo_coach.matches import MatchLog
 from algo_coach.problems import ProblemStore
@@ -102,18 +102,24 @@ class Label(BaseModel):
 # minted per store
 @router.post("/cards/{slug}/runs")
 def started(root: Root, user_id: UserId, slug: str) -> CardRun:
-    card = CardStore(root).by_slug(slug)
+    store = CardStore(root)
+    card = store.by_slug(slug)
     if card is None:
         raise HTTPException(status_code=404, detail=f"no card {slug}")
-    return start(
-        CardRunLog(root),
-        card,
-        load_problems(root),
-        SolutionLog(root).solutions(),
-        MatchLog(root).matches(),
-        AttemptLog(root).attempts(user_id),
-        user_id=user_id,
-    )
+    try:
+        return start(
+            CardRunLog(root),
+            card,
+            store.all(),
+            load_problems(root),
+            SolutionLog(root).solutions(),
+            MatchLog(root).matches(),
+            AttemptLog(root).attempts(user_id),
+            user_id=user_id,
+        )
+    except Locked as refused:
+        # a conflict with the user's own progress, which a later solve resolves
+        raise HTTPException(status_code=409, detail=str(refused)) from refused
 
 
 # by the template's authored slug, as the page's own path is: the trainer names

@@ -9,6 +9,8 @@ import {
   inProgress,
   cardNote,
   cardProgress,
+  runLock,
+  runStartLabel,
   ladderView,
   notInProgress,
   problemCards,
@@ -294,6 +296,7 @@ describe("a card's ladder", () => {
       gaps: [{ template_id: 't2', slug: 't2', title: 'Upper bound' }],
       recall: [],
       probes: [],
+      waiting: [],
     }) as unknown as components['schemas']['Studied'];
 
   it('counts the rungs before a run, and the solved ones once it is open', () => {
@@ -352,5 +355,24 @@ describe("a card's sections and its run", () => {
     expect((await startCardRun(refusing, 'dp')).ok).toBe(false);
     const starting = { POST: () => Promise.resolve({ data: {} }) } as unknown as Parameters<typeof startCardRun>[0];
     expect(await startCardRun(starting, 'dp')).toEqual({ ok: true, value: null });
+  });
+});
+
+describe("a locked card's press", () => {
+  const waiting = (...titles: string[]) => titles.map((title) => ({ slug: title, title }));
+
+  it('reads no lock where nothing is waited on', () => {
+    expect(runLock([])).toBeNull();
+    expect(runStartLabel(false)).toBe('Start studying this card');
+  });
+
+  it('names every card waited on, and how one is met', () => {
+    expect(runLock(waiting('Hashing'))).toBe(
+      'Waits on Hashing. A card is met by solving its ladder, or one of its probes.',
+    );
+    expect(runLock(waiting('Hashing', 'Two pointers', 'Prefix sum'))).toMatch(
+      /^Waits on Hashing, Two pointers and Prefix sum\./,
+    );
+    expect(runStartLabel(false, true)).toBe('Locked');
   });
 });

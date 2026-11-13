@@ -469,6 +469,7 @@ what it offers. The inventory is the list both clients build to.
 | A card's trigger, brief and templates | `/cards/:slug` | Card | same |
 | A card's ladder and probes | `/cards/:slug` | Card | same |
 | The press starting a card's run | `/cards/:slug` | Card, its bottom bar | same |
+| The required cards a locked card waits on, on that press | `/cards/:slug` | Card, its bottom bar | same |
 | A recall | `/cards/:slug/recall/:template` | Recall, from Card | same |
 | The knowledge home | `/knowledge` | Home | same |
 | A module | `/knowledge/modules/:module` | Module | same |
@@ -573,8 +574,10 @@ what it offers. The inventory is the list both clients build to.
   and the sitting it opens returns to that card.
 - **The phone starts a card's run from the bar at the bottom of Card.** The
   run is the card's act until one is open, and the note above the press
-  says the ladder counts from it. Starting draws the probes and opens the
-  run on both clients, and the sittings it counts are sat on either. Once a
+  says the ladder counts from it. On a locked card the note names the required
+  cards not yet met, and the press is disabled, as on the web. Starting draws
+  the probes and opens the run on both clients, and the sittings it counts are
+  sat on either. Once a
   run is open the bar holds the next rung, and the run's progress and its
   recall read at the top of the card, as on the web.
 - **The phone reads the board and the cards from the engine and keeps no

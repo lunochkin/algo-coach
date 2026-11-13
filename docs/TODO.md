@@ -77,7 +77,7 @@ graph, and `log.md` gives when a card is locked.
       template
 - [x] Derive each card's depth, and whether it is locked and met for a user,
       with a test per rule in `log.md` `## Locked cards`
-- [ ] Refuse a locked card's run in the API, and name the unmet required
+- [x] Refuse a locked card's run in the API, and name the unmet required
       cards on the press, on both clients
 - [ ] Write each requirement between the nine cards into `content/cards/`
 - [ ] Author the root cards with `card-author`, one at a time: hashing, two

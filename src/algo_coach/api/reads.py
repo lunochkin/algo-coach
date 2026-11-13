@@ -20,7 +20,7 @@ from algo_coach.board import (
     ungrouped,
 )
 from algo_coach.cards import CardStore
-from algo_coach.ladder import CardState, Gap, Rung, card_state, ladder
+from algo_coach.ladder import CardState, Gap, Rung, card_state, ladder, locked_by
 from algo_coach.log import (
     AttemptLog,
     CardRunLog,
@@ -119,6 +119,13 @@ class Probed(BaseModel):
     attempted: bool
 
 
+class Waiting(BaseModel):
+    """A required card a locked card waits on, named as its page names it."""
+
+    slug: str
+    title: str
+
+
 class Studied(BaseModel):
     """A card as its page reads it. The ladder, the progress and the recall
     state are folds, and `content.md` gives why none of them is stored."""
@@ -129,6 +136,8 @@ class Studied(BaseModel):
     gaps: list[Gap]
     recall: list[Recalled]
     probes: list[Probed]
+    # the required cards not yet met; a run starts once none is left
+    waiting: list[Waiting]
 
 
 @router.get("/board")
@@ -202,16 +211,29 @@ def every_card(root: Root, user_id: UserId) -> list[ListedCard]:
 @router.get("/cards/{slug}")
 def card(root: Root, user_id: UserId, slug: str) -> Studied:
     found = _card(root, slug)
-    run = CardRunLog(root).started(user_id, found.id)
+    runs = CardRunLog(root)
+    run = runs.started(user_id, found.id)
     problems = load_problems(root)
     attempts = AttemptLog(root).attempts(user_id)
+    solutions = SolutionLog(root).solutions()
+    matches = MatchLog(root).matches()
     resolved = ladder(
-        found,
-        problems,
-        SolutionLog(root).solutions(),
-        MatchLog(root).matches(),
-        attempts,
-        since=run.started_at if run else None,
+        found, problems, solutions, matches, attempts, since=run.started_at if run else None
+    )
+    # a started card stays open, so only a card not yet started reads the lock
+    waiting = (
+        []
+        if run
+        else locked_by(
+            found,
+            CardStore(root).all(),
+            runs,
+            problems,
+            solutions,
+            matches,
+            attempts,
+            user_id=user_id,
+        )
     )
     return Studied(
         card=found,
@@ -220,6 +242,7 @@ def card(root: Root, user_id: UserId, slug: str) -> Studied:
         gaps=resolved.gaps,
         recall=_recall(found, RecallLog(root).for_card(user_id, found.id)),
         probes=_probes(run, problems, attempts),
+        waiting=[Waiting(slug=one.slug, title=one.title) for one in waiting],
     )
 
 

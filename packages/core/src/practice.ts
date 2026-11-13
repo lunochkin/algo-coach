@@ -348,7 +348,19 @@ export const probeState = (attempted: boolean) => (attempted ? 'attempted' : 'no
 // solved before it counts toward nothing
 export const RUN_START_NOTE =
   'The ladder is measured from the start, so a problem solved before it counts toward nothing.';
-export const runStartLabel = (starting: boolean) => (starting ? 'Starting…' : 'Start studying this card');
+export const runStartLabel = (starting: boolean, locked = false) =>
+  locked ? 'Locked' : starting ? 'Starting…' : 'Start studying this card';
+
+/**
+ * The note a locked card's press reads in place of the start note: the
+ * required cards not yet met, and how one is met. Null where the card starts.
+ */
+export function runLock(waiting: Studied['waiting']): string | null {
+  if (waiting.length === 0) return null;
+  const names = waiting.map((one) => one.title);
+  const listed = names.length === 1 ? names[0] : `${names.slice(0, -1).join(', ')} and ${names.at(-1)}`;
+  return `Waits on ${listed}. A card is met by solving its ladder, or one of its probes.`;
+}
 export const runStartRefused = (error: string) => `The card did not start: ${error}`;
 
 /** What a run has reached on a card: the rungs solved, the forms recalled, the probes drawn and the rung next. */

@@ -237,3 +237,57 @@ def test_the_carry_bounds_the_editor_by_the_card_s_run(client, database):
 
     assert in_run["code"] is None and in_run["run_started_at"] == started["started_at"]
     assert elsewhere["code"] == "half done"
+
+
+def deque_card(database) -> None:
+    """A card requiring the fixture's card, so it starts locked."""
+    seeded(
+        database,
+        card(
+            slug="deque-window",
+            title="Deque window",
+            templates=[template("deque-max")],
+            requires=[
+                {"card": "sliding-window", "template": "fixed-window", "used_by": "deque-max"}
+            ],
+        ),
+    )
+
+
+def test_a_locked_card_does_not_start(client, database):
+    """`log.md`: a locked card's run does not start, and the refusal names what
+    it waits on."""
+    deque_card(database)
+
+    response = client.post("/api/cards/deque-window/runs")
+
+    assert response.status_code == 409
+    assert "sliding-window" in response.json()["detail"]
+    assert CardRunLog(database).all(USER) == []
+
+
+def test_a_locked_card_reads_the_cards_it_waits_on(client, database):
+    deque_card(database)
+
+    studied = client.get("/api/cards/deque-window").json()
+
+    assert studied["waiting"] == [{"slug": "sliding-window", "title": "sliding-window"}]
+
+
+def test_a_probe_solved_unlocks_the_cards_above(client, database):
+    """A user who holds the form meets the required card at the cost of one
+    problem, and the card above it then starts."""
+    deque_card(database)
+    started = client.post("/api/cards/sliding-window/runs").json()
+    began = datetime.fromisoformat(started["started_at"])
+    probe = started["probes"][0]["problem_id"]
+    AttemptLog(database).append_attempt(
+        solved_attempt(probe, at=began + timedelta(minutes=5), id="a-probe")
+    )
+
+    assert client.get("/api/cards/deque-window").json()["waiting"] == []
+    assert client.post("/api/cards/deque-window/runs").status_code == 200
+
+
+def test_a_root_card_waits_on_nothing(client):
+    assert client.get("/api/cards/sliding-window").json()["waiting"] == []
