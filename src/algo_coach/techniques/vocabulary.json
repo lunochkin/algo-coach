@@ -129,6 +129,9 @@
     {
       "code": "monotonic-stack",
       "kind": "structure",
+      "parents": [
+        "stack"
+      ],
       "earns": "A stack kept sorted by an invariant, popped while the incoming element violates it, so each element is pushed and popped once and the next greater or smaller element is found in amortised constant time.",
       "near_miss": "A plain stack tracking nesting — parentheses, or an iterative traversal's frontier. Nothing is popped to restore an order, so there is no monotone invariant."
     },
@@ -170,6 +173,12 @@
       "kind": "procedure",
       "earns": "The solution orders its data — by a call or by hand — and a later step relies on that order. A sort written out rather than called earns its own paradigm beside this: a merge sort is `divide-and-conquer` and this both.",
       "near_miss": "Ordering the output for presentation, and input that arrives sorted: the solution performs no sort there, so what it did is whatever exploits the order."
+    },
+    {
+      "code": "stack",
+      "kind": "structure",
+      "earns": "A last-in-first-out order carries the correctness: the most recent open item is the one the next item closes or applies to — matching brackets or tags, evaluating an expression with operands and operators, undoing or collapsing in reverse order.",
+      "near_miss": "A list used as a container, appended and read in order, where any order would do. A stack popped to restore a sorted invariant is `monotonic-stack`. The explicit stack of an iterative traversal or search belongs to the search it serves, `depth-first-search` or `tree-traversal`."
     },
     {
       "code": "string-matching",
