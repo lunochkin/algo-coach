@@ -107,11 +107,18 @@ without redefining them. Grouped by the file that specifies the record.
 
 ### Generating a problem
 
-- **Site** (call site): one of the five model calls writing a problem, each
-  at its own configuration: generator, blind, inputs, naive and
+- **Site** (call site): one of the six model calls writing a problem, each
+  at its own configuration: generator, screen, blind, inputs, naive and
   discrimination.
 - **Generator**: the site writing the statement, the canonical and the first
   cases in one call.
+- **Screen site**: the site judging whether a draft reuses the example, the
+  values or the wording of a published problem. It answers from what the model
+  remembers, since the engine holds no published problem to compare with.
+- **Copied**: reusing a published problem's example, values or wording. The
+  gate the screen site rejects a draft by, and the retirement reason of a
+  problem it names. A published question retold in a new setting is not
+  copied.
 - **Blind site**: the site writing the reference from the statement alone.
 - **Inputs site**: the site writing the input generator.
 - **Input generator**: model-written code building an input of a given size and
@@ -125,8 +132,9 @@ without redefining them. Grouped by the file that specifies the record.
   `--site` flags or the built-in default.
 - **Draft**: a problem being written, stored at every state so a failed step
   can resume. Cleared at landing.
-- **Writing state**: how far a draft got: drafted, checked, referenced,
-  agreed, built, paced, searched, hardened, landed, or rejected.
+- **Writing state**: how far a draft got: drafted, checked, screened,
+  referenced, agreed, built, paced, searched, hardened, landed, or rejected.
+- **Screened**: the writing state after the screen site found nothing copied.
 - **Paced**: the writing state after a naive solution passed the cases. Named
   for the pacer, the runner who sets the time others are measured against.
   `unpaced` is the reason a draft has none.
@@ -135,7 +143,7 @@ without redefining them. Grouped by the file that specifies the record.
 - **Gate**: a check a draft must pass to advance. A failed gate rejects the
   draft or holds it, and is named on the site outcome.
 - **Rejected**: a draft's terminal state. The gate names why: `no_value`,
-  `untested`, `disagreed` or `unexercised`.
+  `copied`, `untested`, `disagreed` or `unexercised`.
 - **Held**: a draft stopped at a state a resume can re-enter.
 - **Landing**: the last step: the problem, its cases, its solutions and the
   generator's template match are stored together.
@@ -170,7 +178,7 @@ without redefining them. Grouped by the file that specifies the record.
   the counters and the configuration.
 - **Writing id**: the id a run mints per writing. The draft and its site
   outcomes share it.
-- **Replay**: running the four answering sites over stored problems at a new
+- **Replay**: running the five answering sites over stored problems at a new
   bench. It writes nothing to the corpus.
 - **Sweep**: one `generate` run over every target, or over every held draft.
 

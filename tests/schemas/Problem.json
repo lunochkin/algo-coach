@@ -19,7 +19,8 @@
     },
     "RetirementReason": {
       "enum": [
-        "defective"
+        "defective",
+        "copied"
       ],
       "title": "RetirementReason",
       "type": "string"

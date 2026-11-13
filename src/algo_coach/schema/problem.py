@@ -19,6 +19,7 @@ class ProblemStatus(StrEnum):
 
 class RetirementReason(StrEnum):
     DEFECTIVE = "defective"  # its cases decide something else; its attempts leave mastery
+    COPIED = "copied"  # the screen named a published problem; its attempts stay
 
 
 class Problem(MachineProvenance):

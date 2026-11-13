@@ -2,12 +2,13 @@
 `flows.md` gives. Each step is asked again only where its own configuration or
 prompt hash moved."""
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
 from time import monotonic
 
 from algo_coach.calls import CallLog, Transport
 from algo_coach.drafts import DraftStore
 from algo_coach.generation.aim import Target
+from algo_coach.generation.answering import building, paced
 from algo_coach.generation.bench import BENCH, Bench
 from algo_coach.generation.blind import write_reference
 from algo_coach.generation.checks import (
@@ -17,15 +18,14 @@ from algo_coach.generation.checks import (
     agree,
     check,
     stopped,
-    wrong_on,
 )
 from algo_coach.generation.drafting import advanced, held, rejected
 from algo_coach.generation.fuzzing import Fuzzing, pass_over
 from algo_coach.generation.generator import generate
 from algo_coach.generation.hardening import harden
-from algo_coach.generation.inputs import InputGenerator, write_input_generator
-from algo_coach.generation.naive import write_naive
+from algo_coach.generation.inputs import InputGenerator
 from algo_coach.generation.resuming import draws_again, re_asks, reaches
+from algo_coach.generation.screen import Verdict, screen
 from algo_coach.generation.speedup import CEILING, MARGIN, REPEATS_MAX, SEARCH_REVISION
 from algo_coach.generation.steps import SILENT, Notes
 from algo_coach.generation.timing import timed
@@ -77,6 +77,8 @@ class Passage:
     drafts: DraftStore | None = None
     checked: Checked = field(default_factory=lambda: Checked(outcome=None))
     first: Checked = field(default_factory=lambda: Checked(outcome=None))
+    screen: Call | None = None
+    verdict: Verdict | None = None
     blind: Call | None = None
     inputs: Inputs = field(default_factory=Inputs)
     naive: Naive = field(default_factory=Naive)
@@ -174,6 +176,11 @@ def to_agreed(p: Passage) -> bool:
         p.draft = rejected(p.drafts, p.draft, ran.gate)
         return False
     p.draft = advanced(p.drafts, p.draft, WritingState.CHECKED)
+    if not screened(p):
+        # the cases passed, so the generator's record carries no gate
+        p.first = stopped(ran)
+        p.checked = replace(p.first, gate=Gate.COPIED)
+        return False
 
     if re_asks(p.draft, "blind", p.target, p.bench) or p.draft.reference is None:
         p.notes("reference", "writing the reference from the statement alone")
@@ -202,6 +209,29 @@ def to_agreed(p: Passage) -> bool:
         p.draft = rejected(p.drafts, p.draft, p.first.gate)
         return False
     p.draft = advanced(p.drafts, p.draft, WritingState.AGREED, cases=p.first.cases)
+    return True
+
+
+def screened(p: Passage) -> bool:
+    """Before the reference, so a copied draft costs this call alone."""
+    if not re_asks(p.draft, "screen", p.target, p.bench) and p.draft.screen_provenance:
+        p.notes("screen", "reused, at the configuration that judged it")
+        return True
+    p.notes("screen", "asking whether the draft copied a published problem")
+    p.verdict, p.screen = screen(
+        p.transport, p.calls, p.draft.statement, p.draft.declared, configuration=p.bench.screen
+    )
+    if p.verdict.copied:
+        p.notes("screen", f"copied: {p.verdict.detail}", p.screen)
+        p.draft = rejected(p.drafts, p.draft, Gate.COPIED)
+        return False
+    p.notes("screen", "nothing copied", p.screen)
+    p.draft = advanced(
+        p.drafts,
+        p.draft,
+        WritingState.SCREENED,
+        screen_provenance=MachineProvenance.of(p.screen),
+    )
     return True
 
 
@@ -340,7 +370,7 @@ def stored(draft: Draft) -> Inputs:
 
 
 def sites(writing: Writing, call: Call | None, p: Passage) -> None:
-    """The five records of one writing, written once the loop's numbers are
+    """The six records of one writing, written once the loop's numbers are
     known.
 
     A gate belongs to the site whose answer made it decidable, and a kill to
@@ -357,6 +387,13 @@ def sites(writing: Writing, call: Call | None, p: Passage) -> None:
         killed=p.bar.declared,
         misdeclared=len(p.first.misdeclarations),
         aimed=True,
+    )
+    copied = p.verdict is not None and p.verdict.copied
+    writing(
+        CallSite.SCREEN,
+        p.screen,
+        gate=Gate.COPIED if copied else None,
+        detail=p.verdict.detail if p.verdict else "",
     )
     writing(CallSite.BLIND, p.blind, **blind_verdicts(p.first))
     # the counters as the last round left them, which is why the record cites
@@ -429,75 +466,6 @@ def measured(
     return disagreed, inputs, bar.model_copy(update={"gate": Gate.DISAGREED}), [], []
 
 
-def building(
-    transport: Transport,
-    calls: CallLog,
-    statement: str,
-    *,
-    configuration: Configuration,
-    notes: Notes = SILENT,
-) -> Inputs:
-    """The code that builds an input of a given size, for every problem.
-
-    A call that fails costs the inputs rather than the problem: it says nothing
-    about the statement, as a failed search does not.
-    """
-    notes("inputs", "writing the input generator")
-    try:
-        generator, call = write_input_generator(
-            transport, calls, statement, configuration=configuration
-        )
-    except Exception as failure:
-        notes("inputs", f"unbuilt: {failure!r}")
-        return Inputs(unbuilt=repr(failure))
-    notes("inputs", f"written, up to {generator.largest}", call)
-    return Inputs(call=call, input_generator=generator, provenance=MachineProvenance.of(call))
-
-
-def paced(
-    transport: Transport,
-    calls: CallLog,
-    draft: Draft,
-    target: Target,
-    *,
-    configuration: Configuration,
-    cap_ms: int,
-    notes: Notes = SILENT,
-    reuse: bool = True,
-) -> Naive:
-    """The naive solution, or the one the draft already holds, run against the
-    set the two solutions settled.
-
-    A call that fails costs the naive solution rather than the problem, as a
-    failed input generator does. So does one whose answer is wrong: what it says
-    is that this solution measures nothing, not that the statement is unsound.
-    """
-    if reuse and draft.naive is not None:
-        notes("naive", "reused, at the configuration that wrote it")
-        naive = Naive(code=draft.naive, provenance=draft.naive_provenance)
-    else:
-        notes("naive", "writing the solution the search measures against")
-        try:
-            code, call = write_naive(
-                transport, calls, draft.statement, target, configuration=configuration
-            )
-        except Exception as failure:
-            notes("naive", f"unpaced: {failure!r}")
-            return Naive(unpaced=repr(failure))
-        notes("naive", "written", call)
-        naive = Naive(call=call, code=code, provenance=MachineProvenance.of(call))
-
-    # run again on a reuse: the draft stores the code rather than the verdict,
-    # and a subprocess answers this for nothing
-    detail = wrong_on(draft.cases, code=naive.code or "", cap_ms=cap_ms)
-    if detail is None:
-        return naive
-    notes("naive", detail)
-    # the call is kept, since the site answered and the record is what says
-    # what it cost. Nothing is stored, so the draft stops at the step before
-    return naive.model_copy(update={"code": None, "unpaced": detail})
-
-
 def fuzzing(draft: Draft, inputs: Inputs, *, cap_ms: int) -> Fuzzing | None:
     """The pass `harden` runs before its first round, or nothing where no
     generator was written for it to build with."""
@@ -515,11 +483,9 @@ def fuzzing(draft: Draft, inputs: Inputs, *, cap_ms: int) -> Fuzzing | None:
 __all__ = [
     "STEPS",
     "Passage",
-    "building",
     "carried",
     "fuzzing",
     "measured",
-    "paced",
     "sites",
     "stored",
     "to_agreed",

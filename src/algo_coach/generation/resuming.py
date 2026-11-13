@@ -16,6 +16,7 @@ from algo_coach.generation.bench import BENCH, Bench
 from algo_coach.generation.blind import request_hash as blind_hash
 from algo_coach.generation.inputs import request_hash as inputs_hash
 from algo_coach.generation.naive import request_hash as naive_hash
+from algo_coach.generation.screen import request_hash as screen_hash
 from algo_coach.generation.speedup import (
     CEILING,
     MARGIN,
@@ -28,6 +29,7 @@ from algo_coach.schema import Draft, WritingState
 # the steps a call answers, in the order they run. `checked`, `agreed` and
 # `searched` are local runs, so nothing about a bench moves them
 ANSWERED = (
+    (WritingState.SCREENED, "screen"),
     (WritingState.REFERENCED, "blind"),
     (WritingState.BUILT, "inputs"),
     (WritingState.PACED, "naive"),
@@ -39,6 +41,7 @@ ANSWERED = (
 ORDER = (
     WritingState.DRAFTED,
     WritingState.CHECKED,
+    WritingState.SCREENED,
     WritingState.REFERENCED,
     WritingState.AGREED,
     WritingState.BUILT,
@@ -74,6 +77,8 @@ def starts_at(draft: Draft, target: Target, bench: Bench = BENCH) -> WritingStat
 def sending(draft: Draft, site: str, target: Target) -> str | None:
     """The prompt hash that site would send about this draft now, or `None`
     where only a local pass can say."""
+    if site == "screen":
+        return screen_hash(draft.statement, draft.declared)
     if site == "blind":
         return blind_hash(draft.statement)
     if site == "inputs":

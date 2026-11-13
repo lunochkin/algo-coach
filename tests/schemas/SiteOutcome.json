@@ -4,6 +4,7 @@
       "description": "The calls writing a problem takes. `Bench` names one configuration per\nentry, and a test pins the two lists together.",
       "enum": [
         "generator",
+        "screen",
         "blind",
         "discrimination",
         "inputs",
@@ -15,6 +16,7 @@
     "Gate": {
       "enum": [
         "no_value",
+        "copied",
         "misdeclared",
         "untested",
         "disagreed",

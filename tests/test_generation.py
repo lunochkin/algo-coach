@@ -319,6 +319,14 @@ def test_the_brief_asks_for_a_different_question(tmp_path):
     assert "Yours asks a different question." in rule
 
 
+def test_a_published_example_is_off_limits():
+    """Two landed problems reused a published problem's example word for
+    word, which makes the case set someone else's."""
+    rule = " ".join(SYSTEM.split())
+
+    assert "Invent the worked example and every case." in rule
+
+
 def test_written_statements_reach_the_call(database):
     model = FakeModel(draft())
 

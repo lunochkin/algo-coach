@@ -190,7 +190,7 @@ def test_a_draft_a_raised_call_left_is_held_with_its_reason(database):
     result, drafts = run(database, Raises())
 
     (one,) = result.held
-    assert one.draft.state is WritingState.CHECKED
+    assert one.draft.state is WritingState.SCREENED
     assert "gateway" in one.failed
     assert [failed.index for failed in result.failed] == [1]
     assert drafts.all() == [one.draft]

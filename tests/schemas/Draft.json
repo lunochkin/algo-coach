@@ -31,6 +31,7 @@
     "Gate": {
       "enum": [
         "no_value",
+        "copied",
         "misdeclared",
         "untested",
         "disagreed",
@@ -201,6 +202,7 @@
       "enum": [
         "drafted",
         "checked",
+        "screened",
         "referenced",
         "agreed",
         "built",
@@ -420,6 +422,17 @@
       ],
       "default": null,
       "title": "Repeats Max"
+    },
+    "screen_provenance": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/MachineProvenance"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
     },
     "search_revision": {
       "anyOf": [

@@ -132,6 +132,8 @@ def reason(checked: Checked) -> str:
             return f"the canonical {checked.outcome} on some case"
         case Gate.UNTESTED:
             return "the reference computed no case"
+        case Gate.COPIED:
+            return "the screen named a published problem it was copied from"
         case _:
             return f"the two solutions disagree on {len(checked.disagreements)} case(s)"
 

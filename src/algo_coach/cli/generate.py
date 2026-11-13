@@ -18,6 +18,7 @@ from algo_coach.cli.generating import (
 from algo_coach.cli.transport import transport
 from algo_coach.drafts import DraftStore
 from algo_coach.generation import (
+    REPLAYED,
     Corpus,
     GenerationResult,
     Notes,
@@ -54,6 +55,8 @@ def generate(args: argparse.Namespace, parser: argparse.ArgumentParser, root: Da
     if len([one for one in MODES if getattr(args, one)]) > 1:
         named = ", ".join(f"--{one}" for one in MODES)
         parser.exit(2, f"generate: {named} each do their own work, so one at a time\n")
+    if args.only and not args.replay:
+        parser.exit(2, "generate: --only narrows a --replay, and names nothing on its own\n")
     if args.replay:
         return replayed(args, parser, root)
     if args.resume:
@@ -254,6 +257,8 @@ def replayed(args: argparse.Namespace, parser: argparse.ArgumentParser, root: Da
     """
     if args.card or args.template or args.gaps or args.difficulty:
         parser.exit(2, "generate: --replay reads the stored corpus, so it is aimed at nothing\n")
+    if args.only and any(one not in REPLAYED for one in args.only):
+        parser.exit(2, "generate: --only names a site a replay asks; the generator is none\n")
     api = transport(args, parser)
     bench = chosen_bench(args, parser)
     result = replay(
@@ -266,6 +271,7 @@ def replayed(args: argparse.Namespace, parser: argparse.ArgumentParser, root: Da
         limit=args.limit,
         fresh=args.fresh,
         on_step=stage,
+        sites=args.only or REPLAYED,
     )
     print(replay_summary(result, bench))
     if result.aborted:

@@ -18,6 +18,7 @@ from algo_coach.generation import (
     generator,
     inputs,
     naive,
+    screen,
     write_problems,
 )
 from algo_coach.generation import passage as passage_module
@@ -59,7 +60,7 @@ def test_each_row_is_priced_over_its_own_calls(database):
         on_progress=seen.append,
     )
 
-    assert [line.cost for line in seen] == [0.003, 0.003]
+    assert [line.cost for line in seen] == [0.004, 0.004]
     assert sum(line.cost for line in seen) == sum(call.cost for call in log.appended)
 
 
@@ -87,7 +88,12 @@ def test_a_problem_takes_three_calls_in_one_order(database):
 
     _, result = run(database, model)
 
-    assert [one["system"] for one in model.calls] == [generator.SYSTEM, blind.SYSTEM, inputs.SYSTEM]
+    assert [one["system"] for one in model.calls] == [
+        generator.SYSTEM,
+        screen.SYSTEM,
+        blind.SYSTEM,
+        inputs.SYSTEM,
+    ]
     assert len(result.drafted) == 1
     assert result.drafted[0].reference.startswith("def solve")
 
@@ -155,7 +161,7 @@ def test_every_call_is_recorded(database):
 
     run(database, model, count=2)
 
-    assert len(own(CallLog(database).all())) == 4
+    assert len(own(CallLog(database).all())) == 5
 
 
 def test_a_problem_the_runs_reject_is_reported_apart(database):
@@ -265,7 +271,12 @@ def test_a_form_that_is_its_own_optimum_is_still_built_for(database, monkeypatch
         templates=[template("longest-valid-window", speedup=False)],
     )
 
-    assert [one["system"] for one in model.calls] == [generator.SYSTEM, blind.SYSTEM, inputs.SYSTEM]
+    assert [one["system"] for one in model.calls] == [
+        generator.SYSTEM,
+        screen.SYSTEM,
+        blind.SYSTEM,
+        inputs.SYSTEM,
+    ]
     assert len(CaseLog(database).cases()) == 1
 
 
@@ -542,6 +553,7 @@ def test_the_input_generator_is_written_before_the_rounds(database):
 
     assert [one["system"] for one in model.calls] == [
         generator.SYSTEM,
+        screen.SYSTEM,
         blind.SYSTEM,
         inputs.SYSTEM,
         discrimination.SYSTEM,
@@ -594,7 +606,12 @@ def test_a_set_that_kills_every_mutant_pays_for_no_round(database):
 
     run(database, model)
 
-    assert [one["system"] for one in model.calls] == [generator.SYSTEM, blind.SYSTEM, inputs.SYSTEM]
+    assert [one["system"] for one in model.calls] == [
+        generator.SYSTEM,
+        screen.SYSTEM,
+        blind.SYSTEM,
+        inputs.SYSTEM,
+    ]
 
 
 def test_a_round_that_fails_holds_the_draft_for_a_resume(database):
@@ -652,10 +669,12 @@ def test_a_run_reports_every_stage_as_it_goes(database):
         on_step=reported.append,
     )
 
-    assert [step.name for step in reported][:5] == [
+    assert [step.name for step in reported][:7] == [
         "statement",
         "statement",
         "cases",
+        "screen",
+        "screen",
         "reference",
         "reference",
     ]
@@ -667,6 +686,7 @@ def models(model: FakeWriter) -> dict[str, str]:
     """Which model each call site was asked of, by the prompt it was sent."""
     named = {
         generator.SYSTEM: "generator",
+        screen.SYSTEM: "screen",
         blind.SYSTEM: "blind",
         discrimination.SYSTEM: "discrimination",
         inputs.SYSTEM: "inputs",
@@ -679,6 +699,7 @@ def test_every_site_is_asked_of_its_own_model(database):
     the cheapest of them pay the price of the hardest."""
     bench = Bench(
         generator=Configuration(model="writes-problems", effort="medium", pin="test"),
+        screen=Configuration(model="recalls-problems", effort="medium", pin="test"),
         blind=Configuration(model="reads-statements", effort="medium", pin="test"),
         discrimination=Configuration(model="writes-cases", effort="medium", pin="test"),
         inputs=Configuration(model="builds-inputs", effort="medium", pin="test"),
@@ -692,6 +713,7 @@ def test_every_site_is_asked_of_its_own_model(database):
 
     assert models(model) == {
         "generator": "writes-problems",
+        "screen": "recalls-problems",
         "blind": "reads-statements",
         "discrimination": "writes-cases",
         "inputs": "builds-inputs",

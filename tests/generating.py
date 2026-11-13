@@ -5,7 +5,7 @@ import json
 from dataclasses import dataclass, field
 
 from algo_coach.calls import Reply
-from algo_coach.generation import blind, discrimination, inputs, naive
+from algo_coach.generation import blind, discrimination, inputs, naive, screen
 
 CANONICAL = "def solve(xs):\n    return len(xs)\n"
 BLIND = "def solve(xs):\n    return sum(1 for _ in xs)\n"
@@ -56,6 +56,12 @@ def built(
     return json.dumps({"code": code, "largest": largest})
 
 
+def judged(published: str | None) -> str:
+    return json.dumps(
+        {"copied": published is not None, "published": published, "reused": "the example"}
+    )
+
+
 @dataclass
 class FakeWriter:
     """Answers the two calls apart, telling them by what was sent: the
@@ -81,6 +87,8 @@ class FakeWriter:
     # the canonical against
     slow: str | None = NAIVE
     cases: list[dict] | None = None
+    # the published problem the screen names, or `None` for nothing copied
+    copied: str | None = None
     calls: list[dict] = field(default_factory=list)
     written: int = 0
     answered: int = 0
@@ -91,6 +99,8 @@ class FakeWriter:
         # the input generator are both handed the statement alone
         if kwargs["system"] == blind.SYSTEM:
             return Reply(text=solved(self.solution), stop_reason="stop")
+        if kwargs["system"] == screen.SYSTEM:
+            return Reply(text=judged(self.copied), stop_reason="stop")
         if kwargs["system"] == discrimination.SYSTEM:
             asked = self.separators[min(self.answered, len(self.separators) - 1)]
             self.answered += 1
@@ -121,7 +131,13 @@ class FakeWriter:
             one["content"]
             for one in self.calls
             if one["system"]
-            not in (blind.SYSTEM, naive.SYSTEM, discrimination.SYSTEM, inputs.SYSTEM)
+            not in (
+                blind.SYSTEM,
+                screen.SYSTEM,
+                naive.SYSTEM,
+                discrimination.SYSTEM,
+                inputs.SYSTEM,
+            )
         ]
 
 

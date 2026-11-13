@@ -4,7 +4,7 @@ from sqlalchemy import delete, text
 
 from algo_coach.calls import CallLog
 from algo_coach.cases import CaseLog
-from algo_coach.generation import REPLAYED, Bench, Corpus, naive, replay, write_problems
+from algo_coach.generation import REPLAYED, Bench, Corpus, naive, replay, screen, write_problems
 from algo_coach.outcomes import OutcomeLog
 from algo_coach.problems import ProblemStore
 from algo_coach.schema import (
@@ -64,8 +64,13 @@ def test_a_replay_asks_the_answering_sites_about_a_stored_problem(database, monk
 
     result, outcomes = replayed(database, FakeWriter(generator=BUILDS), cards)
 
-    assert set(sites(outcomes)) == {CallSite.BLIND, CallSite.INPUTS, CallSite.NAIVE}
-    assert result.asked == 3
+    assert set(sites(outcomes)) == {
+        CallSite.SCREEN,
+        CallSite.BLIND,
+        CallSite.INPUTS,
+        CallSite.NAIVE,
+    }
+    assert result.asked == 4
 
 
 def test_the_search_measures_against_the_stored_naive_solution(database, monkeypatch):
@@ -150,8 +155,8 @@ def test_a_pair_this_configuration_answered_is_skipped(database, monkeypatch):
 
     assert second.calls == []
     assert result.asked == 0
-    assert result.skipped == 3
-    assert len(outcomes) == 3
+    assert result.skipped == 4
+    assert len(outcomes) == 4
 
 
 def test_a_second_configuration_is_paid_for(database, monkeypatch):
@@ -165,7 +170,7 @@ def test_a_second_configuration_is_paid_for(database, monkeypatch):
     result, outcomes = replayed(database, FakeWriter(generator=BUILDS), cards, log=log, bench=other)
 
     assert result.asked == 1
-    assert result.skipped == 2
+    assert result.skipped == 3
     assert [one.model for one in outcomes if one.site is CallSite.BLIND][-1] == "another"
 
 
@@ -178,8 +183,8 @@ def test_fresh_asks_again_where_a_record_answers(database, monkeypatch):
 
     result, outcomes = replayed(database, FakeWriter(generator=BUILDS), cards, log=log, fresh=True)
 
-    assert result.asked == 3
-    assert len(outcomes) == 6
+    assert result.asked == 4
+    assert len(outcomes) == 8
 
 
 def test_a_replayed_reference_that_disagrees_is_recorded(database, monkeypatch):
@@ -240,7 +245,7 @@ def test_a_form_that_is_its_own_optimum_is_not_asked(database, monkeypatch):
 
     assert CallSite.INPUTS not in sites(outcomes)
     assert CallSite.NAIVE not in sites(outcomes)
-    assert result.asked == 1  # the reference alone
+    assert result.asked == 2  # the screen and the reference
 
 
 def test_the_discrimination_site_is_asked_where_a_mutant_survives(database, monkeypatch):
@@ -296,7 +301,7 @@ def test_the_loop_is_replayed_against_the_set_as_it_stood(database):
     # skipped rather than unasked: shown the won case the loop kills every
     # mutant, and the site would go unasked for the wrong reason. The inputs
     # and naive sites are the unasked ones, since the form claims no speedup
-    assert (result.skipped, result.unasked) == (2, 2)
+    assert (result.skipped, result.unasked) == (3, 2)
     assert second.answered == 0
 
 
@@ -305,8 +310,39 @@ def test_the_sites_a_replay_asks_exclude_the_generator(tmp_path):
     `generate`."""
     assert CallSite.GENERATOR not in REPLAYED
     assert set(REPLAYED) == {
+        CallSite.SCREEN,
         CallSite.BLIND,
         CallSite.DISCRIMINATION,
         CallSite.INPUTS,
         CallSite.NAIVE,
     }
+
+
+def test_a_stored_copy_is_named_on_the_screens_record(database, monkeypatch):
+    """The served problems landed before the screen existed. Its record names
+    the copy, and retiring one stays a by-hand act."""
+    cards = landed(database, monkeypatch)
+
+    _, outcomes = replayed(
+        database, FakeWriter(copied="a published one"), cards, sites=[CallSite.SCREEN]
+    )
+
+    (screened,) = outcomes_of(outcomes, CallSite.SCREEN)
+    assert screened.gate is Gate.COPIED and "a published one" in screened.detail
+    assert ProblemStore(database).all()[0].served
+
+
+def test_a_replay_narrowed_to_one_site_asks_that_site_alone(database, monkeypatch):
+    """Screening the corpus would otherwise pay every other site's call too."""
+    cards = landed(database, monkeypatch)
+    model = FakeWriter()
+
+    result, _ = replayed(database, model, cards, sites=[CallSite.SCREEN])
+
+    assert result.asked == 1
+    assert [one["system"] for one in model.calls].count(screen.SYSTEM) == 1
+    assert len(model.calls) == 1
+
+
+def outcomes_of(outcomes, site):
+    return [one for one in outcomes if one.site is site and one.problem_id is not None][-1:]

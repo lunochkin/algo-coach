@@ -57,6 +57,16 @@ architecture, and `README.md` is the map.
   corpus for this is deferred to "The corpus gated" in `ROADMAP.md`. It needs
   a corpus to measure and a baseline no generator wrote, and a status the gate
   promotes to is an additive change when it comes.
+- **A statement's example and cases are the engine's own.** The generator's
+  prompt forbids reusing the example, the values or the wording of a published
+  problem. A published question retold in a new setting is accepted. Two of
+  the first problems landed with a published example copied whole, and a
+  problem carrying another platform's cases breaks the rule that every problem
+  is the product's own.
+- **The screen site judges whether a draft copied a published problem.**
+  `flows.md` gives where it runs and what it rejects. The judge answers from
+  the model's memory, since this repo holds no published example to compare
+  against, by the invariant on third-party content.
 - **A problem is never edited, and only its status moves.** A statement that
   says the wrong thing is retired `defective` and a new problem is written.
   The retired problem's attempts stay with the record they were made against,
@@ -68,8 +78,10 @@ architecture, and `README.md` is the map.
   from another user's practice. A user's request to retire a problem is
   deferred until someone other than the author sits.
 - **Retirement names its reason.** `defective` is a statement that asked for
-  something its cases do not decide, and it is the only reason today. A reason
-  whose attempts are kept is additive when a gate needs one.
+  something its cases do not decide. `copied` is a problem the screen site
+  named a published source for.
+- **A copied problem's attempts stay in mastery.** The solver solved what the
+  problem asked, and only where its example came from was wrong.
 - **A defective problem's attempts are excluded from mastery, both
   directions.** The failure was the problem's fault, and the self-label the
   loop asked for blamed the user instead. Excluding only the failures would

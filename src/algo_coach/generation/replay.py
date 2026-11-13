@@ -24,6 +24,8 @@ from algo_coach.generation.inputs import write_input_generator
 from algo_coach.generation.landing import Corpus
 from algo_coach.generation.naive import request_hash as naive_hash
 from algo_coach.generation.naive import write_naive
+from algo_coach.generation.screen import request_hash as screen_hash
+from algo_coach.generation.screen import screen
 from algo_coach.generation.steps import Notes, Step
 from algo_coach.generation.timing import found_in, searched_note, separated
 from algo_coach.generation.verdicts import (
@@ -42,6 +44,7 @@ from algo_coach.schema import (
     Card,
     CaseOutcome,
     Configuration,
+    DraftCase,
     Gate,
     MachineProvenance,
     Problem,
@@ -54,7 +57,13 @@ from algo_coach.schema import (
 
 # the sites a stored problem can be re-asked about. The generator writes a
 # problem rather than answering one, so asking it again is `generate`
-REPLAYED = (CallSite.BLIND, CallSite.DISCRIMINATION, CallSite.INPUTS, CallSite.NAIVE)
+REPLAYED = (
+    CallSite.SCREEN,
+    CallSite.BLIND,
+    CallSite.DISCRIMINATION,
+    CallSite.INPUTS,
+    CallSite.NAIVE,
+)
 
 
 class Failed(BaseModel):
@@ -153,6 +162,7 @@ def replay(
     limit: int | None = None,
     fresh: bool = False,
     on_step: Callable[[Step], None] | None = None,
+    sites: Sequence[CallSite] = REPLAYED,
 ) -> ReplayResult:
     """Each site over each stored problem, at the bench's configuration.
 
@@ -170,6 +180,7 @@ def replay(
         (Notes(on_step, index=index, total=len(asking)), subject, site)
         for index, subject in enumerate(asking, start=1)
         for site in REPLAYED
+        if site in sites
     ]
 
     def ask(pair: tuple[Notes, Subject, CallSite]) -> Asked:
@@ -203,6 +214,33 @@ def replay(
 
 def problem_template(subject: Subject) -> str | None:
     return subject.template.id if subject.template else None
+
+
+def screen_replay(
+    transport: Transport,
+    calls: CallLog,
+    subject: Subject,
+    stored: Sequence[SiteOutcome],
+    bench: Bench,
+    cap_ms: int,
+    fresh: bool,
+    notes: Notes,
+) -> Asked:
+    """The screen over a problem that landed before it existed. Its verdict is
+    a record: retiring a copy stays a by-hand act."""
+    configuration = bench.screen
+    cases = [DraftCase(args=one.args, expected=one.expected) for one in subject.declared]
+    prompt_hash = screen_hash(subject.problem.statement, cases)
+    if not fresh and asked_already(stored, CallSite.SCREEN, subject, configuration, prompt_hash):
+        notes("screen", "answered at this prompt hash")
+        return Asked(skipped=True)
+    notes("screen", "asking whether the problem copied a published one")
+    verdict, call = screen(
+        transport, calls, subject.problem.statement, cases, configuration=configuration
+    )
+    notes("screen", f"copied: {verdict.detail}" if verdict.copied else "nothing copied", call)
+    gate = Gate.COPIED if verdict.copied else None
+    return Asked(call=call, verdicts={"gate": gate, "detail": verdict.detail})
 
 
 def blind_replay(
@@ -386,6 +424,7 @@ def asked_already(
 
 
 ASK = {
+    CallSite.SCREEN: screen_replay,
     CallSite.BLIND: blind_replay,
     CallSite.DISCRIMINATION: discrimination_replay,
     CallSite.INPUTS: inputs_replay,

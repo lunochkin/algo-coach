@@ -23,6 +23,7 @@ class WritingState(StrEnum):
 
     DRAFTED = "drafted"
     CHECKED = "checked"
+    SCREENED = "screened"
     REFERENCED = "referenced"
     AGREED = "agreed"
     BUILT = "built"
@@ -140,6 +141,7 @@ class Draft(BaseModel):
     # starts at the first step whose configuration or prompt hash moved, which
     # is why both are held here rather than only the outputs
     generator_provenance: MachineProvenance | None = None
+    screen_provenance: MachineProvenance | None = None
     blind_provenance: MachineProvenance | None = None
     inputs_provenance: MachineProvenance | None = None  # the input generator and the search it fed
     naive_provenance: MachineProvenance | None = (
@@ -186,7 +188,7 @@ class Draft(BaseModel):
     def _each_step_copies_a_whole_configuration(self) -> Draft:
         """A step whose configuration is partly unknown could not be compared
         with the one a resume would run."""
-        for site in ("generator", "blind", "inputs", "naive", "discrimination"):
+        for site in ("generator", "screen", "blind", "inputs", "naive", "discrimination"):
             copied = getattr(self, f"{site}_provenance")
             if copied is not None:
                 copied.check_provenance(True)

@@ -5,7 +5,7 @@ flow says in what order, and what each step may not do.
 
 ## Generating a problem
 
-A problem, its test cases and its solutions are written across five calls.
+A problem, its test cases and its solutions are written across six calls.
 The order matters because each step can reject what came before.
 
 1. The target: a template, naming the form the problem must be solvable by, or
@@ -14,20 +14,22 @@ The order matters because each step can reject what came before.
    call.
 3. The canonical runs, and its outputs are read against the expected values
    the same call declared.
-4. The reference solution, from the statement alone.
-5. The reference runs, and the two solutions' outputs are settled: they agree
+4. A judge reads the statement and the cases for an example, values or
+   wording taken from a published problem, and rejects a copied draft.
+5. The reference solution, from the statement alone.
+6. The reference runs, and the two solutions' outputs are settled: they agree
    on every case, or the draft is rejected.
-6. Code that builds an input of a given size and seed, from the statement
+7. Code that builds an input of a given size and seed, from the statement
    alone.
-7. A deliberately naive solution, from the statement and the form it may not
+8. A deliberately naive solution, from the statement and the form it may not
    use, on a template that claims a speedup.
-8. The smallest input separating that solution from the canonical under the
+9. The smallest input separating that solution from the canonical under the
    cap is searched for.
-9. Mutants of the canonical run against the cases, then against inputs that
+10. Mutants of the canonical run against the cases, then against inputs that
    code builds. A call asks for the cases that kill whichever mutant survived
    both, and the ones that killed are appended to the set.
-10. The case at the separating size is appended after them.
-11. All of it lands together, with the template match the generation asserts
+11. The case at the separating size is appended after them.
+12. All of it lands together, with the template match the generation asserts
     on its canonical.
 
 - **Problems for one template are written one at a time.** Each call is shown
@@ -58,6 +60,24 @@ The order matters because each step can reject what came before.
   and nothing else, so a disagreement is evidence the prose admits two readings.
   The generator's declaration is evidence about one call.
 
+- **The screen runs before the reference.** A copied draft then costs the
+  screen's call alone, rather than the four calls after it.
+- **The screen reads the statement and every declared case.** A published
+  example reaches a draft as the worked example or as a case's arguments.
+- **A retold question is not copied.** An easy problem applies a template's
+  form unchanged, so its question is a published one in a new setting. The
+  screen rejects reused values and reused wording only.
+- **The screen names the published problem it found**, in the site outcome's
+  `detail`, so a reader can check the verdict. The record holds the name alone,
+  never the published statement.
+- **The screen answers from memory, and a miss passes silently.** A model that
+  does not remember a published example lets it through. Which configuration
+  recalls the most is unmeasured.
+- **A copied draft is rejected, not held.** A second generator call writes a
+  different problem, so nothing would re-run this one.
+- **The problems already stored are screened by a replay**, `generate --replay
+  --only screen`. They landed before the screen existed. A copy the replay
+  names is retired by hand, as `copied`.
 - **A disagreement is the statement's fault, not either solution's.** Two
   correct-looking solutions returning different answers means the prose admits
   two readings. An in-place edit cannot repair that, since the cases would
@@ -196,7 +216,8 @@ calls before it away.
 ```mermaid
 flowchart TB
   D["drafted"] -->|"the canonical returns a value on every case"| C["checked"]
-  C -->|"<b>blind</b>: the reference, from the statement alone"| R["referenced"]
+  C -->|"<b>screen</b>: nothing copied from a published problem"| Q["screened"]
+  Q -->|"<b>blind</b>: the reference, from the statement alone"| R["referenced"]
   R -->|"the two solutions agree on every case"| A["agreed"]
   A -->|"<b>inputs</b>: code that builds an input of a given size"| B["built"]
   B -->|"<b>naive</b>: the naive solution, where a speedup is claimed"| P["paced"]
@@ -205,11 +226,13 @@ flowchart TB
   H -->|"the problem, its cases, its solutions and the match"| L(["landed"])
 
   D -.->|"no_value"| X(["rejected<br/><i>terminal, and names the gate</i>"])
+  C -.->|"copied"| X
   R -.->|"untested · disagreed"| X
   P -.->|"disagreed"| X
   S -.->|"disagreed"| X
 
-  C ==>|"the blind call failed"| Z(["held<br/><i>at the state it reached; a resume re-enters at the<br/>first step whose configuration or prompt hash moved</i>"])
+  C ==>|"the screen call failed"| Z(["held<br/><i>at the state it reached; a resume re-enters at the<br/>first step whose configuration or prompt hash moved</i>"])
+  Q ==>|"the blind call failed"| Z
   A ==>|"no input generator, and a speedup is claimed"| Z
   B ==>|"no naive solution, or one the cases failed"| Z
   P ==>|"the round's call failed"| Z
@@ -229,9 +252,9 @@ a second generator call writes a different problem.
 - **The draft is identified by the writing id.** `SiteOutcome` already mints
   one per writing, so the site records of one draft group with no new
   reference.
-- **A state per step that can fail**: drafted, checked, referenced, agreed,
-  built, paced, searched, hardened, landed. The names are the steps above and
-  the order is theirs.
+- **A state per step that can fail**: drafted, checked, screened, referenced,
+  agreed, built, paced, searched, hardened, landed. The names are the steps
+  above and the order is theirs.
 - **A search that separated nothing stops the draft at `searched`.** The
   search's result is recorded either way, and `corpus.md` gives the four exits
   a held draft leaves by.
@@ -392,7 +415,7 @@ other way to solve it is found afterwards, over the stored problem.
 
 ## Replaying a site
 
-The four answering sites over a stored problem, at a configuration the corpus
+The five answering sites over a stored problem, at a configuration the corpus
 has not been read by. Generation writes a new problem every call, so nothing
 there is ever asked twice and no two configurations meet the same item.
 
@@ -408,6 +431,8 @@ there is ever asked twice and no two configurations meet the same item.
    searches against it, where the template claims a speedup.
 6. Each site's answer is recorded as its outcome, keyed to the problem.
 
+- **`--only` narrows a replay to the sites it names.** Screening the corpus
+  would otherwise pay every other site's call too.
 - **A replay writes nothing to the corpus.** A case a round wins here is
   dropped, or the next configuration would be measured against a different
   problem.

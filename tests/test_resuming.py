@@ -464,7 +464,7 @@ def test_a_draft_a_raised_call_left_resumes_at_that_call(database):
     drafts = DraftStore(database)
     one, first = written(database, Raises(), drafts)
     (stopped,) = first.held
-    assert stopped.draft.state is WritingState.CHECKED
+    assert stopped.draft.state is WritingState.SCREENED
 
     result = resume(
         FakeWriter(),

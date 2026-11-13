@@ -44,7 +44,12 @@ def test_every_site_that_answered_leaves_a_record(database):
     _, result, outcomes = run(database, FakeWriter(generator=BUILDS))
 
     assert len(result.drafted) == 1
-    assert set(sites(outcomes)) == {CallSite.GENERATOR, CallSite.BLIND, CallSite.INPUTS}
+    assert set(sites(outcomes)) == {
+        CallSite.GENERATOR,
+        CallSite.SCREEN,
+        CallSite.BLIND,
+        CallSite.INPUTS,
+    }
 
 
 def test_the_four_sites_of_one_writing_share_a_writing_id(database):
@@ -72,7 +77,7 @@ def test_a_rejected_draft_still_leaves_what_its_sites_left(database):
     _, result, outcomes = run(database, model)
 
     assert result.drafted == []
-    assert set(sites(outcomes)) == {CallSite.GENERATOR, CallSite.BLIND}
+    assert set(sites(outcomes)) == {CallSite.GENERATOR, CallSite.SCREEN, CallSite.BLIND}
     assert {one.problem_id for one in outcomes} == {None}
 
 

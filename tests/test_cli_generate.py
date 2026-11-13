@@ -25,6 +25,7 @@ from algo_coach.generation import (
     generator,
     inputs,
     reject,
+    screen,
 )
 from algo_coach.matches import MatchLog
 from algo_coach.problems import ProblemStore
@@ -51,7 +52,7 @@ def test_the_command_writes_problems(root, monkeypatch, capsys):
     out = capsys.readouterr().out
     assert "2 problem(s) stored, written by" in out
     assert f"generator {GENERATOR_DEFAULT.model} at {GENERATOR_DEFAULT.effort}" in out
-    assert len(own(CallLog(root).all())) == 6
+    assert len(own(CallLog(root).all())) == 8
 
 
 def test_the_run_names_each_stored_problem_and_not_its_statement(root, monkeypatch, capsys):
@@ -73,7 +74,7 @@ def test_the_run_reports_what_its_calls_cost(root, monkeypatch, capsys):
     query reads, and this is what one sitting spent."""
     run(monkeypatch, FakeWriter(), "longest-valid-window")
 
-    assert "3 call(s), 0 output token(s)" in capsys.readouterr().out
+    assert "4 call(s), 0 output token(s)" in capsys.readouterr().out
 
 
 def test_a_problem_its_runs_kept_is_stored_whole(root, monkeypatch, capsys):
@@ -109,7 +110,7 @@ def test_a_rejected_draft_stores_nothing(root, monkeypatch, capsys):
     assert ProblemStore(root).all() == []
     assert CaseLog(root).cases() == []
     assert "1 rejected" in capsys.readouterr().out
-    assert len(own(CallLog(root).all())) == 2
+    assert len(own(CallLog(root).all())) == 3
 
 
 def test_an_unseeded_card_is_named_before_any_call(root, monkeypatch, capsys):
@@ -466,6 +467,7 @@ def asked(model: FakeWriter) -> dict[str, dict]:
     """What each site was asked of, by the prompt it was sent."""
     named = {
         generator.SYSTEM: "generator",
+        screen.SYSTEM: "screen",
         blind.SYSTEM: "blind",
         discrimination.SYSTEM: "discrimination",
         inputs.SYSTEM: "inputs",
@@ -579,8 +581,8 @@ def test_replay_pays_for_a_second_configuration_once(root, monkeypatch, capsys):
     replaying(monkeypatch, FakeWriter(generator=BUILDS), *ANOTHER)
     second = capsys.readouterr().out
 
-    assert "1 pair(s) asked, 2 skipped" in first
-    assert "0 pair(s) asked, 3 skipped" in second
+    assert "1 pair(s) asked, 3 skipped" in first
+    assert "0 pair(s) asked, 4 skipped" in second
 
 
 def test_replay_is_aimed_at_nothing(root, monkeypatch, capsys):
@@ -641,7 +643,7 @@ def test_a_draft_a_raised_call_left_is_named_too(root, monkeypatch, capsys):
         run(monkeypatch, Raises(), "longest-valid-window")
 
     out, err = capsys.readouterr()
-    assert "# held" in out and "checked" in out
+    assert "# held" in out and "screened" in out
     assert "the call raised: RuntimeError('the gateway is down')" in out
     assert "no problem stored" in err
 
@@ -747,7 +749,7 @@ def test_the_drafts_are_listed_with_the_step_each_would_resume_at(root, monkeypa
 
     out = capsys.readouterr().out
     assert f"{stored.id}  longest-valid-window" in out
-    assert "checked" in out and "starts at referenced" in out
+    assert "screened" in out and "starts at referenced" in out
     assert "1 draft(s) stored, 1 would resume" in out
     assert len(own(CallLog(root).all())) == spent
 
@@ -963,3 +965,11 @@ def test_reading_a_draft_is_aimed_at_nothing(root, monkeypatch, capsys):
 
     assert exit_info.value.code == 2
     assert "aimed at nothing" in capsys.readouterr().err
+
+
+def test_only_narrows_a_replay_and_nothing_else(root, monkeypatch, capsys):
+    with pytest.raises(SystemExit) as exit_info:
+        run_cli(monkeypatch, "generate", "--only", "screen")
+
+    assert exit_info.value.code == 2
+    assert "--only narrows a --replay" in capsys.readouterr().err

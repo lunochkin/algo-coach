@@ -43,6 +43,7 @@ drafts = Table(
     # the call each site made, which holds the configuration and the prompt
     # hash a resume compares with what it would send now
     Column("generator_call_id", Text, ForeignKey("calls.id")),
+    Column("screen_call_id", Text, ForeignKey("calls.id")),
     Column("blind_call_id", Text, ForeignKey("calls.id")),
     Column("inputs_call_id", Text, ForeignKey("calls.id")),
     Column("naive_call_id", Text, ForeignKey("calls.id")),

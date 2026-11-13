@@ -19,6 +19,7 @@ class CallSite(StrEnum):
     entry, and a test pins the two lists together."""
 
     GENERATOR = "generator"
+    SCREEN = "screen"
     BLIND = "blind"
     DISCRIMINATION = "discrimination"
     INPUTS = "inputs"
@@ -28,6 +29,7 @@ class CallSite(StrEnum):
 class Gate(StrEnum):
     # named rather than a boolean: a run reports how its problems were lost
     NO_VALUE = "no_value"
+    COPIED = "copied"  # the screen named the published problem in `detail`
     # no run raises it: the count sits on the generator's own record, and the
     # arm stays for the drafts and the outcomes already written under it
     MISDECLARED = "misdeclared"

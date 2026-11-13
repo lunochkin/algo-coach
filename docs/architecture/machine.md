@@ -16,12 +16,13 @@ fields to stay comparable, and those fields are stated here once.
   that rejects the parameter, records the level it ran at rather than an empty
   field.
 - **A configuration is per call site, not per run.** Writing a problem takes
-  five calls, and each asks for a different thing. The generator writes a
-  statement and a solution. The blind site writes an independent reading of
+  six calls, and each asks for a different thing. The generator writes a
+  statement and a solution. The screen site judges whether the draft copied a
+  published problem. The blind site writes an independent reading of
   that statement. The discrimination site writes the inputs that catch a wrong
   solution. The inputs site writes code that builds an input of a given size.
   The naive site writes the approach the form replaces, and the speedup search
-  measures the canonical against it. One configuration over all five sites
+  measures the canonical against it. One configuration over all six sites
   makes the cheapest site pay the price of the hardest.
 - **A run mixing models stays readable, because each record names its own
   call.** The problem names the call that wrote it, its
@@ -51,7 +52,7 @@ fields to stay comparable, and those fields are stated here once.
   gives: each produces an artifact rather than a verdict about one. The
   generator's variance buys diversity across a corpus of statements, and the
   naive site's variance buys a second draw where the first draw wrote the form.
-- **The other three sites are greedy.** Greedy answers make two configurations
+- **The other four sites are greedy.** Greedy answers make two configurations
   of one site comparable over the same item. Those sites answer about a
   statement that already exists, and each answer decides something.
 - **Whether a site can be greedy is the endpoint's answer.** A request naming
@@ -105,7 +106,7 @@ call returned, so it sits beside the call log.
   one line per stage, and that output is gone when the process ends. Without a
   stored record, nobody can later see which gate rejected an answer, which
   configuration produced it, or which prompt hash it was sent.
-- **One record per site and per writing.** The five sites can run at five
+- **One record per site and per writing.** The six sites can run at six
   configurations, and one record over the writing could not say which of them a
   gate rejected.
 - **A kill is filed under the site whose output did it**, as a gate is filed

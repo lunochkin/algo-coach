@@ -218,3 +218,15 @@ def test_a_rating_names_its_problem(root, monkeypatch, capsys):
         shown(monkeypatch, "--rate", "easy")
 
     assert exit_info.value.code == 2
+
+
+def test_a_copy_is_retired_under_its_own_reason(root, monkeypatch, capsys):
+    """Its attempts stay counted, which the reason alone tells a reader."""
+    stored = landed(root, monkeypatch)
+    answering(monkeypatch, "y")
+
+    shown(monkeypatch, "--retire", stored.id[:8], "--reason", "copied")
+
+    retired = ProblemStore(root).get(stored.id)
+    assert retired.retired_reason is RetirementReason.COPIED
+    assert not retired.defective

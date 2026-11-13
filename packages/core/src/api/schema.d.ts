@@ -1140,7 +1140,7 @@ export interface components {
      * RetirementReason
      * @enum {string}
      */
-    RetirementReason: 'defective';
+    RetirementReason: 'defective' | 'copied';
     /**
      * Rung
      * @description One problem on a ladder, with the templates its canonicals display.

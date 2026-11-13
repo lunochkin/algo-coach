@@ -44,6 +44,7 @@ def test_the_states_are_the_steps_that_can_fail():
     assert [state.value for state in WritingState] == [
         "drafted",
         "checked",
+        "screened",
         "referenced",
         "agreed",
         "built",

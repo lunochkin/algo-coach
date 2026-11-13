@@ -48,6 +48,10 @@ labelled easy, where the platforms call it hard.
       filter and the ladder's selector
 - [x] Add a by-hand rating command beside `problem --retire`, writing a
       `user` rating
+- [x] Add the screen site, rejecting a draft that reuses a published
+      problem's example, values or wording under the gate `copied`
+- [x] Run the screen over the served problems, and retire each one it names
+      under a new retirement reason `copied` whose attempts stay counted
 - [ ] Hold the generation prompt to the criteria
 - [x] Add a `--difficulty` flag to `generate` that names the level the
       generator writes for. A sweep cannot fill the easy rungs while the

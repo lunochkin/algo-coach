@@ -8,6 +8,7 @@ from algo_coach.generation.discrimination import DISCRIMINATION_DEFAULT
 from algo_coach.generation.generator import GENERATOR_DEFAULT
 from algo_coach.generation.inputs import INPUTS_DEFAULT
 from algo_coach.generation.naive import NAIVE_DEFAULT
+from algo_coach.generation.screen import SCREEN_DEFAULT
 from algo_coach.schema import Configuration
 
 
@@ -17,6 +18,7 @@ class Bench(BaseModel, frozen=True):
     changes one file."""
 
     generator: Configuration = GENERATOR_DEFAULT
+    screen: Configuration = SCREEN_DEFAULT
     blind: Configuration = BLIND_DEFAULT
     discrimination: Configuration = DISCRIMINATION_DEFAULT
     inputs: Configuration = INPUTS_DEFAULT

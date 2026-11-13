@@ -72,6 +72,10 @@ is usually the published problem the cue was written from, and a solver who
 recognises that problem has not derived its form. Choose a setting neither the
 cue nor the notes mentions.
 
+Invent the worked example and every case. Do not reuse the example, the values
+or the wording of any published problem, even in a new setting. A solver who
+has met the published example recognises the answer before deriving it.
+
 Any statements already written for this form are listed after the brief. Yours
 asks a different question. The same question in a new setting is a variant, and
 ten variants of one problem teach the form once.

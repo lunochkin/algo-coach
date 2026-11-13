@@ -2805,7 +2805,8 @@
       "RetirementReason": {
         "type": "string",
         "enum": [
-          "defective"
+          "defective",
+          "copied"
         ],
         "title": "RetirementReason"
       },

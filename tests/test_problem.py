@@ -128,10 +128,16 @@ def test_a_problem_is_retired_for_a_named_reason():
         assert problem.retired_reason is reason
 
 
-def test_the_one_reason_is_the_one_the_board_excludes_on():
-    """A defective problem was never a fair test, so its attempts leave mastery.
-    A reason whose attempts are kept is additive when a gate needs one."""
-    assert set(RetirementReason) == {RetirementReason.DEFECTIVE}
+def test_only_a_defective_problem_takes_its_attempts_off_the_board():
+    """A defective problem was never a fair test. A copied one was: the solver
+    solved what it asked, and only its provenance was wrong."""
+    retired = {
+        reason: make_problem(status="retired", retired_reason=reason) for reason in RetirementReason
+    }
+
+    assert {reason for reason, one in retired.items() if one.defective} == {
+        RetirementReason.DEFECTIVE
+    }
 
 
 def test_a_retired_problem_must_say_why():

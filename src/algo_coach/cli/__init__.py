@@ -28,7 +28,7 @@ from algo_coach.cli.score import score
 from algo_coach.cli.seed import BadLine, seed
 from algo_coach.cli.user_log import user_log
 from algo_coach.runs import CONCURRENCY
-from algo_coach.schema import ProblemDifficulty
+from algo_coach.schema import CallSite, ProblemDifficulty, RetirementReason
 from algo_coach.storage import Database
 
 # What a shell reports for a command its user stopped: 128 plus the signal.
@@ -240,6 +240,13 @@ def main() -> None:
         help="re-ask the answering sites about the stored problems, writing nothing to the corpus",
     )
     generate_parser.add_argument(
+        "--only",
+        metavar="SITE",
+        type=CallSite,
+        action="append",
+        help="with --replay, ask this site alone; repeatable, and every site otherwise",
+    )
+    generate_parser.add_argument(
         "--resume",
         action="store_true",
         help="carry every held draft forward, from the step its bench or its own state moved",
@@ -289,7 +296,14 @@ def main() -> None:
     problem_parser.add_argument(
         "--retire",
         metavar="ID",
-        help="read one problem whole, then retire it as defective once confirmed",
+        help="read one problem whole, then retire it under --reason once confirmed",
+    )
+    problem_parser.add_argument(
+        "--reason",
+        type=RetirementReason,
+        choices=list(RetirementReason),
+        default=RetirementReason.DEFECTIVE,
+        help="why --retire retires it: defective leaves mastery, copied stays in it",
     )
     problem_parser.add_argument(
         "--rate",
