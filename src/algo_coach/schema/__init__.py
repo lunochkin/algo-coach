@@ -54,6 +54,7 @@ from algo_coach.schema.problem import (
     RetirementReason,
 )
 from algo_coach.schema.provenance import MachineProvenance
+from algo_coach.schema.rating import DifficultyRating
 from algo_coach.schema.recall import LADDER, Hint, RecallAttempt
 from algo_coach.schema.record import AttemptRecord
 from algo_coach.schema.seed import CardSeed, TemplateSeed
@@ -85,6 +86,7 @@ __all__ = [
     "Configuration",
     "Diagnosis",
     "Diagram",
+    "DifficultyRating",
     "Draft",
     "DraftCase",
     "Execution",

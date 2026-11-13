@@ -291,6 +291,12 @@ def main() -> None:
         metavar="ID",
         help="read one problem whole, then retire it as defective once confirmed",
     )
+    problem_parser.add_argument(
+        "--rate",
+        type=ProblemDifficulty,
+        choices=list(ProblemDifficulty),
+        help="rate the problem the id names by hand, standing over the generator's label",
+    )
 
     gaps_parser = _command(sub, "gaps", "core templates no stored solution displays")
     gaps_parser.add_argument(

@@ -31,28 +31,28 @@ since a user compares it with those. The generator's current rule judges a
 problem against its target form, so a direct sliding-window maximum is
 labelled easy, where the platforms call it hard.
 
-- [ ] Write each difficulty into `corpus.md` as criteria a reader can check,
+- [x] Write each difficulty into `corpus.md` as criteria a reader can check,
       on the platforms' scale: easy, a direct approach within the limits or one
       technique in its plainest use; medium, one standard technique the limits
       force; hard, a technique few solvers hold, or two combined
-- [ ] Write into `corpus.md` which templates admit an easy problem on that
+- [x] Write into `corpus.md` which templates admit an easy problem on that
       scale. A card whose templates admit none takes its easy rungs from its
       technique instead
-- [ ] List every served problem with the difficulty the criteria give it
+- [x] List every served problem with the difficulty the criteria give it
       beside its stored label. The list sizes the relabel
 - [ ] Count the retired drafts by `retired_reason` and difficulty, and write
       the leading cause into `log.md`. A fix aimed at the leading cause raises
       the medium yield more than more runs do
-- [ ] Add the `DifficultyRating` record, its append-only table and its
+- [x] Add the `DifficultyRating` record, its append-only table and its
       store, and read the standing difficulty in the badge, the listing's
       filter and the ladder's selector
-- [ ] Add a by-hand rating command beside `problem --retire`, writing a
+- [x] Add a by-hand rating command beside `problem --retire`, writing a
       `user` rating
 - [ ] Hold the generation prompt to the criteria
 - [x] Add a `--difficulty` flag to `generate` that names the level the
       generator writes for. A sweep cannot fill the easy rungs while the
       generator picks the level itself
-- [ ] Rate by hand every served problem the list found mislabelled
+- [x] Rate by hand every served problem the list found mislabelled
 - [ ] Run sweeps until every technique of the nine cards serves at least two
       easy and three medium problems, counting easy only where `corpus.md`
       admits one. Easy problems on one template differ little from each other

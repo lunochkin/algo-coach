@@ -3,6 +3,7 @@
 from collections.abc import Iterable
 
 from algo_coach.problems.store import ProblemStore
+from algo_coach.ratings import RatingLog, with_standing_difficulty
 from algo_coach.schema import Problem, Solution, SolutionClaim, SolutionRole
 from algo_coach.solution_claims.standing import standing_solution_claims
 from algo_coach.solution_claims.store import SolutionClaimLog
@@ -58,12 +59,12 @@ def load_problem(root: Database, problem_id: str) -> Problem | None:
         for solution in solutions
         for claim in SolutionClaimLog(root).for_solution(solution.id)
     ]
-    return with_techniques([problem], solutions, claims)[0]
+    rated = with_standing_difficulty([problem], RatingLog(root).for_problem(problem_id))
+    return with_techniques(rated, solutions, claims)[0]
 
 
 def load_problems(root: Database) -> list[Problem]:
     """Every stored problem carrying the view. The store alone returns the
-    record, whose `techniques` is empty on every generated problem."""
-    return with_techniques(
-        ProblemStore(root).all(), SolutionLog(root).solutions(), SolutionClaimLog(root).claims()
-    )
+    record: no techniques, and the generator's label."""
+    rated = with_standing_difficulty(ProblemStore(root).all(), RatingLog(root).ratings())
+    return with_techniques(rated, SolutionLog(root).solutions(), SolutionClaimLog(root).claims())

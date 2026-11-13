@@ -6,6 +6,7 @@ that wrote it, and matching, solution claims and the drill loop all reach it.
 
 import argparse
 
+from algo_coach import mint
 from algo_coach.cards import CardStore
 from algo_coach.cli.display import (
     case_line,
@@ -16,6 +17,7 @@ from algo_coach.cli.display import (
 )
 from algo_coach.generation import Corpus
 from algo_coach.outcomes import OutcomeLog
+from algo_coach.ratings import RatingLog, with_standing_difficulty
 from algo_coach.schema import Problem, RetirementReason, Solution, TemplateMatch, TestCase
 from algo_coach.solution_claims import SolutionClaimLog, derive
 from algo_coach.storage import Database
@@ -29,6 +31,8 @@ def problem(args: argparse.Namespace, parser: argparse.ArgumentParser, root: Dat
         parser.exit(0, "problem: no problem is stored\n")
     if args.retire:
         return retired_by_hand(args, parser, stored, corpus, root)
+    if args.rate:
+        return rated_by_hand(args, parser, stored, root)
     if not args.id:
         return listed(stored, corpus, root)
     print(page(one_of(stored, args.id, parser, "problem"), corpus, root))
@@ -59,17 +63,43 @@ def retired_by_hand(
     print(f"problem {left.id}: {standing(left)}")
 
 
+def rated_by_hand(
+    args: argparse.Namespace,
+    parser: argparse.ArgumentParser,
+    stored: list[Problem],
+    root: Database,
+) -> None:
+    """A `user` rating, which stands over every machine one. Appended without
+    a prompt: a later rating supersedes it, and both stay readable."""
+    if not args.id:
+        parser.exit(2, "problem: --rate names the level; the id names the problem\n")
+    one = one_of(stored, args.id, parser, "problem")
+    ratings = RatingLog(root)
+    (before,) = with_standing_difficulty([one], ratings.for_problem(one.id))
+    ratings.append(mint.user_rating(one.id, args.rate))
+    print(f"problem {one.id}: {before.difficulty} -> {args.rate}")
+
+
+def labelled(one: Problem, root: Database) -> str:
+    """The standing difficulty, and the generator's where a rating moved it."""
+    (rated,) = with_standing_difficulty([one], RatingLog(root).for_problem(one.id))
+    if rated.difficulty == one.difficulty:
+        return str(rated.difficulty)
+    return f"{rated.difficulty} (generator: {one.difficulty})"
+
+
 def listed(stored: list[Problem], corpus: Corpus, root: Database) -> None:
     """Every stored problem: how it stands and what it carries."""
     forms = slugs(root)
     cases = corpus.cases.cases()
     solutions = corpus.solutions.solutions()
-    for one in sorted(stored, key=lambda problem: problem.title):
+    rated = with_standing_difficulty(stored, RatingLog(root).ratings())
+    for one in sorted(rated, key=lambda problem: problem.title):
         form = aimed_at(one, forms)
         held = sum(case.problem_id == one.id for case in cases)
         wrote = sum(solution.problem_id == one.id for solution in solutions)
         carries = f"{held} case(s), {wrote} solution(s)"
-        print(f"{one.id}  {form[:24]:<24}  {standing(one):<12}  {carries}")
+        print(f"{one.id}  {form[:24]:<24}  {one.difficulty!s:<6}  {standing(one):<12}  {carries}")
     print(f"{len(stored)} problem(s) stored")
 
 
@@ -100,7 +130,7 @@ def page(one: Problem, corpus: Corpus, root: Database) -> str:
         [
             f"# {one.title} ({one.id})",
             "",
-            f"{aimed_at(one, forms)}, {one.difficulty}, {standing(one)}",
+            f"{aimed_at(one, forms)}, {labelled(one, root)}, {standing(one)}",
             f"techniques: {' '.join(read) or 'none read'}",
             f"written by {configured(one)}",
             "",

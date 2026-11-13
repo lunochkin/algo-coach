@@ -70,6 +70,7 @@ from algo_coach.log.table import (
 from algo_coach.matches.table import template_matches
 from algo_coach.outcomes.table import site_outcomes
 from algo_coach.problems.table import problems
+from algo_coach.ratings.table import difficulty_ratings
 from algo_coach.schema import (
     Answer,
     Attempt,
@@ -84,6 +85,7 @@ from algo_coach.schema import (
     ClaimSource,
     Diagnosis,
     Diagram,
+    DifficultyRating,
     Draft,
     DraftCase,
     Focus,
@@ -172,6 +174,7 @@ STORED: list[Stored] = [
         elsewhere=frozenset({"techniques"}),
     ),
     Stored(SolutionClaim, solution_claims, through_call=True),
+    Stored(DifficultyRating, difficulty_ratings, through_call=True),
     Stored(TemplateMatch, template_matches, through_call=True),
     Stored(SiteOutcome, site_outcomes, through_call=True, required=frozenset({"call_id"})),
     Stored(Sitting, sittings, elsewhere=frozenset({"pauses"})),
@@ -689,6 +692,7 @@ APPEND_ONLY = {
     "test_cases",
     "solutions",
     "solution_claims",
+    "difficulty_ratings",
     "template_matches",
     "verifications",
     "site_outcomes",

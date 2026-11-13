@@ -7,7 +7,7 @@ from algo_coach.calls import CallLog
 from algo_coach.generation import Corpus, write_problems
 from algo_coach.outcomes import OutcomeLog
 from algo_coach.problems import ProblemStore
-from algo_coach.schema import ProblemStatus, RetirementReason
+from algo_coach.schema import ProblemDifficulty, ProblemStatus, RetirementReason
 
 BUILDS = "def solve(size, seed):\n    return [list(range(size))]\n"
 
@@ -194,3 +194,27 @@ def test_retire_takes_no_second_id(root, monkeypatch, capsys):
 
     assert exit_info.value.code == 2
     assert ProblemStore(root).get(stored.id).status is ProblemStatus.CREATED
+
+
+def test_a_rating_by_hand_moves_the_label_the_page_shows(root, monkeypatch, capsys):
+    """The page names the generator's label beside the rating, since the two
+    disagreeing is what the relabel is for."""
+    stored = landed(root, monkeypatch)
+    other = next(one for one in ProblemDifficulty if one is not stored.difficulty)
+
+    shown(monkeypatch, stored.id[:8], "--rate", str(other))
+    shown(monkeypatch, stored.id[:8])
+
+    out = capsys.readouterr().out
+    assert f"{stored.difficulty} -> {other}" in out
+    assert f"{other} (generator: {stored.difficulty})" in out
+    assert ProblemStore(root).get(stored.id).difficulty == stored.difficulty
+
+
+def test_a_rating_names_its_problem(root, monkeypatch, capsys):
+    landed(root, monkeypatch)
+
+    with pytest.raises(SystemExit) as exit_info:
+        shown(monkeypatch, "--rate", "easy")
+
+    assert exit_info.value.code == 2

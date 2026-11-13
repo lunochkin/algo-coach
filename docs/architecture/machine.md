@@ -140,8 +140,8 @@ call returned, so it sits beside the call log.
   reached the bound or stopped under it.
 - **The aimed difficulty is on the generator's record alone.** `generate
   --difficulty` names a level in the generator's prompt, and no other site's
-  prompt names one. A landed problem clears its draft, so the record is where
-  the aim stays readable. The generator still labels the problem it wrote, and
+  prompt names one. A landed problem clears its draft, so only the record
+  keeps the aim readable. The generator still labels the problem it wrote, and
   a label differing from the aim is stored as written.
 - **The bound is not a denominator.** The bound counts whatever the input
   generator's `size` counts, which is a list length on one problem and a grid's

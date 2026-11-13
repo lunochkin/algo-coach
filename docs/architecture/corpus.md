@@ -105,6 +105,9 @@ architecture, and `README.md` is the map.
   rating, the problem's own `difficulty` answers.
 - **Every reader of a label reads the standing difficulty.** These readers are
   the badge, the listing's filter and a card's selector.
+- **A loaded problem carries its standing difficulty in `difficulty`.** The
+  loader folds the ratings in, as it folds the derived techniques in. The
+  problem store alone returns the generator's label.
 - **A `user` rating is written by hand, in the terminal, beside retirement.**
   A learner's reading of a problem does not change the label another user is
   served.
@@ -114,6 +117,58 @@ architecture, and `README.md` is the map.
 - **A difficulty estimated from attempts is deferred** to "Difficulty
   calibrated from attempts" in `ROADMAP.md`. Whether an estimate is a rating
   with a source of its own is decided there.
+
+### The criteria
+
+A rater checks a problem against these in order, and the first level that
+fits is the label. Each criterion counts the steps a solution takes beyond one
+template's form, so two raters reading one statement reach one label.
+
+- **Easy: the solution is one basic form applied unchanged, or a direct
+  approach that fits the limits.** The basic forms are a binary search over a
+  sorted array, a running sum or minimum, a window of fixed width over sums,
+  and a recurrence on the two previous terms. The statement asks the form's own
+  question about the input as given. A solver who holds the form types it and
+  adapts only names and the return value.
+- **Medium: one standard technique, plus one step the statement does not
+  name.** The step transforms the input, chooses a state, or derives the
+  predicate a search runs on. A search for the smallest feasible capacity is
+  medium: the form is easy, and the feasibility check is the derived step.
+- **Medium also covers a form that is itself a step past the basics**, applied
+  directly: a monotonic stack, a disjoint set, a topological order, a knapsack,
+  a backtracking search, and a choice per element under an adjacency ban.
+- **Hard: a form few solvers hold, or two techniques combined, or a step the
+  statement gives no hint of.** A sliding-window maximum on a deque and the
+  largest rectangle in a histogram are each hard applied directly. So are
+  counting the windows with exactly k distinct values by complement, placing n
+  queens, and the longest cycle of a graph with one edge out of each node.
+
+### The templates that admit an easy problem
+
+A template admits an easy problem where its form, applied unchanged, answers a
+question the platforms label easy. The sweeps write easy problems for these
+templates alone.
+
+| Card | Templates admitting easy |
+|---|---|
+| `binary-search` | `predicate-first-true`, `answer-space` |
+| `sliding-window` | `fixed-window-match` |
+| `dp-1d-linear` | `two-prev-pick-skip`, `running-aggregate` |
+
+- **`answer-space` admits easy only where the predicate is given**, as in an
+  integer square root. A predicate the solver has to derive makes the problem
+  medium, by the criteria above.
+- **`two-prev-pick-skip` and `running-aggregate` admit easy only in their
+  plainest use**: counting the ways up a staircase, the cheapest climb, the best
+  single buy and sell. The adjacency ban and the best contiguous sum are
+  medium.
+- **`monotonic-stack`, `union-find`, `topological-sort`, `dp-knapsack-01`,
+  `dp-state-design` and `backtracking` admit none.** Each form is a step past
+  the basics, so its direct use is medium already. These cards take no easy
+  rung.
+- **`sliding-window` has one admitting template, and takes its two easy
+  problems from it.** The two problems then differ in the question asked
+  rather than in the form.
 
 ## Test cases
 

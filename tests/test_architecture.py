@@ -15,6 +15,7 @@ from algo_coach.log import AttemptLog, SittingStore
 from algo_coach.matches import MatchLog
 from algo_coach.outcomes import OutcomeLog
 from algo_coach.problems import ProblemStore
+from algo_coach.ratings import RatingLog
 from algo_coach.solution_claims import SolutionClaimLog
 from algo_coach.solutions import SolutionLog
 from algo_coach.verifications import VerificationLog
@@ -244,6 +245,7 @@ APPEND_ONLY = (
     CaseLog,
     SolutionLog,
     SolutionClaimLog,
+    RatingLog,
     OutcomeLog,
     MatchLog,
     CallLog,

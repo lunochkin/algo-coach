@@ -16,6 +16,7 @@ from algo_coach.schema import (
     CaseResult,
     ClaimSource,
     Confidence,
+    DifficultyRating,
     Draft,
     DraftCase,
     Execution,
@@ -113,6 +114,16 @@ def user_solution_claim(
         techniques=techniques,
         source=ClaimSource.USER,
         informed_by=list(informed_by),
+    )
+
+
+def user_rating(problem_id: str, difficulty: ProblemDifficulty) -> DifficultyRating:
+    return DifficultyRating(
+        id=new_id(),
+        created_at=datetime.now(UTC),
+        problem_id=problem_id,
+        difficulty=difficulty,
+        source=ClaimSource.USER,
     )
 
 
