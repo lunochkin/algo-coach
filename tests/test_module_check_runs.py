@@ -26,6 +26,15 @@ def test_a_snippet_printing_an_unkeyed_choice_is_refused(tmp_path):
     assert any("matches an unkeyed choice" in e for e in found(ran(root).errors, 1))
 
 
+def test_a_snippet_shown_by_an_unkeyed_choice_alone_is_refused(tmp_path):
+    """Rule 1: `two, then one` holds the printed lines, and `three` is keyed."""
+    q = output("a", "print('two')\nprint('one')", choices=["three", "two, then one", "four"])
+
+    errors = found(ran(written(tmp_path, [q])).errors, 1)
+
+    assert any("is shown by B, not the key" in e for e in errors)
+
+
 def test_a_snippet_printing_no_choice_is_warned(tmp_path):
     """Rule 1: the printed line is in none of the choices."""
     root = written(tmp_path, [output("a", "print('seven')")])

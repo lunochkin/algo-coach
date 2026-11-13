@@ -35,9 +35,10 @@ The rules come from three review passes over the Python module in November
    question's code prints exactly the keyed output on the module's
    interpreter. A question naming an exception raises that exception. A
    snippet is run before it is published, and again whenever it is edited.
-   An `output` question with choices holds its printed lines in some choice;
-   one whose answer describes the output instead is listed under
-   `skip.choice-match`. *check*
+   An `output` question with choices holds its printed lines in a keyed
+   choice. Output shown by an unkeyed choice alone is refused. A question
+   whose answer describes the output instead, or whose prompt runs the code
+   another way, is listed under `skip.choice-match`. *check*
 2. **Every lesson code block runs on its own and matches its shown output.**
    A block carries its own imports and creates the tables it uses, since a
    reader may jump to any section. A block that connects to Postgres names
@@ -149,8 +150,10 @@ The rules come from three review passes over the Python module in November
       on any example, and the question tests it on its own.
     *check (warning: the snippet's lines in the lesson, as written or with the
     names changed; an expression of the snippet or of the prompt with its
-    values; a keyed output the lesson prints), review (the same shape with its
-    values changed, a restated scenario, and a heading stating a verdict)*
+    values; a keyed output the lesson prints; in a module written by concept,
+    a name or a literal shared with the section's code), review (the same
+    shape with its values changed, a restated scenario, and a heading stating
+    a verdict)*
 16. **A question's level follows the level definitions in `modules.md`, and one
     fact sits at one level.** The same scenario once sat at L0 in one subtopic
     and at L3 in another. *review*

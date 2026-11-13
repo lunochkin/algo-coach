@@ -104,12 +104,21 @@ def _judge(q: Question, course: Course, report: Report, ran: Ran) -> None:
     if whole in others and whole not in keyed:
         report.error(1, where(q), f"output {out.strip()[:60]!r} matches an unkeyed choice")
         return
-    shown = any(shares(out + raised_by(code, err), c) or shares(out + err, c) for c in q["choices"])
-    if shown or (seen | {whole}) & (keyed | others):
+    shows = [
+        chr(65 + i)
+        for i, c in enumerate(q["choices"])
+        if shares(out + raised_by(code, err), c) or shares(out + err, c)
+    ]
+    if set(shows) & set(q["answer"]) or (seen | {whole}) & keyed:
+        return
+    skipped = q["id"] in course.skip.get("choice-match", {})
+    if (shows or (seen | {whole}) & others) and not skipped:
+        wrong = ", ".join(shows) or "an unkeyed choice"
+        report.error(1, where(q), f"output {out.strip()[:60]!r} is shown by {wrong}, not the key")
         return
     if not out.strip() and raised_by(code, err) in ("NameError", "SyntaxError"):
         report.fragments += 1  # code its prompt completes: a model, an engine, a file
-    elif q["id"] not in course.skip.get("choice-match", {}):
+    elif not skipped:
         printed = (out or last_exception(err)).strip()[:60]
         report.warn(1, where(q), f"output {printed!r} matches no choice")
 

@@ -175,3 +175,23 @@ def test_a_short_reply_of_only_true_or_false_is_refused(tmp_path):
     errors = found(check(module(tmp_path, q=q), run=False).report.errors, 3)
 
     assert errors == ["[3] banks/t/sub.toml w: the reply is a yes or no, so the format is choice"]
+
+
+def test_a_question_sharing_a_name_with_its_section_is_warned(tmp_path):
+    """Rule 15: a renamed copy keeps a name of the section's example."""
+    lesson = "## While\n\n```python\nfuel = 7\nwhile fuel > 4:\n    fuel = fuel - 1\n```\n"
+    q = asking() | {"kind": "output", "code": "fuel = 9\nprint(fuel > 4, 'start')\n"}
+
+    warnings = found(check(module(tmp_path, lesson=lesson, q=q), run=False).report.warnings, 15)
+
+    assert warnings == ["[15] banks/t/sub.toml w: shares fuel with les#while"]
+
+
+def test_a_keyword_argument_or_a_builtin_shared_with_the_section_is_not_warned(tmp_path):
+    """Rule 15: `start=` and `enumerate` are the API the section teaches."""
+    lesson = "## While\n\n```python\nfor i, w in enumerate(ws, start=1):\n    print(i)\n```\n"
+    q = asking() | {"kind": "output", "code": "print(list(enumerate('ab', start=5)))\n"}
+
+    warnings = found(check(module(tmp_path, lesson=lesson, q=q), run=False).report.warnings, 15)
+
+    assert warnings == []

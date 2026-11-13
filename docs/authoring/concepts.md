@@ -152,7 +152,15 @@ is approved.
    place. In the pilot, five reviews and three fresh generations of the same
    lessons settled at 13 to 15 findings each, mostly local.
 3. **Questions.** The questions are written from the approved concepts. A
-   reviewer checks each against its concept and the section teaching it.
+   reviewer checks each against its concept and the section teaching it,
+   and names a new task for each question repeating its section. The
+   findings are fixed in place, and the stage ends on the stopping rule of
+   stage 1. A finding about a concept goes to the author of the module
+   first, since it reopens stage 1.
+
+Each stage is written by one agent and reviewed by another, which wrote
+nothing it reviews. The `concept-author` skill in `.claude/skills/` holds the
+brief each agent is given.
 
 - **A defect found in a later stage is fixed in the layer it belongs to.** A
   wrong claim found while writing a question goes back to stage 1, and the
@@ -201,7 +209,11 @@ the prose a program can check. Rule 19 files each question by its concept.
 It warns of a concept no question tests, and of a misconception no wrong
 choice embodies. Rule 3 refuses a `short` question whose every accepted
 reply is `True`, `False`, yes or no. Rule 15 compares a question with the
-section its concept names, as it does for any module.
+lesson its concept names, as it does for any module. It also warns of a
+question sharing a name or a literal with its section's code, beside the
+API the section teaches. That warning caught 7 of the 17 repeats the
+pilot's first review found, so the review still compares each question
+with its section.
 
 ## The parallel module
 
@@ -226,8 +238,9 @@ section its concept names, as it does for any module.
 
 ## Deferred
 
-- **Whether the engine generates a lesson or a question from a concept.** The
-  pilot writes each lesson and question in its own authoring step first.
+- **Whether the engine generates a lesson or a question from a concept**, as
+  a command. The pilot wrote each stage through the skill's agents. A command
+  follows once the briefs stop changing between subtopics.
 - **When `py` replaces `python`**, and what happens to a user's answers in
   `python` then.
 

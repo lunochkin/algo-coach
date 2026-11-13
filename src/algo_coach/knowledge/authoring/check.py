@@ -7,7 +7,7 @@ import os
 from dataclasses import dataclass, field
 from pathlib import Path
 
-from algo_coach.knowledge.authoring.concept_rules import filed, records, taught
+from algo_coach.knowledge.authoring.concept_rules import filed, records, shared, taught
 from algo_coach.knowledge.authoring.course import Report, load
 from algo_coach.knowledge.authoring.execution import Runs
 from algo_coach.knowledge.authoring.layout import box_drawing, text_fences, widths
@@ -48,7 +48,7 @@ STATIC = (
 )
 # a module written by concept files each question by its concept, where
 # another files it in the coverage map: docs/authoring/concepts.md
-BY_CONCEPT = (records, taught, prose, filed, replies)
+BY_CONCEPT = (records, taught, prose, filed, replies, shared)
 
 
 @dataclass

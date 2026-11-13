@@ -1,6 +1,8 @@
-"""Rules 27 and 28, and rule 19 for a module written by concept:
+"""Rules 27 and 28, and rules 15 and 19 for a module written by concept:
 docs/authoring/concepts.md."""
 
+import builtins
+import keyword
 import re
 from collections import defaultdict
 from typing import Any, cast
@@ -12,6 +14,10 @@ REQUIRED = ("id", "level", "claim", "source", "misconceptions", "taught_by")
 HEADING = re.compile(r"^## (.+)$", re.M)
 # the seed renders these from the concepts, so a file holding one holds a copy
 RENDERED = ("common-mistakes", "go-deeper")
+CODE = re.compile(r"```\w*\n(.*?)```|`([^`\n]+)`", re.S)
+# a literal or a name; an attribute and a keyword argument name the API taught
+TOKEN = re.compile(r"(?<![\w.])(?:'[^'\n]+'|\"[^\"\n]+\"|[A-Za-z_]\w*(?!\w|=[^=])|\d+(?:\.\d+)?)")
+COMMON = frozenset([*keyword.kwlist, *keyword.softkwlist, *dir(builtins), "self"])
 
 
 def records(course: Course, report: Report) -> None:
@@ -83,6 +89,44 @@ def filed(course: Course, report: Report) -> None:
                 report.warn(19, where(q), f"wrong choice {', '.join(bare)} names no misconception")
             if keyed := sorted(_targets(q).keys() & set(q["answer"])):
                 report.error(19, where(q), f"keyed choice {', '.join(keyed)} names a misconception")
+
+
+def shared(course: Course, report: Report) -> None:
+    """Rule 15: a question shares no name or literal with its section's code.
+    Catches a renamed copy keeping a value, never a copy of shape alone."""
+    skipped = course.skip.get("lesson-repeat", {})
+    for q in course.questions:
+        concept = course.concepts.get(q.get("concept", ""))
+        if concept is None or q["id"] in skipped:
+            continue
+        slug, _, at = concept["taught_by"].partition("#")
+        own = q.get("code", "") + _code(
+            q["prompt"] + " ".join(q.get("key", []) + q.get("traps", []))
+        )
+        common = _tokens(own) & _tokens(_code(_section(course.lessons.get(slug, ""), at)))
+        if found := sorted(common - _tokens(_code(concept["claim"]))):
+            report.warn(15, where(q), f"shares {', '.join(found[:6])} with {slug}#{at}")
+
+
+def _code(text: str) -> str:
+    return "\n".join(m[1] or m[2] for m in CODE.finditer(text))
+
+
+def _tokens(code: str) -> set[str]:
+    return {
+        t
+        for t in TOKEN.findall(code)
+        if t not in COMMON
+        and not t.startswith("__")
+        and not re.fullmatch(r"[A-Za-z_]|\d|['\"][\W_]*['\"]", t)
+    }
+
+
+def _section(text: str, at: str) -> str:
+    for part in re.split(r"^## ", text, flags=re.M)[1:]:
+        if anchor(part.splitlines()[0]) == at:
+            return part
+    return ""
 
 
 def _targets(q: dict[str, Any]) -> dict[str, str]:
