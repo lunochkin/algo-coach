@@ -132,7 +132,9 @@ the coverage map for a module written by concept.
 - **A question uses the constructs its subtopic teaches at its level or
   below**, the subtopics it needs, and the module's baseline. A queue serves
   questions by subtopic and level, never by lesson, so a question of the
-  conditions lesson may use a `for` loop taught at the same level.
+  conditions lesson may use a `for` loop taught at the same level. The facts
+  its keyed answer rests on sit at its level or below too, and the phone pass
+  over `core/functions` found a level 0 question keyed on a level 1 fact.
 - **A wrong choice names the misconception it embodies, by its id**, as
   `misconception = { B = "<id>" }`, or as `"<concept>#<id>"` for a
   misconception of another concept. A good distractor can embody another

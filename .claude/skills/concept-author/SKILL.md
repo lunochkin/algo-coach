@@ -96,7 +96,9 @@ reports, in a scratchpad folder of the stage's own.
      never served, so its shape is free. A claim about one expression is
      asked inside a larger task.
    - Constructs: the baseline, and what the subtopic teaches at the
-     question's level or below.
+     question's level or below. The facts the keyed answer rests on sit at
+     that level or below too: a level 0 question once keyed on the order
+     in which a call's arguments are evaluated, a level 1 fact.
    - A `short` reply has more than two plausible values.
    - A kind does not reveal the answer: rule 11.
    - Each distractor is what a learner holding its misconception would
