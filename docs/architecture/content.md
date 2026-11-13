@@ -152,6 +152,11 @@ each technique, and a card and a mastery estimate share no data.
   runs what the user typed rather than comparing it with the stored code. Two
   correct reproductions of one form differ in their whitespace and in the names
   they choose, and neither difference is a recall failure.
+- **A template's cases are checked against the form's own mutants.** `card
+  check` runs every one-change mutant of the form against the cases, and a
+  mutant every case passes is a case the template may lack. A survivor
+  refuses nothing, since a mutant can be equivalent to the form, and only the
+  author can tell which.
 - **The cases call `solve`**, as a problem's cases do. `corpus.md` gives why
   that name is fixed: a function called `lower_bound` announces the form the
   recall is asking for.

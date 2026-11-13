@@ -150,14 +150,10 @@ Judging a solution is built from a template's mutants that fail a case, so a
 template's cases must catch its mutants first. Taken from the content
 pipeline, Phase 17, which keeps the rest for the next module.
 
-- [ ] Move the card rules out of the `card-author` skill into a `cards.md`
-      beside `docs/authoring/rules.md`, numbered as `rules.md` numbers a
-      module's.
-      A reviewer cites a rule by its number, and a skill's prose carries none
-- [ ] Port the skill's `validate.py` to `algo-coach card check <slug>`, with a
+- [x] Port the skill's `validate.py` to `algo-coach card check <slug>`, with a
       test per check, and have the content repository's pre-commit hook run
       it on a staged card
-- [ ] Run the mutants of each template's form against its cases in `card
+- [x] Run the mutants of each template's form against its cases in `card
       check`, and report each survivor as a case the template lacks.
       `algo_coach.mutation` enumerates them already, and the pass costs no
       call
@@ -274,6 +270,11 @@ module. The rest waits for the next module.
 
 ### The card reviewers
 
+- [ ] Move the card rules out of the `card-author` skill into a `cards.md`
+      beside `docs/authoring/rules.md`, numbered as `rules.md` numbers a
+      module's. A reviewer cites a rule by its number, and a skill's prose
+      carries none. Moved here from Phase 16, since nothing cites a number
+      before these reviewers do
 - [ ] Write the trigger reviewer's skill: a session reads a card's trigger and
       each template's trigger alone and names the form, and a wrong form is a
       finding. A probe asks a user the same question

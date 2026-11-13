@@ -211,7 +211,7 @@ file in place.
    - **A class template and a procedure template carry none.** The cases call
      one function, and exercising a structure through the form the user types
      is not settled. Both are read on the card until it is.
-   - **The author's own form must pass them**, which `validate.py` runs. A case
+   - **The author's own form must pass them**, which `card check` runs. A case
      the stored form fails would fail every reproduction of it.
 
    ### When the template is a method, not code
@@ -275,14 +275,19 @@ file in place.
    `requires` empty. The required template must be core, and no edge may close
    a cycle.
 
-8. **Validate**, and fix what it reports. It matches the file against
+8. **Check**, and fix what it reports. It matches the file against
    `CardSeed`, checks the technique codes and the requirements against the
-   cards beside it, parses every template, and runs each template's own form
-   against the cases authored beside it:
+   cards beside it, parses every template, runs each template's own form
+   against its cases, and then runs every one-change mutant of the form
+   against them:
 
    ```bash
-   uv run python .claude/skills/card-author/validate.py content/cards/<slug>.json
+   uv run algo-coach card check content/cards/<slug>.json
    ```
+
+   A surviving mutant is a case the template may lack: add a case it fails,
+   unless the mutant is equivalent to the form (a hash base, a builder's own
+   bound), which no case can kill. Survivors are reported and refuse nothing.
 
 ## Rules
 

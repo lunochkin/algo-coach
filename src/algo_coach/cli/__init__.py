@@ -10,6 +10,7 @@ from dotenv import find_dotenv, load_dotenv
 from algo_coach.classifier import DEFAULT
 from algo_coach.cli.bench import SITES
 from algo_coach.cli.board import board
+from algo_coach.cli.card import card
 from algo_coach.cli.claim import claim
 from algo_coach.cli.claim_solutions import claim_solutions
 from algo_coach.cli.classify import classify
@@ -364,6 +365,17 @@ def main() -> None:
     # named every time: the history is one person's, never a default's
     import_parser.add_argument("--user", required=True, help="whose history it is")
 
+    card_parser = _command(sub, "card", "an authored card's file, before it is seeded")
+    card_action = card_parser.add_subparsers(dest="action", required=True)
+    card_check = card_action.add_parser(
+        "check", help="the schema, the graph, the cases and the mutants they leave standing"
+    )
+    card_check.add_argument("cards", nargs="+", help="card files, or slugs under content/cards")
+    card_check.add_argument(
+        "--no-mutants", action="store_true", help="skip running each template's mutants"
+    )
+    card_check.add_argument("--json", action="store_true", help="emit the findings as JSON")
+
     module_parser = _command(sub, "module", "a knowledge module's authored files")
     module_action = module_parser.add_subparsers(dest="action", required=True)
     check_parser = module_action.add_parser(
@@ -431,6 +443,7 @@ COMMANDS: dict[str, Callable[[argparse.Namespace, argparse.ArgumentParser, Datab
     "movement": moved,
     "log": user_log,
     "knowledge": knowledge,
+    "card": lambda args, parser, _root: card(args, parser),
     "module": lambda args, parser, _root: module(args, parser),
     "invite": invitation,
 }
