@@ -171,16 +171,11 @@ back to a concept in the pilot broke one of them.
 
 ## Mechanical checks
 
-The module check adds these for a module written by concept.
-
-- Every witness runs on every supported build and prints its shown output.
-- Every concept without a witness quotes its source.
-- Every `taught_by` resolves to a section, and every section is named by at
-  least one concept.
-- Every question names a known concept, and every concept has at least one
-  question.
-- A question and the section teaching its concept share no example, as rule
-  15 gives.
+The module check holds a module written by concept to rules 26 to 29 of
+`rules.md`: the witnesses, the concept records, the lessons' sections and
+the prose a program can check. Rule 19 files each question by its concept,
+and warns of a concept no question tests. Rule 15 compares a question with
+the section its concept names, as it does for any module.
 
 ## The parallel module
 
@@ -207,9 +202,6 @@ The module check adds these for a module written by concept.
 
 - **How a wrong choice names its misconception**, as an index, an id or a
   quoted sentence. The first questions written show which one reads well.
-- **Which mechanical checks `check.py` implements.** During the pilot, a
-  check `check.py` lacks runs as a script written for the pilot. The pilot's
-  work shows which checks repay a place in `check.py`.
 - **Whether the engine generates a lesson or a question from a concept.** The
   pilot writes each lesson and question in its own authoring step first.
 - **When `py` replaces `python`**, and what happens to a user's answers in

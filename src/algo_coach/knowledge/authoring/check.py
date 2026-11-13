@@ -7,11 +7,13 @@ import os
 from dataclasses import dataclass, field
 from pathlib import Path
 
+from algo_coach.knowledge.authoring.concept_rules import filed, records, taught
 from algo_coach.knowledge.authoring.course import Report, load
 from algo_coach.knowledge.authoring.execution import Runs
 from algo_coach.knowledge.authoring.layout import box_drawing, text_fences, widths
 from algo_coach.knowledge.authoring.lessons import lessons_run
 from algo_coach.knowledge.authoring.likeness import overlaps
+from algo_coach.knowledge.authoring.prose import prose
 from algo_coach.knowledge.authoring.repeats import repeats
 from algo_coach.knowledge.authoring.snippets import snippets, versions
 from algo_coach.knowledge.authoring.static import (
@@ -25,6 +27,7 @@ from algo_coach.knowledge.authoring.static import (
     reused_ids,
 )
 from algo_coach.knowledge.authoring.tools import tool_outputs, transcripts
+from algo_coach.knowledge.authoring.witnesses import witnesses
 
 # kept beside the module, and gitignored by the content repository
 CACHE = ".check-cache.json"
@@ -40,9 +43,11 @@ STATIC = (
     text_fences,
     box_drawing,
     widths,
-    coverage,
     reused_ids,
 )
+# a module written by concept files each question by its concept, where
+# another files it in the coverage map: docs/authoring/concepts.md
+BY_CONCEPT = (records, taught, prose, filed)
 
 
 @dataclass
@@ -71,8 +76,10 @@ def check(
             )
             if other_versions:
                 ran["runs on other interpreters"] = versions(course, report, pool, runs, here)
+            if course.concepts:
+                ran["witness runs"] = witnesses(course, report, pool, runs, other_versions)
         kept.write_text(json.dumps(runs.cache))
-    for rule in STATIC:
+    for rule in STATIC + (BY_CONCEPT if course.concepts else (records, coverage)):
         rule(course, report)
     checked.executed = len(runs.executed)
     return checked

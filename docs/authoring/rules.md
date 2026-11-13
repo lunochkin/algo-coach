@@ -190,3 +190,28 @@ The rules come from three review passes over the Python module in November
     40 characters and wraps a longer line behind a `↪`. In a snippet read for
     its output, a reader can take that wrap for a line break. *check (a block
     with a line over 60 is warned)*
+
+## Concepts
+
+Rules for a module written by concept, which `concepts.md` beside this file
+describes. A module with no concept files is checked by rules 1 to 25 alone.
+
+26. **A concept's witness prints its recorded output on every supported
+    build.** The claim rests on that output, and a lesson and a question quote
+    it. The output is compared exactly, since a normalized comparison passes a
+    witness whose wording a lesson then misquotes. *check (the project's
+    interpreter, and each version and build `check.toml` names)*
+27. **A concept holds every field of its record, and a witness with its output
+    or a quote of its source.** The source names a section, the level is 0 to
+    3, and the concept lists at least one misconception. A question naming an
+    unknown concept, or restating a field it derives from its concept, is
+    refused. *check*
+28. **Each `taught_by` names a section, and each section of a lesson teaching
+    concepts is named by one.** A section no concept names asserts what no
+    witness checks. A lesson file holds no intro and no common-mistakes or
+    links section, since the seed renders them, and a copy written by hand
+    drifts from the concepts. *check*
+29. **A claim, a misconception and a lesson's prose follow the writing rules a
+    program can check.** No sentence opens with What, Where, Neither, Both or
+    Nothing, no sentence runs over 40 words, and spelling is Oxford British.
+    The rest of the writing rules need a reader. *check (warning), review*

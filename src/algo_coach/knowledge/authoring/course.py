@@ -8,6 +8,8 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
 
+from algo_coach.knowledge.concepts import derive, read_concepts
+
 # a question as its bank holds it, plus `_sub` and `_file`
 type Question = dict[str, Any]
 
@@ -42,14 +44,25 @@ class Course:
     settings: dict[str, Any]
     # made-up modules a snippet imports to stand for the reader's own code
     fixtures: set[str]
+    # a module written by concept: docs/authoring/concepts.md
+    concepts: dict[str, dict[str, Any]] = field(default_factory=dict[str, dict[str, Any]])
+    # what reading the concepts found wrong: a file, an id, a derived field
+    unread: list[str] = field(default_factory=list[str])
 
 
 def load(root: Path) -> Course:
+    unread: list[str] = []
+    concepts = read_concepts(root, unread)
     questions: list[Question] = []
     for path in sorted((root / "banks").rglob("*.toml")):
         for q in tomllib.loads(path.read_text()).get("q", []):
             q["_sub"] = path.stem
             q["_file"] = str(path.relative_to(root))
+            # a question whose concept did not resolve lacks its derived
+            # fields, and rule 27 reports it
+            if errors := derive(q["_file"], q, concepts):
+                unread += errors
+                continue
             questions.append(q)
     graph = tomllib.loads((root / "graph.toml").read_text())
     lessons = {
@@ -72,6 +85,8 @@ def load(root: Path) -> Course:
         expect=config.get("expect", {}),
         settings=tomllib.loads((root / "course.toml").read_text()),
         fixtures=set(config.get("fixtures", [])),
+        concepts=concepts,
+        unread=unread,
     )
 
 

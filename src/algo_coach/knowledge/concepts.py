@@ -18,6 +18,7 @@ def read_concepts(base: Path, unread: list[str]) -> dict[str, dict[str, Any]]:
             unread.append(f"concepts/{path.parent.name}/{path.name}: {error}")
             continue
         for concept in raws:
+            concept["_file"] = f"concepts/{path.parent.name}/{path.name}"
             if concept["id"] in concepts:
                 unread.append(f"concept {concept['id']}: duplicate id")
             concepts[concept["id"]] = concept
