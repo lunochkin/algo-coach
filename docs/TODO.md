@@ -52,7 +52,7 @@ labelled easy, where the platforms call it hard.
       problem's example, values or wording under the gate `copied`
 - [x] Run the screen over the served problems, and retire each one it names
       under a new retirement reason `copied` whose attempts stay counted
-- [ ] Hold the generation prompt to the criteria
+- [x] Hold the generation prompt to the criteria
 - [x] Add a `--difficulty` flag to `generate` that names the level the
       generator writes for. A sweep cannot fill the easy rungs while the
       generator picks the level itself

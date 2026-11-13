@@ -27,6 +27,7 @@ GENERATOR_DEFAULT = Configuration(
     model="google/gemini-3.7-flash", effort="medium", pin="google-ai-studio"
 )
 
+# item 4 restates the criteria in `corpus.md`, Difficulty ratings
 SYSTEM = f"""You write practice problems for one form of a technique.
 
 You are given a template: a form a solver reproduces from memory, its cue, and
@@ -53,12 +54,26 @@ Produce four things.
    solution from a plausible wrong one: a solution that handles the ordinary
    input and gets the boundary wrong has to fail at least one case.
 4. A difficulty: easy, medium or hard, as the public problem platforms label
-   their problems. Easy: a direct approach fits the limits, or one technique
-   applied unchanged. Medium: one standard technique the limits force, often
-   after the input is transformed or a state chosen. Hard: a technique few
-   solvers hold, or two ideas combined. A form that is itself hard to hold,
-   such as a monotonic deque, makes even its direct use medium or hard. Judge
-   the problem you wrote, not the form.
+   their problems. Check the levels in order, and the first that fits is the
+   label. Judge the problem you wrote, not the form.
+   - Easy: one basic form applied unchanged, or a direct approach that fits
+     the limits. The basic forms are a binary search over a sorted array, a
+     running sum or minimum, a window of fixed width over sums, and a
+     recurrence on the two previous terms. The statement asks the form's own
+     question about the input as given, so a solver who holds the form adapts
+     only names and the return value.
+   - Medium: one standard technique plus one step the statement does not
+     name: transforming the input, choosing a state, or deriving the predicate
+     a search runs on. A search for the smallest feasible capacity is medium,
+     since the feasibility check is the derived step. Medium also covers the
+     direct use of a form past the basics: a monotonic stack, a disjoint set, a
+     topological order, a knapsack, a backtracking search, a choice per
+     element under an adjacency ban.
+   - Hard: a form few solvers hold, two techniques combined, or a step the
+     statement gives no hint of. A sliding-window maximum on a deque and the
+     largest rectangle in a histogram are hard even applied directly, and so
+     are counting windows with exactly k distinct values by complement and
+     placing n queens.
 
 The value `solve` returns is compared exactly, so it is built from integers,
 strings, booleans and lists of those. A problem whose answer is a ratio asks
