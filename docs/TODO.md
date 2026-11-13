@@ -87,7 +87,7 @@ graph, and `log.md` gives when a card is locked.
 - [ ] Author the middle cards: heap, binary search tree, greedy and intervals
 - [x] Redraw the `/cards` wireframe by depth, then build it: the web draws
       the edges, and the phone names the required cards on each row
-- [ ] Name the unlocked cards not yet started on the board, by depth
+- [x] Name the unlocked cards not yet started on the board, by depth
 
 ### The algorithms module
 

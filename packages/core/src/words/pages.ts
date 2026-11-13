@@ -49,6 +49,8 @@ export const BOARD_TITLE = 'Practice';
 export const BOARD_NOTE = 'Continue a card or a module, or pick a technique, stalest first.';
 export const BOARD_NONE = 'No served problem carries a technique yet.';
 export const BOARD_STUDYING = 'Cards in progress';
+export const BOARD_NEXT = 'Cards to start';
+export const boardMoreCards = (n: number) => `${n} more on the cards list`;
 export const BOARD_UNTOUCHED = 'Techniques not practised yet';
 export const BOARD_PRACTISED = 'Techniques practised';
 

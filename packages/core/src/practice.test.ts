@@ -14,6 +14,7 @@ import {
   runStartLabel,
   ladderView,
   depthSections,
+  nextCards,
   problemCards,
   problemFacts,
   problemTried,
@@ -405,5 +406,20 @@ describe("a locked card's press", () => {
       /^Waits on Hashing, Two pointers and Prefix sum\./,
     );
     expect(runStartLabel(false, true)).toBe('Locked');
+  });
+});
+
+describe('the cards the board offers to start', () => {
+  it('offers unlocked cards never started, the shallowest first, and counts the rest', () => {
+    const cards = [
+      card('deep', { depth: 1 }),
+      card('started', {}, { started_at: '2026-11-01T00:00:00Z', state: 'acquiring' }),
+      card('locked', { depth: 1, waiting: [{ slug: 'x', title: 'X' }] }),
+      card('b'),
+      card('a'),
+    ];
+    const next = nextCards(cards, 2);
+    expect(next.cards.map((one) => one.slug)).toEqual(['a', 'b']);
+    expect(next.more).toBe(1);
   });
 });

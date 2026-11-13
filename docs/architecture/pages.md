@@ -60,7 +60,9 @@ those steps at low fidelity.
   card.
 - **The board then names the unlocked cards not yet started**, by depth, the
   shallowest first. A user with nothing in progress then reads the next study
-  the card graph offers, rather than a list of every technique.
+  the card graph offers, rather than a list of every technique. It names five
+  at most, and a link to the cards list counts the rest, so the board stays one
+  glance with a dozen roots open.
 - **The board is the overview of the user's practice.** It reads the
   knowledge study first: the focus, Continue and the modules. The cards in
   progress and the techniques follow. A user reads every study they declared

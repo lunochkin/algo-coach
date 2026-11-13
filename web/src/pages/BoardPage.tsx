@@ -8,6 +8,9 @@ import {
   OF,
   BOARD_NONE,
   BOARD_STUDYING,
+  BOARD_NEXT,
+  boardMoreCards,
+  nextCards,
   BOARD_UNTOUCHED,
   BOARD_PRACTISED,
   MODULES_HEADING,
@@ -34,6 +37,7 @@ export function BoardPage() {
   // one way on both pages
   const cards = useLoaded((signal) => api.GET('/api/cards', { signal }), 'cards')
   const studying = inProgress(cards.data ?? [])
+  const next = nextCards(cards.data ?? [])
   const { catalog, board: learnerBoard, order, now } = useLearner()
   const modules = useMemo(() => {
     const all = learnerBoard(null)
@@ -75,6 +79,22 @@ export function BoardPage() {
                 <section className="space-y-stack">
                   <SectionHeading title={BOARD_STUDYING} count={studying.length} />
                   <CardPanel technique={null} cards={studying} />
+                </section>
+              )}
+
+              {/* what the card graph opens next, the shallowest first */}
+              {next.cards.length > 0 && (
+                <section className="space-y-stack">
+                  <SectionHeading title={BOARD_NEXT} count={next.cards.length + next.more} />
+                  <CardPanel technique={null} cards={next.cards} />
+                  {next.more > 0 && (
+                    <Link
+                      to="/cards"
+                      className="text-meta text-muted-foreground underline-offset-4 hover:underline"
+                    >
+                      {boardMoreCards(next.more)}
+                    </Link>
+                  )}
                 </section>
               )}
 

@@ -13,6 +13,9 @@ import {
   OF,
   BOARD_NONE,
   BOARD_STUDYING,
+  BOARD_NEXT,
+  boardMoreCards,
+  nextCards,
   BOARD_UNTOUCHED,
   BOARD_PRACTISED,
   BOARD_NOTE,
@@ -127,12 +130,29 @@ function BoardBody({ board, cards }: { board: Board; cards: ListedCard[] }) {
   const [now] = useState(() => Date.now());
   const { untouched, practised, foot } = boardView(board);
   const studying = inProgress(cards);
+  const next = nextCards(cards);
   return (
     <>
       {studying.length > 0 ? (
         <>
           <Heading title={BOARD_STUDYING} count={studying.length} />
           <CardPanel technique={null} cards={studying} />
+        </>
+      ) : null}
+      {next.cards.length > 0 ? (
+        <>
+          <Heading title={BOARD_NEXT} count={next.cards.length + next.more} />
+          <CardPanel technique={null} cards={next.cards} />
+          {next.more > 0 ? (
+            <Text
+              variant="bodySmall"
+              accessibilityRole="link"
+              onPress={() => router.navigate('/cards')}
+              style={{ color: theme.colors.onSurfaceVariant }}
+            >
+              {boardMoreCards(next.more)}
+            </Text>
+          ) : null}
         </>
       ) : null}
       {untouched.length > 0 ? (

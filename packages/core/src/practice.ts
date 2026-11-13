@@ -106,6 +106,20 @@ export function inProgress(cards: ListedCard[]): ListedCard[] {
     .sort((a, b) => (b.status.last_at ?? '').localeCompare(a.status.last_at ?? ''));
 }
 
+// the board names a few, and the cards list holds the rest: `pages.md`
+export const NEXT_CARDS = 5;
+
+/**
+ * The cards the board offers to start: unlocked and never started, the
+ * shallowest first, the rest counted.
+ */
+export function nextCards(cards: ListedCard[], most = NEXT_CARDS): { cards: ListedCard[]; more: number } {
+  const open = cards
+    .filter((card) => !card.status.started_at && (card.waiting ?? []).length === 0)
+    .sort((a, b) => a.depth - b.depth || a.slug.localeCompare(b.slug));
+  return { cards: open.slice(0, most), more: Math.max(0, open.length - most) };
+}
+
 /**
  * A technique's cards as the cards list reads them, in its order: `taught` is
  * what the engine names as teaching the technique or a narrower one.
