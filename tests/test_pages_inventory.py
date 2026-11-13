@@ -64,6 +64,7 @@ PHONE_PARTS = {
     "A certification's conditions": "certs.tsx",
     "A card's ladder and probes": "card.tsx",
     "The press starting a card's run": "card.tsx",
+    "The required cards a locked card waits on, on that press": "card.tsx",
     "A sitting": "problem.tsx",
 }
 
