@@ -3,7 +3,7 @@ import { Linking, View, type TextStyle, type ViewStyle } from 'react-native';
 import { Renderer, useMarkdown, type MarkedStyles } from 'react-native-marked';
 import { Text, useTheme, type MD3Theme } from 'react-native-paper';
 
-import { codeWraps, EXTERNAL_HINT, EXTERNAL_MARK, isExternal } from '@algo-coach/core';
+import { codeWraps, EXTERNAL_HINT, EXTERNAL_MARK, isExternal, spans } from '@algo-coach/core';
 
 import { withMath } from '@/lib/math';
 import { CodeBlock } from '@/ui/common';
@@ -27,6 +27,20 @@ export function InlineCode({ text, style, size }: InlineCodeProps) {
     <Text selectable style={[style, { fontSize: size }]}>
       {text}
     </Text>
+  );
+}
+
+type ProseVariant = 'titleMedium' | 'bodyLarge' | 'bodyMedium' | 'bodySmall';
+
+/** Authored prose inside a `Text`, its backtick pairs drawn as a lesson draws inline code. */
+export function Inline({ text, variant }: { text: string; variant: ProseVariant }) {
+  const theme = useTheme();
+  const size = CODE_SCALE * theme.fonts[variant].fontSize;
+  const style = { fontFamily: font.mono, backgroundColor: theme.colors.surfaceVariant };
+  return (
+    <>
+      {spans(text).map((s, i) => (s.code ? <InlineCode key={i} text={s.text} style={style} size={size} /> : s.text))}
+    </>
   );
 }
 

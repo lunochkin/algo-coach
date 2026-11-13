@@ -82,3 +82,22 @@ function commonPrefix(a: string, b: string): string {
   while (i < a.length && i < b.length && a[i] === b[i]) i++;
   return a.slice(0, i);
 }
+
+/** One run of authored prose: code where the author wrote backticks. */
+export interface Span {
+  text: string;
+  code: boolean;
+}
+
+/** Authored prose split at its backtick pairs, as a lesson renders inline code. A lone backtick stays text. */
+export function spans(text: string): Span[] {
+  const out: Span[] = [];
+  let at = 0;
+  for (const m of text.matchAll(/`([^`\n]+)`/g)) {
+    if (m.index > at) out.push({ text: text.slice(at, m.index), code: false });
+    out.push({ text: m[1], code: true });
+    at = m.index + m[0].length;
+  }
+  if (at < text.length) out.push({ text: text.slice(at), code: false });
+  return out;
+}

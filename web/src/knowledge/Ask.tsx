@@ -34,6 +34,7 @@ import {
 import { Link } from 'react-router'
 
 import { Diagram } from '@/components/Diagram'
+import { Inline } from '@/components/Inline'
 import { Markdown } from '@/components/Markdown'
 import { SectionHeading } from '@/components/SectionHeading'
 import { PlainCode, PythonCode } from '@/components/PythonCode'
@@ -110,7 +111,9 @@ export function Ask({ q, course, head, onAnswered, onNext, exam, onLesson }: Pro
   return (
     <div className="space-y-stack">
       <p className="text-meta text-muted-foreground">{head}</p>
-      <p className="text-heading whitespace-pre-wrap">{block(q.prompt)}</p>
+      <p className="text-heading whitespace-pre-wrap">
+        <Inline text={block(q.prompt)} />
+      </p>
       {q.code && <PythonCode code={q.code} />}
 
       {q.format === 'choice' && (
@@ -129,7 +132,9 @@ export function Ask({ q, course, head, onAnswered, onNext, exam, onLesson }: Pro
                 className={cn(optionTile(on), 'w-full items-baseline')}
               >
                 <span className="font-medium">{LETTERS[pos]}</span>
-                <span className="flex-1 whitespace-pre-wrap">{q.choices[i]}</span>
+                <span className="flex-1 whitespace-pre-wrap">
+                  <Inline text={q.choices[i]} />
+                </span>
                 <span className="text-meta text-muted-foreground">{pos + 1}</span>
               </button>
             )
@@ -243,7 +248,9 @@ function Tick(props: {
         className="mt-1"
       />
       <span className="flex-1">
-        <span className="whitespace-pre-wrap">{props.label}</span>
+        <span className="whitespace-pre-wrap">
+          <Inline text={props.label} />
+        </span>
         {props.hint && <span className="block text-meta text-muted-foreground">{props.hint}</span>}
       </span>
     </label>
@@ -261,7 +268,11 @@ export function Verdict({ r }: { r: Result }) {
           {head.text}
         </p>
       )}
-      {explain && <p className="whitespace-pre-wrap">{explain}</p>}
+      {explain && (
+        <p className="whitespace-pre-wrap">
+          <Inline text={explain} />
+        </p>
+      )}
       {note && <p className="text-meta text-muted-foreground">{note}</p>}
     </div>
   )
@@ -291,12 +302,12 @@ export function Details({
                   <span className={row.ok ? 'text-verdict-passed' : 'text-verdict-wrong'}>
                     {row.mark}{' '}
                   </span>
-                  {row.label}
+                  <Inline text={row.label} />
                   {row.yours && <span className="text-muted-foreground">{DETAIL_YOURS}</span>}
                 </p>
                 {row.note && (
                   <p className="pl-4 text-meta whitespace-pre-wrap text-muted-foreground">
-                    {row.note}
+                    <Inline text={row.note} />
                   </p>
                 )}
               </div>
@@ -321,12 +332,14 @@ export function Details({
             <ul className="list-disc space-y-1 pl-5">
               {x.items.map((item, i) => (
                 <li key={i} className="whitespace-pre-wrap">
-                  {item}
+                  <Inline text={item} />
                 </li>
               ))}
             </ul>
           ) : (
-            <p className="whitespace-pre-wrap">{x.text}</p>
+            <p className="whitespace-pre-wrap">
+              <Inline text={x.text} />
+            </p>
           )}
         </Section>
       ))}

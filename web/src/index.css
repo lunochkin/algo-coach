@@ -273,7 +273,8 @@ summary {
   content: none;
 }
 
-.prose :is(code) {
+.prose :is(code),
+.code-inline {
   font-size: var(--text-code-inline);
   font-weight: 400;
   background: var(--muted);

@@ -9,6 +9,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
   type AnswerRow,
   block,
+  plain,
   byTopic,
   choiceOrder,
   DEFAULT_RULES,
@@ -74,7 +75,7 @@ import { Heading, PickPanel, PickRow } from '@/ui/rows';
 import { BottomBar, CodeBlock, fromCopy, Loaded, Press, ScreenHeader, styles } from '@/ui/common';
 import { KeyPad, PAD_HEIGHT } from '@/ui/keys';
 import { Diagram } from '@/ui/diagram';
-import { Markdown } from '@/ui/markdown';
+import { Inline, Markdown } from '@/ui/markdown';
 import { font, palette, radius, space } from '@/ui/tokens';
 
 // a note under an answer row starts past the row's mark and its space
@@ -391,7 +392,7 @@ function Head({ q, tag, early = false }: { q: Question; tag: string; early?: boo
         {questionHead(course, catalog?.rules ?? DEFAULT_RULES, q, tag, early)}
       </Text>
       <Text variant="titleMedium" selectable>
-        {block(q.prompt)}
+        <Inline text={block(q.prompt)} variant="titleMedium" />
       </Text>
       {q.code ? <CodeBlock code={q.code} wrap /> : null}
     </>
@@ -434,7 +435,7 @@ function Choices(props: { q: Question; order: number[]; picked: number[]; onTogg
           >
             <Text variant="titleSmall">{LETTERS[pos]}</Text>
             <Text variant="bodyLarge" style={{ flex: 1 }}>
-              {q.choices[i]}
+              <Inline text={q.choices[i]} variant="bodyLarge" />
             </Text>
           </Pressable>
         );
@@ -603,7 +604,12 @@ function Reviewed({ r, bottom, last, onNext }: { r: Result; bottom: number; last
 function Verdict({ r }: { r: Result }) {
   const theme = useTheme();
   const { head, explain, note } = verdictView(r);
-  if (!head) return explain ? <Text variant="bodyMedium">{explain}</Text> : null;
+  if (!head)
+    return explain ? (
+      <Text variant="bodyMedium">
+        <Inline text={explain} variant="bodyMedium" />
+      </Text>
+    ) : null;
   return (
     <View style={{ gap: space[1.5] }}>
       <Text variant="titleMedium" style={{ color: head.correct ? palette(theme.dark).passed : theme.colors.error }}>
@@ -611,7 +617,7 @@ function Verdict({ r }: { r: Result }) {
       </Text>
       {explain ? (
         <Text variant="bodyMedium" selectable>
-          {explain}
+          <Inline text={explain} variant="bodyMedium" />
         </Text>
       ) : null}
       {note ? (
@@ -662,12 +668,12 @@ function Row({ row }: { row: AnswerRow }) {
     >
       <Text variant="bodyMedium" selectable>
         <Text style={{ color: row.ok ? palette(theme.dark).passed : theme.colors.error }}>{`${row.mark} `}</Text>
-        {row.label}
+        <Inline text={row.label} variant="bodyMedium" />
         {row.yours ? <Text style={{ color: theme.colors.tertiary }}>{DETAIL_YOURS}</Text> : null}
       </Text>
       {row.note ? (
         <Text variant="bodySmall" selectable style={{ color: theme.colors.onSurfaceVariant, marginLeft: MARK_INDENT }}>
-          {row.note}
+          <Inline text={row.note} variant="bodySmall" />
         </Text>
       ) : null}
     </View>
@@ -707,12 +713,13 @@ function Details({ r }: { r: Result }) {
           ) : 'items' in x ? (
             x.items.map((p, i) => (
               <Text key={i} variant="bodyMedium" selectable>
-                {`•  ${p}`}
+                {'•  '}
+                <Inline text={p} variant="bodyMedium" />
               </Text>
             ))
           ) : (
             <Text variant="bodyMedium" selectable>
-              {x.text}
+              <Inline text={x.text} variant="bodyMedium" />
             </Text>
           )}
         </Section>
@@ -749,7 +756,7 @@ function Tick(props: { label: string; hint?: string; on: boolean; disabled: bool
       borderless
       accessibilityRole="checkbox"
       accessibilityState={{ checked: on, disabled }}
-      accessibilityLabel={hint ? `${hint}: ${label}` : label}
+      accessibilityLabel={hint ? `${hint}: ${plain(label)}` : plain(label)}
       style={[optionTile(on, theme), { justifyContent: 'center' }]}
     >
       <View style={styles.row}>
@@ -760,7 +767,7 @@ function Tick(props: { label: string; hint?: string; on: boolean; disabled: bool
         />
         <View style={{ flex: 1 }}>
           <Text variant="bodyLarge" selectable>
-            {label}
+            <Inline text={label} variant="bodyLarge" />
           </Text>
           {hint ? (
             <Text variant="labelSmall" style={{ color: theme.colors.onSurfaceVariant }}>
