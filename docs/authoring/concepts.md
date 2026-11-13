@@ -81,6 +81,9 @@ the coverage map for a module written by concept.
 - **A section's example shows the main point of its claim**, chosen against
   the concept's misconceptions. The witness proves every clause of the claim,
   so the example need not show each one.
+- **A section targets the misconceptions its example can separate.** The
+  others reach the learner through the lesson's common mistakes, which the
+  seed renders.
 - **For each misconception a section targets, the example's output differs
   from the output the misconception predicts.** An example that prints the
   same under the claim and under a misconception teaches neither. A `return`
@@ -89,7 +92,11 @@ the coverage map for a module written by concept.
   consequence is a fact, and no witness checks it.
 - **A section uses only constructs the lessons it `needs` have taught**, the
   module's baseline, or constructs the section explains itself. A module's
-  `CLAUDE.md` lists its baseline.
+  `CLAUDE.md` lists its baseline. `needs` is transitive: the lessons of a
+  subtopic the subtopic needs count, and so do the earlier sections of the
+  same lesson. A construct no concept teaches is added to the baseline
+  rather than explained in a section, since the explanation would be a fact
+  no witness checks.
 - **A claim that some code is a `SyntaxError` is stated in the lesson and
   shown by a question.** A lesson block that showed it would need `compile`,
   which a lesson does not teach. A `debug` question shows the refused code as
@@ -146,9 +153,12 @@ is approved.
    after that review. A list of about thirty claims reads in minutes, and an
    error caught here reaches no lesson and no question.
    - Stage 1 also lays out the subtopic's lessons, since each `taught_by`
-     names a lesson and a section. It adds the subtopic to `course.toml` and
-     to `graph.toml`, with the subtopics it needs, and writes each lesson
-     file as its `##` headings alone. The check then holds every `taught_by`
+     names a lesson and a section. Each lesson's `needs` and the order of
+     its headings follow the concept order, so every construct a witness
+     uses is taught before the section teaching that witness's concept. It
+     adds the subtopic to `course.toml` and to `graph.toml`, with the
+     subtopics it needs, and writes each lesson file as its `##` headings
+     alone. The check then holds every `taught_by`
      to a section, and stage 2 writes under the approved headings.
    - The approval is recorded in the concept file's header, with its date
      and the scopes the author decided.
@@ -162,10 +172,13 @@ is approved.
    reviewer checks each against its concept and the section teaching it,
    and names a new task for each question repeating its section. The
    findings are fixed in place, and the stage ends on the stopping rule of
-   stage 1. The stopping rule waives a full review of the fixed bank, not
-   rule 23: a second reader reviews the fix pass on its diff. A finding
-   about a concept goes to the author of the module first, since it reopens
-   stage 1.
+   stage 1. A finding about a concept goes to the author of the module
+   first, since it reopens stage 1.
+
+In every stage, the stopping rule waives a full review of the fixed layer,
+not rule 23: a second reader reviews the last fix pass on its diff. In stage
+3, the first fix pass rewrote 19 questions with no false statement and
+seven new defects, which only a review of its diff found.
 
 Each stage is written by one agent and reviewed by another, which wrote
 nothing it reviews. The `concept-author` skill in `.claude/skills/` holds the
@@ -193,6 +206,11 @@ back to a concept in the pilot broke one of them.
   "iterator" and "generator" were each used before any claim defined them.
   The subtopic orders its concepts as its file lists them. A concept of a
   subtopic this one `needs` counts as earlier.
+- **An example can separate every misconception.** For each one, the
+  reviewer names an output the claim gives and the misconception does not,
+  from code using the baseline and the concepts ordered before it. In
+  `core/functions`, two misconceptions needed a level 1 fact or `id()` to be
+  told apart, and no lesson at their level could target them.
 - **Every misconception's text is false wherever the claim's scope reaches.**
   A misconception that is true in one case teaches that case wrong. In
   `core/functions`, four wrong claims were misconceptions that a `:=`, a

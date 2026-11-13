@@ -24,13 +24,19 @@ Read both files, and the module's `CLAUDE.md`, before the first step.
   decides each disputed scope.
 - **The writer** is one agent per step. It is given the brief below and the
   layer above, never the layer it replaces: a fresh generation reads no
-  earlier version of its own file.
+  earlier version of its own file. The session may write a step itself when
+  it has read no earlier version of the file.
 - **The reviewer** is a second agent, which wrote nothing it reviews. It
   edits no file and writes its report to the scratchpad.
 - **The fixer** applies a review in place. It may be the session itself.
 
 Every agent runs code from the engine repo root with `uv run`, and runs
-`uv run algo-coach module check <module>` before it reports.
+`uv run algo-coach module check <module>` before it reports. A reviewer
+judges no prose line's width, since markdown reflows prose.
+
+Each stage ends on `concepts.md`'s stopping rule: a review finds nothing
+WRONG, the other findings are fixed in place, and a second reader reviews the
+last fix pass on its diff (rule 23).
 
 ## Stage 1: concepts
 
@@ -43,6 +49,8 @@ Every agent runs code from the engine repo root with `uv run`, and runs
      `sub_titles`) and to `graph.toml` (`needs`, and a `[lesson.<slug>]` per
      lesson, one lesson per level and cluster of concepts). Write each lesson
      file as its `##` headings alone, one per section a `taught_by` names.
+     Each lesson's `needs` and its heading order follow the concept order,
+     so every construct a witness uses is taught before its section.
    - Order the concepts so each term is defined before its use. A concept of
      a subtopic this one needs counts as defined.
    - Report each scope you chose that a reviewer could dispute, with a
@@ -50,7 +58,9 @@ Every agent runs code from the engine repo root with `uv run`, and runs
 2. **Review.** Brief: check each concept against the stage 1 checklist. Run
    one more case each claim's wording covers. Check that each misconception's
    text is false in every case the claim's scope reaches, and that each
-   witness uses only the baseline and earlier concepts. Sort each finding as
+   witness uses only the baseline and earlier concepts. For each
+   misconception, name an output the claim gives and the misconception does
+   not, from code using only the baseline and earlier concepts. Sort each finding as
    WRONG (false), GAP (a clause or misconception missing) or STYLE.
 3. **Fix**, then repeat 2 with a fresh reviewer until a review finds no
    WRONG. Bring the disputed scopes to the user, then ask for approval.
