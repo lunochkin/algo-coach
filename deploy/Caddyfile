@@ -7,3 +7,10 @@
 	encode zstd gzip
 	reverse_proxy api:8000
 }
+
+# ALGO_COACH_REDIRECT_FROM lists further hosts, space-separated, that answer
+# with a permanent redirect to ALGO_COACH_DOMAIN. Sign-in returns to the one
+# origin alone, so a second host serving the pages would break it.
+{$ALGO_COACH_REDIRECT_FROM} {
+	redir https://{$ALGO_COACH_DOMAIN}{uri} permanent
+}

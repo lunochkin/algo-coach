@@ -10,8 +10,9 @@
 # `db` service by, ALGO_COACH_ORIGIN and ALGO_COACH_SECRET, and each provider's
 # client id and secret. ALGO_COACH_DOMAIN is the host ALGO_COACH_ORIGIN names,
 # since Caddy issues the certificate for it and the sign-in callback returns
-# there. DOCKER_GID is the id of the host's docker group, which the deployment
-# repo writes per server.
+# there. ALGO_COACH_REDIRECT_FROM lists the hosts Caddy redirects to it, and
+# Caddy refuses to start without it. DOCKER_GID is the id of the host's docker
+# group, which the deployment repo writes per server.
 
 name: algo-coach
 
