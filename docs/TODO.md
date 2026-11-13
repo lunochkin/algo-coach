@@ -4,12 +4,161 @@ The phases still open. A ticked item stays while its phase is open. When a
 phase closes, its items are harvested into `docs/ROADMAP.md` and removed whole.
 The work not yet ready for a phase waits under Further developments.
 
-## Phase 19 — the content pipeline (current)
+## Phase 16 — the algorithms track, opened (current)
+
+The algorithms track in all three of its forms, and what the engine needs
+before a user other than the author starts on it. Learn: a module of short
+lessons and questions, one subtopic per technique the cards teach. Drill: short
+exercises on the phone. Solve: the sitting, on problems whose difficulty
+matches their label. Planned 2026-11-13, ahead of the content pipeline: the
+pipeline improves content, and this phase puts the content in front of someone
+other than the author.
+
+The order below is the order of work. The problem sweeps run in the background
+from the second block on.
+
+### The Python module, finished
+
+- [ ] Close the open findings of the content repository's review of the Python
+      module, as its `PLAN.md` gives, and seed the result
+
+### Problem difficulty
+
+The easy problems ask for more than easy, and few medium problems survive
+verification: 24 of the 33 generated were retired, against 2 of the 43 easy.
+
+- [ ] List every served easy problem that asks for more than the form applied
+      to the input as given, and what it asks for. The list shows whether the
+      generator writes past its own definition of easy or labels too low
+- [ ] Write each difficulty as criteria a reader can check into `corpus.md`:
+      easy, the form applied to the input as given; medium, the form after one
+      transformation of the input or the state; hard, two ideas combined, or
+      one the statement does not suggest
+- [ ] Count the retired drafts by `retired_reason` and difficulty, and write
+      the leading cause into `log.md`. A fix aimed at the leading cause raises
+      the medium yield more than more runs do
+- [ ] Hold the generation prompt to the criteria, and relabel the served
+      problems the list found mislabelled
+- [ ] Run sweeps until every technique of the nine cards serves at least four
+      easy and three medium problems
+- [ ] Read each served problem's difficulty against the author's own sittings
+      on it, and list where the two disagree
+
+### The algorithms module
+
+Mastery's knowledge part counts answers to the questions a technique carries,
+and no question carries a technique yet. The module itself is authored in the
+content repository, as its `PLAN.md` gives: one subtopic per technique of the
+nine cards, at levels 0 and 1, segmented as the Python module is.
+
+- [ ] Decide how a subtopic names the technique it teaches, and write the field
+      into `knowledge.md`. `log.md` defers how a question is tied to its
+      technique, and the field settles it
+- [ ] Write into `content.md` how a card and a subtopic share one technique:
+      the card holds the trigger, the templates and the ladder, the subtopic
+      the facts. Without the split a lesson and a brief restate each other
+- [ ] Add the technique field to the seed and the snapshot, checked against
+      the vocabulary as the seed runs
+- [ ] Write the solver's skill: a session answers each question without its
+      key, and a reply differing from the key is a finding under rules 7
+      and 9
+- [ ] Write the lesson reviewer's skill: a session reads each lesson's prose
+      against its example and its questions, under rules 15 and 22
+- [ ] Run the solver and the lesson reviewer over the module by hand before
+      it is seeded, and fix what they find. A lesson giving its question away
+      was the Python module's commonest defect
+- [ ] Seed the module, with `module check` passing
+- [ ] Link a card's page to its technique's subtopic on both clients, with the
+      row in `pages.md` `### Acts`
+- [ ] Count a technique's knowledge reading from the answers to its subtopic's
+      questions, as `log.md` gives, and show it on the board
+
+### The cards, checked
+
+Judging a solution is built from a template's mutants that fail a case, so a
+template's cases must catch its mutants first. Taken from the content
+pipeline, Phase 17, which keeps the rest for the next module.
+
+- [ ] Move the card rules out of the `card-author` skill into a `cards.md`
+      beside `docs/authoring/rules.md`, numbered as `rules.md` numbers a
+      module's.
+      A reviewer cites a rule by its number, and a skill's prose carries none
+- [ ] Port the skill's `validate.py` to `algo-coach card check <slug>`, with a
+      test per check, and have the content repository's pre-commit hook run
+      it on a staged card
+- [ ] Run the mutants of each template's form against its cases in `card
+      check`, and report each survivor as a case the template lacks.
+      `algo_coach.mutation` enumerates them already, and the pass costs no
+      call
+
+### Judging a solution
+
+The first short exercise. A solution is shown, either clean or carrying one
+mutant that fails at least one case, and the user judges it. Judging a
+solution is reading code for correctness and cost, the step a sitting ends on
+and a review of anyone's code begins with.
+
+- [ ] Write the design of a short exercise into `log.md`: its own record kind,
+      and that mastery never counts it as execution. A judged solution is not a
+      solve
+- [ ] Write the judgement exercise into `log.md`: the solution, whether it is
+      clean, the mutant's line, the case that separates it, and the answers it
+      takes — correct or not, then the flawed line
+- [ ] Build the items from each card template's mutants that fail a case, with
+      about a quarter of the items clean. A clean item makes a false alarm
+      countable
+- [ ] Serve the exercise at the phone's width first, on both clients, with the
+      shared fixtures passing in both suites
+- [ ] Show the user's judgement as two rates per technique: flaws found, and
+      clean solutions called flawed
+
+### Filling the key line
+
+- [ ] Serve a template's solution with one line blanked — the invariant, the
+      update or the edge case — and the choices drawn from the template's
+      mutants of that line. Each choice is run against the cases
+
+### The sitting
+
+- [ ] List the frictions of a sitting met in the author's own use of the
+      current corpus, each landing as an item in this block
+
+### A user other than the author
+
+Who is asked to use the engine, and when, is decided outside this repo. These
+are the capabilities any new user needs from it.
+
+- [ ] A first run for a user who is not the author: what each form is for,
+      where to start, and the pretest before the first lesson
+- [ ] Repeat each pretest's subtopics four weeks or more after it, and store
+      both results under the user. The difference is the measured gain
+- [ ] Read retention at 7 and 30 days, and recall against what FSRS predicted,
+      per user and over all users
+- [ ] Let a user request a problem's retirement, as a private record an admin
+      reads before retiring the problem by hand. Problems are served to every
+      user, so no user retires one directly
+- [ ] Limit execution per user: runs per hour and the resources a run takes
+- [ ] Let a user export their records and delete their account
+- [ ] A privacy page: what is kept, for how long, and why. The retention
+      statement it needs is open in the deployment repository
+- [ ] Report a client's errors to the server, and give the user a way to send
+      feedback from either client
+
+### Exit
+
+- A user other than the author completes the first run with its pretest, and
+  uses each form of the algorithms track: a lesson, a short exercise and a
+  sitting.
+
+## Phase 17 — the content pipeline (after Phase 16)
 
 Modules and cards written, checked and revised by Claude Code sessions, with no
 call to the API. The pipeline lives in this repo, and the content repository
 holds the content alone. Planned 2026-11-11, and cards joined on 2026-11-12.
 Which modules and cards get written is the content repository's `PLAN.md`.
+On 2026-11-13 the card rules, `card check` with its mutant pass, the solver
+and the lesson reviewer moved to Phase 16, which needs them for the algorithms
+module. The rest waits for the next module.
 
 ### The design
 
@@ -35,22 +184,12 @@ Which modules and cards get written is the content repository's `PLAN.md`.
 - [x] Port `content/modules/check.py` to `algo-coach module check <slug>`,
       with a test per rule it checks. Its 1126 lines carry no test today, and
       every later step trusts its verdict
-- [ ] Move the card rules out of the `card-author` skill into a `cards.md`
-      beside `docs/authoring/rules.md`, numbered as `rules.md` numbers a
-      module's.
-      A reviewer cites a rule by its number, and a skill's prose carries none
-- [ ] Port the skill's `validate.py` to `algo-coach card check <slug>`, with a
-      test per check, and have the content repository's pre-commit hook run
-      it on a staged card
 - [ ] Add the `Finding` record and its schema snapshot: the rule, the question
       or the template, the reviewer, the verdict and the outcome, stored as
       one JSON-lines file per module and per card in the content repository
 
 ### The module reviewers
 
-- [ ] Write the solver's skill: a session answers each question without its
-      key, and a reply differing from the key is a finding under rules 7
-      and 9
 - [ ] Write the form reviewer's skill: a session picks from the choices
       alone, with no prompt, and a keyed pick above chance is a finding under
       rules 10 and 11
@@ -59,17 +198,11 @@ Which modules and cards get written is the content repository's `PLAN.md`.
       under rule 16
 - [ ] Write the fact reviewer's skill: a session checks each claim against
       the sources the module names, under rules 4 to 6 and 12
-- [ ] Write the lesson reviewer's skill: a session reads each lesson's prose
-      against its example and its questions, under rules 15 and 22
 - [ ] Have each reviewer read its example defects from a path in the content
       repository. The skill is public, and a real question is not
 
 ### The card reviewers
 
-- [ ] Run the mutants of each template's form against its cases in `card
-      check`, and report each survivor as a case the template lacks.
-      `algo_coach.mutation` enumerates them already, and the pass costs no
-      call
 - [ ] Write the trigger reviewer's skill: a session reads a card's trigger and
       each template's trigger alone and names the form, and a wrong form is a
       finding. A probe asks a user the same question
@@ -107,7 +240,7 @@ Which modules and cards get written is the content repository's `PLAN.md`.
 - [ ] One authored card is revised through the loop, seeded with `card check`
       passing and every finding closed
 
-## Phase 16 — scheduling and mastery
+## Phase 18 — scheduling and mastery
 
 - [ ] Port learn's FSRS replay, question states and gating into
       `algo_coach.knowledge`, with the shared fixtures passing against it. The
@@ -132,6 +265,9 @@ Which modules and cards get written is the content repository's `PLAN.md`.
 - [ ] Compute each technique's execution reading from its sittings, as `log.md`
       gives, and show it on the board beside recognition read as unknown. The
       pick and the predictions both read it
+- [ ] Decide what a short exercise's answers feed in a technique's mastery:
+      a reading of their own, judgement, or recognition. Phase 16 keeps them
+      out of execution, and nothing else reads them yet
 
 ### The card lifecycle
 
@@ -162,6 +298,9 @@ cards' states.
       attempt, graded by the hints taken, and a sitting on a problem whose
       `target_template_id` names the template. The matcher is unscored, so a
       review never reads a match
+- [ ] Decide whether a short exercise drawn from a template, such as its key
+      line, reviews that template in FSRS or stays practice beside the
+      schedule, and write the choice into `flows.md`
 - [ ] Write down the FSRS parameters the schedule starts from and why each was
       chosen. A number nobody wrote down is guessed again at every change
 - [ ] Write down the card spacing gap and the in-flight cap the schedule starts
@@ -186,7 +325,16 @@ cards' states.
 
 The scheduler is worth building only if it beats a simpler policy over the same
 problems. The comparison runs from the first pick, so its design lands with
-the schedule.
+the schedule. It was planned for the author's log alone, and Phase 16
+prepares the engine for other users.
+
+- [ ] Decide whether other users enter the comparison, and if they do,
+      assign by user and technique rather than by technique alone. More users
+      give the comparison more power, and a readiness bar written for one
+      user's level may not hold for another's
+- [ ] Keep every record made before the criterion and the assignment out of
+      the comparison. Phase 16's users sit before this phase ships, and a
+      criterion written after reading their records is fitted to them
 
 - [ ] Write into `log.md` what ready means per technique: the bar, the
       difficulty and the time limit. A criterion written after the data is
@@ -204,7 +352,7 @@ the schedule.
 - [ ] Start a sitting from the scheduler's pick on the board, and complete it
       to the claim, with the pick's prediction and its arm stored
 
-## Phase 17 — the matcher, measured
+## Phase 19 — the matcher, measured
 
 The matcher says which templates a generated solution displays, and every
 ladder is built from those matches. No number says how often the matcher is
@@ -276,7 +424,7 @@ returned. Both are read off the sample the hand pass already covers.
 - [ ] The matcher carries a per-template score in both directions, and the
       gate carries a share with the denominator the pass covered
 
-## Phase 18 — the diagnosis, measured
+## Phase 20 — the diagnosis, measured
 
 The machine counterpart of the self-label, and how much the program-analysis
 tools add to it. The mutants make the eval set: a mutant carries its mistake by
@@ -332,7 +480,7 @@ meant for the phone joins this block rather than opening a block of its own.
 #### The recognition drill
 
 A problem served without its technique, answered in words with no code run.
-Moved out of Phase 16 on 2026-10-02: hiding the technique matters less than
+Moved out of Phase 18 on 2026-10-02: hiding the technique matters less than
 the schedule, and the mastery state reads recognition as unknown until a drill
 feeds it.
 
@@ -356,9 +504,6 @@ Exercises that need little typing, and so suit a phone: ordering a solution's
 shuffled lines, filling one blank in it, and tracing what it prints. Each
 tests less than writing the solution does.
 
-- [ ] Write the design of a short exercise into `log.md`: its own record
-      kind, and that mastery never counts it as execution. A reordered line
-      is not a solve
 - [ ] Compare tracing with the knowledge module's `output` questions, and
       write into `knowledge.md` whether a traced output is one of them
 
@@ -389,7 +534,7 @@ records the corpus already holds.
 
 ### Scheduling on the diagnosed cause
 
-Waits on the scores Phase 18 produces: a cause nothing measured is a guess the
+Waits on the scores Phase 20 produces: a cause nothing measured is a guess the
 board would act on.
 
 - [ ] Have the pick read the diagnosed cause beside mastery, once the call
@@ -468,10 +613,6 @@ one form its target named.
       expression in a code span, never TeX, and say so in `corpus.md`. A code
       span reads the same on both clients, where the phone reads TeX through a
       Unicode fallback. Triggered by the next generation sweep
-- [ ] List every served easy problem that asks for more than the form applied
-      to the input as given, and what it asks for. The list shows whether the
-      generator writes past its own definition of easy or labels too low
-
 ### Cases and verdicts
 
 - [ ] Choose how a case with several correct returns is decided, by a
@@ -494,15 +635,15 @@ one form its target named.
 - [ ] Write the repair search: a failing attempt and the problem's canonicals
       in, the smallest edit on the parsed tree passing every case out. The
       search returns no edit when none is found within a stated budget.
-      Triggered when Phase 18 scores its first tool
+      Triggered when Phase 20 scores its first tool
 - [ ] Measure the repair by what it adds to the diagnosis call, the same way
-      Phase 18 measures each tool. A tool nobody measured is a guess the call
+      Phase 20 measures each tool. A tool nobody measured is a guess the call
       acts on
 
 ### Technique detection by static analysis
 
 - [ ] Write rules per core template that say from the parsed tree whether a
-      solution displays the template's form. Triggered when Phase 17 names
+      solution displays the template's form. Triggered when Phase 19 names
       templates the matcher reads badly
 - [ ] Compare the rules with the matcher per template on the hand pass, and
       send each pair where the two disagree to adjudication
@@ -539,7 +680,7 @@ one form its target named.
 
 - [ ] Fit a knowledge-tracing model to the log, and score the model on the
       predictions each pick records against FSRS alone and the mastery state.
-      Triggered when Phase 16 has recorded predictions for a few hundred picks
+      Triggered when Phase 18 has recorded predictions for a few hundred picks
 
 ### Forgetting per technique
 
@@ -708,25 +849,6 @@ re-aims it by hand. Nothing aims the next focus once the current one is done.
 - [ ] Show a module's own forecast on its page. Triggered when the home's
       forecast reads two modules' load and the user asks which one it is
 
-### The algorithms module
-
-Mastery's knowledge part counts answers to the questions a technique carries,
-and no question carries a technique yet. The module itself is authored in the
-content repository, as its `PLAN.md` gives.
-
-- [ ] Decide how a subtopic names the technique it teaches, and write the field
-      into `knowledge.md`. `log.md` defers how a question is tied to its
-      technique, and the field settles it
-- [ ] Write into `content.md` how a card and a subtopic share one technique:
-      the card holds the trigger, the templates and the ladder, the subtopic
-      the facts. Without the split a lesson and a brief restate each other
-- [ ] Add the technique field to the seed and the snapshot, checked against
-      the vocabulary as the seed runs
-- [ ] Link a card's page to its technique's subtopic on both clients, with the
-      row in `pages.md` `### Acts`
-- [ ] Count a technique's knowledge reading from the answers to its subtopic's
-      questions, as `log.md` gives, and show it on the board
-
 ### Output questions typed
 
 An `output` question answered by picking an option tests recognition. Typing
@@ -799,7 +921,7 @@ fits.
 - [ ] Expose the corpus and the engine's commands as an MCP server.
       Triggered when an agent outside the engine needs to read the corpus
 - [ ] Run the practice loop as a scheduled agent over the MCP server, serving
-      the scheduler's pick. Triggered when Phase 16's pick is served on the
+      the scheduler's pick. Triggered when Phase 18's pick is served on the
       board
 
 ### Design simulation
@@ -821,10 +943,6 @@ fits.
       whole corpus. The listing fetches every problem today, since a page of
       rows cannot count the tags. Triggered when the corpus outgrows one
       request
-- [ ] Let a user request a problem's retirement, as a private record an admin
-      reads before retiring the problem by hand. Problems are served to every
-      user, so no user retires one directly. Triggered when someone other than
-      the author sits
 - [ ] Print the seed's progress to stderr as it runs: one line per stage,
       modules, questions, lessons, cards, with its count. A seed through the
       tunnel runs for minutes and prints nothing before its closing summary

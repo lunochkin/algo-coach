@@ -50,7 +50,7 @@ those steps at low fidelity.
   it and the way back names where the pick came from.
 - **A signed-in user lands on the board, on both clients.** Every sitting
   starts from a technique the user picks there, Continue starts the next
-  queue there, and Phase 16 serves the scheduler's pick on the same page.
+  queue there, and Phase 18 serves the scheduler's pick on the same page.
 - **The board names the cards in progress before the techniques.** A card in
   progress is one
   acquiring or consolidating: a study the user declared and has not finished.

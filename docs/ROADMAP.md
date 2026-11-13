@@ -405,7 +405,7 @@ one app with one log.
   due reviews, and next up named by Continue's own rule.
 - Exit met in part at close: practice moved to the app on 2026-11-09, and the
   phase was closed by hand on 2026-11-10. The days before were practised in
-  learn. The Python port of FSRS replay, states and gating moved to Phase 16,
+  learn. The Python port of FSRS replay, states and gating moved to Phase 18,
   which reads it.
 
 Measured:
@@ -474,7 +474,41 @@ Measured:
 - A release build of the app after a TypeScript change took 25 s against
   177 s, once the Android project is regenerated only when its inputs change.
 
-## Phase 19 — The content pipeline (current)
+## Phase 16 — The algorithms track, opened (current)
+
+The algorithms track in all three of its forms, and what the engine needs
+before a user other than the author starts on it. Learn: a module of short
+lessons and questions, one subtopic per technique the nine cards teach, at
+levels 0 and 1. Drill: short exercises on the phone, first judging a solution
+and filling its key line. Solve: the sitting, on problems whose difficulty
+matches their label. Planned on 2026-11-13 ahead of the content pipeline, which
+improves content, where this phase puts the content in front of someone other
+than the author.
+
+- The Python module's review closed and seeded.
+- Difficulty as criteria a reader can check, the easy problems audited against
+  them, and sweeps until each technique of the nine cards serves at least four
+  easy and three medium problems.
+- The technique field on a subtopic, carried by the seed and the snapshot, and
+  the algorithms module authored to it in the content repository, checked by
+  the solver and the lesson reviewer before it is seeded.
+- The card rules numbered in `cards.md`, and `algo-coach card check` with a
+  pass running each template's mutants against its cases, so the mutants a
+  solution is judged on are ones the cases catch.
+- Judging a solution: a template's solution, clean or carrying one mutant that
+  fails a case, judged as correct or not and then by its flawed line. The
+  key line: one line blanked, the choices drawn from that line's mutants.
+- A first run for a new user with the pretest, the pretest repeated four weeks
+  or more later, retention read at 7 and 30 days, execution limited per user,
+  export and deletion, a privacy page and error reports.
+- Exit: a user other than the author completes the first run with its
+  pretest, and uses a lesson, a short exercise and a sitting.
+
+## Phase 17 — The content pipeline (after Phase 16)
+
+The card rules, `card check` with its mutant pass, the solver and the lesson
+reviewer moved to Phase 16 on 2026-11-13, which needs them for the algorithms
+module. The rest of the pipeline waits for the next module.
 
 Modules and cards written, checked and revised by a pipeline of Claude Code
 sessions, with the pipeline's reviewers measured before content is trusted to
@@ -510,7 +544,7 @@ module left 23 numbered rules. Cards joined on 2026-11-12.
   through the loop, and one card is revised through it, each with every
   finding closed.
 
-## Phase 16 — Scheduling and mastery
+## Phase 18 — Scheduling and mastery
 
 Per-technique skill state derived from the log, a scheduler that says what is
 due, and a comparison of that scheduler against a simpler policy.
@@ -519,6 +553,9 @@ Ordered ahead of the matcher on 2026-09-22. What this phase is worth is read
 from attempts made after it ships, so a week earlier is a week more log to
 read it on. The matcher's score waits on work alone and loses nothing by
 following. The recognition drill moved to Further developments on 2026-10-02.
+Moved behind Phase 16 on 2026-11-13: it then reads other users' records as
+well as the author's, and the short exercises Phase 16 adds need a place in
+mastery and in the schedule.
 
 - **FSRS replay, question states and gating ported to Python**, held to the
   TypeScript core by the shared fixtures, for the mastery formula and the
@@ -553,7 +590,7 @@ following. The recognition drill moved to Further developments on 2026-10-02.
 - Exit: a sitting started from the scheduler's pick on the board, and
   completed to the claim, with the pick's prediction and its arm stored.
 
-## Phase 17 — The matcher, measured
+## Phase 19 — The matcher, measured
 
 How often the matcher is right, measured.
 
@@ -571,7 +608,7 @@ How often the matcher is right, measured.
 - Exit: the matcher carries a per-template score in both directions, and the
   gate carries a share with the denominator the pass covered.
 
-## Phase 18 — The diagnosis, measured
+## Phase 20 — The diagnosis, measured
 
 The machine counterpart of the self-label, and how much the program-analysis
 tools add to it.
@@ -610,7 +647,7 @@ items of each block, the smaller ones included.
   canonical against its naive solution, and the separating case checks the
   judgement. The user writes the instruction a model implements, and the
   problem's cases judge the code the model wrote.
-- **Scheduling on the diagnosed cause.** What Phase 18 names, fed back into
+- **Scheduling on the diagnosed cause.** What Phase 20 names, fed back into
   what the board picks next. It waits on the scores that phase produces.
 - **Alternative solutions.** Every other way to solve a stored problem,
   enumerated over the corpus, each approach its own canonical judged by the
@@ -620,7 +657,7 @@ items of each block, the smaller ones included.
   from every mutant already known.
 - **Repair as diagnosis.** The smallest edit on the parsed tree that makes a
   failing attempt pass every case, searched against the problem's canonicals.
-  The edit's location and kind name the mistake, and Phase 18 can score the
+  The edit's location and kind name the mistake, and Phase 20 can score the
   repair as one more tool.
 - **Technique detection by static analysis.** Rules per template that read a
   solution's form from its parsed tree, run beside the matcher. A pair where
@@ -639,7 +676,7 @@ items of each block, the smaller ones included.
   run of concurrent code says nothing about the next run.
 - **Knowledge tracing.** A model that estimates from attempts the probability
   that a user holds a technique, fitted to the log. The model is scored on the
-  predictions Phase 16 records, against FSRS alone and the mastery state.
+  predictions Phase 18 records, against FSRS alone and the mastery state.
 - **Forgetting per technique.** The decay of the chance of passing with time
   since the last pass, fitted per technique and mode from the log. A form that
   decays differently from a recalled fact needs different review intervals.
