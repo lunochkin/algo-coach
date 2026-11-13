@@ -77,6 +77,44 @@ architecture, and `README.md` is the map.
 - **Exclusion is a read-time rule, never a deletion.** The attempts stay
   readable, and the board stops counting them.
 
+## Difficulty ratings
+
+- **A label reads on the scale of the public problem platforms.** Easy,
+  medium and hard mean what the platforms' three levels mean, since a user
+  compares a label with those. The criteria for each level are written below
+  this section's rules.
+- **An easy problem on a template applies the template's form unchanged.**
+  A recall attempt already checks that the user can type the form. The easy
+  problem adds one check: that the user sees the form behind the statement.
+  Whether a ladder requires an easy rung of a user who passed the recall is
+  deferred until real sittings show what the easy rung adds.
+- **A problem's `difficulty` is the generator's rating, and stays as
+  written.** The generator judges the problem it wrote, and nothing has read
+  the problem yet. A problem is never edited, so a corrected label cannot
+  overwrite that field.
+- **A `DifficultyRating` stores one later judgement of one problem's
+  difficulty.** It carries an engine-minted `id`, the `problem_id`, the
+  `difficulty`, its `source` and `created_at`. A rating with `source`
+  `classifier` carries provenance whole, as any machine record does.
+- **Ratings are product data, global and append-only.** A problem is served to
+  every user, so its label is the same for every user. A rating replaced by a
+  later one stays readable beside it.
+- **The standing difficulty is read at every read and never stored.** The
+  standing rating answers, by the standing rule: a `user` rating stands over a
+  `classifier` one, and among each source's ratings the latest stands. With no
+  rating, the problem's own `difficulty` answers.
+- **Every reader of a label reads the standing difficulty.** These readers are
+  the badge, the listing's filter and a card's selector.
+- **A `user` rating is written by hand, in the terminal, beside retirement.**
+  A learner's reading of a problem does not change the label another user is
+  served.
+- **A model call writing ratings is deferred.** The by-hand pass covers the
+  corpus while the corpus holds tens of problems. The call is the
+  `classifier` source when the corpus outgrows a by-hand pass.
+- **A difficulty estimated from attempts is deferred** to "Difficulty
+  calibrated from attempts" in `ROADMAP.md`. Whether an estimate is a rating
+  with a source of its own is decided there.
+
 ## Test cases
 
 The test cases decide whether a solution to a generated problem is correct.

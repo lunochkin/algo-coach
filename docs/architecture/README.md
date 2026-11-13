@@ -93,6 +93,10 @@ without redefining them. Grouped by the file that specifies the record.
   ceiling put out of reach.
 - **Solution claim**: a claim about a solution the engine wrote. Product data,
   and what a problem's techniques are folded from.
+- **Difficulty rating**: a judgement of a problem's difficulty written after
+  landing, by hand or by a model. A `DifficultyRating` record stores one.
+- **Standing difficulty**: the label a problem is served with: its standing
+  rating, or the generator's `difficulty` where no rating exists.
 - **Defective**: a retirement reason: the statement asks for something its
   cases do not decide.
 - **Enumeration**: a pass over a landed problem proposing other approaches,
@@ -372,6 +376,7 @@ times. Each record class is specified in one of the files beside it.
 | Test cases | product | global | written with the problem | the store |
 | Solutions | product | global | append-only | the store |
 | Solution claims | product | global | append-only | the store |
+| Difficulty ratings | product | global | append-only | the store |
 | Verification runs | product | global | append-only | the store |
 | Template matches | product | global | append-only | the store |
 | Site outcomes | product | global | append-only | the store |
