@@ -79,7 +79,7 @@ graph, and `log.md` gives when a card is locked.
       with a test per rule in `log.md` `## Locked cards`
 - [x] Refuse a locked card's run in the API, and name the unmet required
       cards on the press, on both clients
-- [ ] Write each requirement between the nine cards into `content/cards/`
+- [x] Write each requirement between the nine cards into `content/cards/`
 - [ ] Author the root cards with `card-author`, one at a time: hashing, two
       pointers, prefix sum, sorting, stack and queue, linked list, tree
       traversal, breadth-first search and depth-first search. Each is a root
