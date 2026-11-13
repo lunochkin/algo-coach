@@ -265,9 +265,20 @@ file in place.
    technique needs, not by what the store happens to hold. A core template
    no problem matches is a reported gap, and generation writes for that gap.
 
-7. **Validate**, and fix what it reports. It matches the file against
-   `CardSeed`, checks the technique codes, parses every template, and runs each
-   template's own form against the cases authored beside it:
+7. **Write `requires`** — the cards this one builds on, each as
+   `{"card": <slug>, "template": <its core template>, "used_by": <this card's
+   template>}`. `docs/architecture/content.md` gives the card graph. An edge
+   says this card's template uses that template's form: Kruskal's template
+   uses the disjoint set, so it names `dsu-core` on the union-find card. "Is
+   usually taught first" is no edge, and a kind-of relation is a technique's
+   parent rather than a requirement. A root card, teaching a basic form, leaves
+   `requires` empty. The required template must be core, and no edge may close
+   a cycle.
+
+8. **Validate**, and fix what it reports. It matches the file against
+   `CardSeed`, checks the technique codes and the requirements against the
+   cards beside it, parses every template, and runs each template's own form
+   against the cases authored beside it:
 
    ```bash
    uv run python .claude/skills/card-author/validate.py content/cards/<slug>.json

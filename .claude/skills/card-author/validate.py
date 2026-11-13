@@ -1,10 +1,11 @@
 """Check an authored card before it is seeded.
 
-Four things the author cannot see by reading the file: whether it matches
+Five things the author cannot see by reading the file: whether it matches
 `CardSeed`, whether the technique code is one the vocabulary carries, whether
-each template parses, and whether a template's form passes the cases authored
-beside it. The trainer runs a recalled form against those cases, so a case the
-form itself fails would fail every reproduction of it.
+its requirements hold against the cards beside it, whether each template
+parses, and whether a template's form passes the cases authored beside it.
+The trainer runs a recalled form against those cases, so a case the form
+itself fails would fail every reproduction of it.
 
 Usage: uv run python .claude/skills/card-author/validate.py
 content/cards/*.json
@@ -15,6 +16,7 @@ from pathlib import Path
 
 from pydantic import ValidationError
 
+from algo_coach.cards.graph import broken
 from algo_coach.runner import agrees, as_json, defines_solve, run
 from algo_coach.schema import CardSeed, TemplateKind, TemplateSeed
 from algo_coach.sitting import DRILL_CAP_MS
@@ -34,6 +36,9 @@ def problems(path: Path) -> list[str]:
         found.append(f"unknown selector technique: {card.selector.technique}")
     if path.stem != card.slug:
         found.append(f"file name {path.stem} does not match slug {card.slug}")
+    graph = siblings(path.parent) | {card.slug: card}
+    if card.slug in (refused := broken(graph)):
+        found.append(refused[card.slug])
     for template in card.templates:
         if template.kind is not TemplateKind.CODE:
             continue  # a procedure is steps to reproduce, not source
@@ -69,6 +74,18 @@ def settled(value: object, template: TemplateSeed) -> object:
     if not template.unordered or not isinstance(value, list):
         return value
     return sorted(value, key=as_json)
+
+
+def siblings(folder: Path) -> dict[str, CardSeed]:
+    """The cards a requirement may name: the seed checks the same graph."""
+    found: dict[str, CardSeed] = {}
+    for path in sorted(folder.glob("*.json")):
+        try:
+            one = CardSeed.model_validate_json(path.read_text())
+        except ValidationError:
+            continue  # reported when that file is validated
+        found[one.slug] = one
+    return found
 
 
 def main(paths: list[str]) -> int:
