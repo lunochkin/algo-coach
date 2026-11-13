@@ -41,8 +41,8 @@ labelled easy, where the platforms call it hard.
 - [x] List every served problem with the difficulty the criteria give it
       beside its stored label. The list sizes the relabel
 - [x] Count the retired drafts by `retired_reason` and difficulty, and write
-      the leading cause into `corpus.md`. A fix aimed at the leading cause raises
-      the medium yield more than more runs do
+      the leading cause into `corpus.md`. A fix aimed at the leading cause
+      raises the medium yield more than more runs do
 - [x] Add the `DifficultyRating` record, its append-only table and its
       store, and read the standing difficulty in the badge, the listing's
       filter and the ladder's selector
