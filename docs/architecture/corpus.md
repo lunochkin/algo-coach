@@ -21,30 +21,21 @@ architecture, and `README.md` is the map.
   `target_technique` records what the generator was told rather than what a
   model inferred. The template arm makes the first template match provenance.
   No arm claims the problem exercises nothing else.
-- **A technique target asserts no pair.** The generator was told no form, so
-  no template match is written for its canonical, and the matcher alone says
-  which forms the canonical displays.
-- **A technique target asserts no technique either.** A problem's techniques
-  are folded from the solution claims of its canonicals, and the fold never
-  reads the target. The target says what the generator was asked for. The
-  claims say what the canonical used, and only the second is evidence about
-  the code.
+- **A technique target asserts no template match and no technique.** The
+  generator was told no form, so the matcher alone says which forms the
+  canonical displays. The target says what the generator was asked for, and
+  only a solution claim says what the canonical used.
 - **Provenance is required.** A problem names what produced it, as any machine
   record does.
-- **A problem's techniques are derived from solution claims of its
-  canonical
-  solutions**, and are a view rather than stored truth: adding a canonical can
-  widen the set, and re-deriving is legal and expected. The reference is
-  excluded from those claims. Otherwise the naive approach a form replaces
-  would be credited as an approach the problem takes. A canonical that sorts
-  before it searches used two techniques, and only a solution claim names
-  the second.
-- **Never derived from templates.** A template is defined by whether its form
-  can be reproduced from memory. That definition says nothing about what the
-  template classifies. A paradigm and a
+- **A problem's techniques are the union of the standing solution claims of
+  its canonicals**, a view rather than stored truth. Adding a canonical can
+  widen the set, and re-deriving is legal and expected. The reference and the
+  naive solution are excluded, or the approach a form replaces would be
+  credited to the problem. A canonical that sorts before it searches used two
+  techniques, and only a solution claim names the second.
+- **Never derived from templates or from the target.** A paradigm and a
   problem class have no form to type out, so templates reach about half the
-  vocabulary, and a technique set folded from them would be capped by which
-  cards happen to exist.
+  vocabulary, and a set folded from them would be capped by which cards exist.
 - **The statement is stored, because a solver is served it.** A matcher also
   reads the statement beside the canonical it classifies. Required and
   non-blank.
@@ -59,14 +50,10 @@ architecture, and `README.md` is the map.
   promotes to is an additive change when it comes.
 - **A statement's example and cases are the engine's own.** The generator's
   prompt forbids reusing the example, the values or the wording of a published
-  problem. A published question retold in a new setting is accepted. Two of
-  the first problems landed with a published example copied whole, and a
-  problem carrying another platform's cases breaks the rule that every problem
-  is the product's own.
-- **The screen site judges whether a draft copied a published problem.**
-  `flows.md` gives where it runs and what it rejects. The judge answers from
-  the model's memory, since this repo holds no published example to compare
-  against, by the invariant on third-party content.
+  problem, and a published question retold in a new setting is accepted. The
+  screen site rejects a copy, and `flows.md` gives where it runs. The screen
+  answers from the model's memory, since no repo may hold a published example
+  to compare against.
 - **A problem is never edited, and only its status moves.** A statement that
   says the wrong thing is retired `defective` and a new problem is written.
   The retired problem's attempts stay with the record they were made against,
@@ -79,27 +66,12 @@ architecture, and `README.md` is the map.
   deferred until someone other than the author sits.
 - **Retirement names its reason.** `defective` is a statement that asked for
   something its cases do not decide. `copied` is a problem the screen site
-  named a published source for.
-- **A copied problem's attempts stay in mastery.** The solver solved what the
-  problem asked, and only where its example came from was wrong.
+  named a published source for, and its attempts stay in mastery: the solver
+  solved what the problem asked.
 - **A defective problem's attempts are excluded from mastery, both
-  directions.** The failure was the problem's fault, and the self-label the
-  loop asked for blamed the user instead. Excluding only the failures would
-  raise a technique's solve rate because a problem was broken.
-- **Exclusion is a read-time rule, never a deletion.** The attempts stay
-  readable, and the board stops counting them.
-- **The medium retirements came from one early batch, not from verification.**
-  Counted on 2026-11-13 over 80 problems: 24 of the 35 labelled medium were
-  retired `defective`, against 2 of the 45 labelled easy. All 26 defective
-  problems landed on 2026-09-05, before a statement had to end on `def
-  solve(...)`, and each lacks that line. No problem landed since is defective.
-- **The later shortage of medium problems was the generator's label.** Of the
-  47 problems landed after that batch, the generator labelled 37 easy. Rated
-  by hand against the criteria, 35 problems labelled easy read medium.
-  `--difficulty` and the ratings answer that cause, so a fix to verification
-  would raise no yield.
-- **`copied` retired 28 problems, 21 of them labelled easy.** The screen site
-  now rejects a copy before the reference is written.
+  directions, at read time.** The failure was the problem's fault, and
+  excluding only the failures would raise a solve rate because a problem was
+  broken. The attempts stay readable, and the board stops counting them.
 
 ## Difficulty ratings
 
@@ -107,11 +79,9 @@ architecture, and `README.md` is the map.
   medium and hard mean what the platforms' three levels mean, since a user
   compares a label with those. The criteria for each level are written below
   this section's rules.
-- **An easy problem on a template applies the template's form unchanged.**
-  A recall attempt already checks that the user can type the form. The easy
-  problem adds one check: that the user sees the form behind the statement.
-  Whether a ladder requires an easy rung of a user who passed the recall is
-  deferred until real sittings show what the easy rung adds.
+- **Whether a ladder requires an easy rung of a user who passed the recall is
+  deferred** until real sittings show what the easy rung adds. A recall checks
+  the user types the form, and an easy problem that the user sees it.
 - **A problem's `difficulty` is the generator's rating, and stays as
   written.** The generator judges the problem it wrote, and nothing has read
   the problem yet. A problem is never edited, so a corrected label cannot
@@ -190,9 +160,6 @@ templates alone.
   `dp-state-design` and `backtracking` admit none.** Each form is a step past
   the basics, so its direct use is medium already. These cards take no easy
   rung.
-- **`sliding-window` has one admitting template, and takes its two easy
-  problems from it.** The two problems then differ in the question asked
-  rather than in the form.
 
 ## Test cases
 
@@ -206,26 +173,14 @@ The test cases decide whether a solution to a generated problem is correct.
   case describe how a solution was driven rather than what it must compute.
   The arguments are positional, so a canonical names its parameters whatever
   reads best.
-- **The entry point is fixed rather than stored.** Every solution defines one
-  module-level function named `solve`. A stored name lets a generator write a
-  statement naming one function and a canonical defining another, and the
-  runner then fails a correct solution. A fixed name makes that state
-  unreachable.
-- **A fixed name also stops the signature announcing the approach.** A
-  function called `longest_palindromic_substring` tells the solver what the
-  statement was written to withhold. A signature can name the form as a
-  statement can, so the same rule covers both.
-- **The statement carries the signature, because the parameter order has to
-  be stated somewhere.** A fixed name leaves the parameter order to be
-  inferred from prose, and three prompts infer it separately. A reference took
-  `solve(capacity, times, sizes)` where the canonical took `solve(times,
-  sizes, capacity)`, answered no case, and the draft was rejected as
-  untested.
-- **A statement whose signature contradicts its canonical does not land.** The
-  reference and the naive solution are written to the statement, so a wrong
-  signature there is worse than a missing one. The signature and the canonical
-  are both read off the generation call's reply, so the check runs as that
-  reply is read.
+- **The entry point is fixed rather than stored: one module-level `solve`.**
+  A stored name lets a statement name one function and a canonical define
+  another. A fixed name also stops the signature announcing the approach, as
+  `longest_palindromic_substring` would.
+- **The statement carries the signature, and one contradicting its canonical
+  does not land.** Three prompts would otherwise infer the parameter order from
+  prose apart. A reference took `solve(capacity, times, sizes)` where the
+  canonical took `solve(times, sizes, capacity)`, and answered no case.
 - **A problem needing more than one entry point is not expressible**, and that
   is accepted. A structure asked for by its operations has no single function.
   If one is ever wanted, `entrypoint` is an additive field whose absence means
@@ -237,14 +192,9 @@ The test cases decide whether a solution to a generated problem is correct.
   the cases a generated problem carries are the product's own.
 - **Expected outputs come from the reference, never from the canonical.** A
   case the canonical produced passes by construction, and `verified` then
-  means only that the solution agrees with itself. The reference is different
-  code from a call that saw the statement alone, so a case the reference
-  computed is a test.
-- **The value the generator declared is neither a source nor a gate.** One call
-  wrote the canonical and the declaration, so a contradiction between them is
-  that call's arithmetic rather than a second reading of the statement. The
-  count of contradictions sits on the generator's site outcome, and the
-  reference decides whether the draft is rejected.
+  means only that the solution agrees with itself. A reference that computed
+  no case therefore rejects the draft. The generator's declared values are
+  neither a source nor a gate, as `flows.md` gives.
 - **A case records where its expected output came from.** Beyond the largest
   input the reference finishes at generation time, only the canonical can
   compute an expected output, and such a case is evidence about the cap rather
@@ -254,16 +204,11 @@ The test cases decide whether a solution to a generated problem is correct.
   problem's own wherever a mutation round or the speedup search won the case.
   Three sites write cases at three configurations, and a reader taking the
   problem's provenance would attribute a round's case to the generator.
-- **A case names the round that won it, zero for the set the first round was run
-  against.** Replaying the discrimination site needs that set as it stood,
-  because the set decides which mutants survive and the set goes into the
-  prompt. A loop shown a case a round already won reaches other survivors and
-  sends another prompt hash, so the verdict the generation run recorded is paid
-  for a second time.
-- **Zero covers two writers, and provenance separates them.** The statement's
-  own cases name the generator's call. A fuzz case names the call that wrote
-  the input generator. Each kind was in the set before any round ran, and that
-  is all zero says. No field repeats what the call already names.
+- **A case names the round that won it, zero for the set the first round was
+  run against.** Replaying the discrimination site needs that set as it stood,
+  since the set decides which mutants survive and goes into the prompt. Zero
+  covers the statement's cases and the fuzz pass's, which provenance tells
+  apart.
 - **The separating case names no round.** The separating case is appended
   after the loop, so it was never in the set the survivors were decided
   against. Zero would put the separating case in the set a replay rebuilds. An
@@ -287,16 +232,6 @@ The test cases decide whether a solution to a generated problem is correct.
   size would store less. Such a case would name how its input is built rather
   than what the input holds, and a run would build the input before judging
   it.
-- **The ceiling was 64 KiB first, and a quadratic separation did not fit.** An
-  integer drawn at full magnitude costs eleven bytes, so 64 KiB held a few
-  thousand elements. Under the 2 s cap two quadratic naive solutions crossed
-  the cap only between 64 KiB and 256 KiB: one at 4467 elements with a 94 KB
-  case, one at some 13k elements. The ceiling moved to 256 KiB on 2026-09-09.
-- **256 KiB was short by a factor of two as well.** A sliding-window naive
-  solution separated at 23k and 30k elements with a 393 KB case, and the
-  expected list weighed half of that case. A naive Prim over 5355 vertices ran
-  2.0 s and 2.2 s at the largest input 256 KiB held, the cap's own edge. The
-  ceiling moved to 1 MiB the same day.
 - **A separating case may carry a repeat count**, and the cap covers the calls
   together. A form whose one application is sublinear separates on no input the
   ceiling holds, since a linear scan of the largest storable array takes two
@@ -314,17 +249,6 @@ The test cases decide whether a solution to a generated problem is correct.
   rather than of the machine that ran it. The two solutions are within a
   constant factor when the naive solution is over the cap and the canonical
   over a tenth of it, and no count separates them.
-- **Every canonical held that margin under the sandbox.** On 2026-09-17 the
-  broker ran the 50 served problems' canonicals against all 506 of their cases
-  at the sitting's cap, under gVisor on the deployed server, and no case took
-  over a tenth of the cap. The separating sizes the local subprocess found
-  therefore stand under the clock a verdict is now read from.
-- **The margin held again on Python 3.15.2.** On 2026-11-09 the sandbox moved
-  to the 3.15.2 image, and the broker ran the same 506 cases on the server.
-  One separating case, 8000 calls on 512 KB, read 263 ms against the 200 ms
-  bar. The 3.15.1 and 3.15.2 images each time that case at 51 ms locally, so
-  the reading is the server's variance rather than the interpreter's. The
-  case still passes at a seventh of the cap.
 - **The separating case is chosen against the sitting's cap**, and never
   against generation's. The separating size is the size at which a submission
   that did not use the form fails, so the cap a sitting judges under decides
@@ -340,141 +264,15 @@ The test cases decide whether a solution to a generated problem is correct.
   whose naive cost the values drive separates at the smallest legal input,
   against the same bound of a hundred thousand. Two sizes drawn from two naive
   solutions say nothing about each other.
-- **A separating input over the ceiling stores no case.** The draft stops at
-  the search, and the run reports what the walk found.
-- **A search stores no case for one of two reasons, and the draft names the two
-  apart.** The two reasons assert opposite things. A search that reached a
-  separating size and could not store the case has established the speedup. It
-  reports the size and both timings. A search whose naive solution finished at
-  the largest storable input has established nothing: a separation may sit
-  above the ceiling, where no case can hold it.
-- **The walk bisects to the ceiling before it gives up.** Doubling leaves a
-  factor of two under the ceiling untried, and a quadratic naive solution
-  separates in exactly that gap: five of the first eighteen held drafts did.
-
-- **A search that stored no case is not a defect either way.** A run folding
-  those two answers together with a naive solution that finished at the
-  largest legal input could not tell a defect from an unknown.
-- **The naive solution finishing at the largest legal input is a defect in the
-  run, not in the problem.** The naive solution is prompted as the approach the
-  form replaces and told which form to avoid, so finishing means the prompt did
-  not take.
-- **Three faults produce that answer, and the run cannot separate them.** The
-  naive solution reached the form. The input generator built a shape the form
-  does not beat. Or the template claims a speedup its form does not have.
 - **A problem whose template claims a speedup lands with the case that
-  separates it, or it does not land.** A rung teaches the claimed speedup. A
-  corpus carrying problems that do not demonstrate the speedup teaches the
-  form on problems the naive solution also solves.
-- **The same holds where no search ran.** A call that wrote no input generator,
-  or one that wrote no naive solution, leaves the claim undemonstrated as an
-  empty search does. The draft stops at the step before the search.
-- **The problem is held as a draft rather than rejected.** The statement, the
-  cases and every solution passed every gate that judges them. Rejecting here
-  would keep only the problems one model happened to be slow at. The draft is
-  resumed where it stopped, so nothing the calls bought is thrown away.
-- **A held draft leaves by one of four exits**, and each names a different
-  thing the run got wrong. A resumed search separates the draft. A second
-  naive solution is drawn, and the second one is slow. The template's
-  `speedup` is corrected, and the next resume skips the search. Or the draft
-  is rejected: the claim holds, and this problem does not exercise the form.
-- **A resume watches the template's `speedup` beside the prompt hash.** A flag
-  edit moves neither a configuration nor a prompt, so a resume reading only
-  those two would leave the draft where the search stopped it.
-- **A resume watches the search's own bounds too**: the ceiling, the share of
-  the cap the canonical may take, and the most calls a case may carry. The
-  draft records all three, since a raised constant moves neither a
-  configuration nor a prompt hash. One rule covers them, because the search is
-  a local step and a walk taken again where an unrelated bound moved costs
-  subprocesses and no call.
-- **The search carries a revision beside its bounds**, bumped where the walk's
-  behaviour changes. A change to the walk moves no bound, so a held draft would
-  otherwise wait for a constant nobody is going to edit. A hash of the code
-  would need no bumping and is not used: the search is spread over four
-  modules, so a hash of one fires on a comment there and misses a change
-  elsewhere. No check catches a forgotten bump, and the cost of forgetting is a
-  draft that waits for the next change.
-- **A moved bound is read before a second naive draw.** A draft held because
-  the two solutions ran within a constant factor can leave by either, and the
-  search costs subprocesses where a draw costs a call.
-- **A resume asks the naive site again where the naive solution finished at
-  every size the input generator reached**, though its configuration and its
-  prompt hash both stand. The naive site is sampled, so a second call is a
-  second draw. The skip that spares every other site would spend the exit that
-  costs one call.
-- **The draft carries why the search stored no case**, since the exits differ by
-  that reason. A crashed input generator is the inputs site's to repair, and a
-  second naive draw there buys a call the search still cannot use.
-- **The reference is not asked again for this.** The reference is immutable,
-  the search no longer measures against the reference, and a second blind
-  reading answers a question no exit asks.
-- **Rejection is the exit left when the draws run out.** A model prompted to be
-  slow and told the form to avoid, writing the form anyway, is the strongest
-  evidence the run can produce that the problem does not exercise the form.
-- **A linearithmic naive solution is out of the clock's reach today.** A factor
-  of log n is at most fourteen at the ceiling, and growing the input grows both
-  solutions' cost alike, so neither side reaches the cap inside a storable
-  case. The speedup claim still holds for such a form. Timing one case run many
-  times would reach it, since a repeat count is bounded by the cap rather than
-  by the ceiling, and that is deferred. The search today demonstrates a claim
-  only against a naive solution at least quadratic in the input.
+  separates it, or it does not land.** A rung teaches the claimed speedup, and
+  a problem the naive solution also solves does not exercise the form.
+  `flows.md` gives how a draft without that case is held and leaves.
 - **Consistent is not the same as statable.** A set fitting only "compute f,
   except return 7 on this input" is a function nobody can write a statement
   for. Such a problem does not land, and the discrimination bar catches it.
-- **How discrimination is established is in `flows.md`.** A blind reference
-  disagreeing on any case rejects the draft, and a surviving mutant of the
-  canonical names a case that has to exist.
-- **The mutation loop stops after two rounds**, at one call each. A survivor
-  two rounds did not kill is usually equivalent to the canonical, and no case
-  kills an equivalent mutant. A round that kills nothing stops the loop
-  early, since the next round asks the same question of the same survivors.
-  The bound of two was set before a corpus existed, and how much the second
-  round still kills revises it.
-- **A round's proposal lands only where it killed.** The round is paid for by
-  the call rather than by the cases it returns, so a proposal no mutant fails
-  is a case every later verification runs for nothing. `flows.md` gives how
-  the kill is attributed.
-- **The fuzz pass runs before the first round, and costs no call.** The input
-  generator builds at several sizes and seeds, and the mutants still standing
-  are run against those inputs. Only the mutants that survive the fuzz pass
-  reach a round.
-- **The canonical is the oracle for killing, and the reference still settles
-  the case.** A mutant is killed by answering a built input differently from
-  the solution it is a copy of, which needs no expected value. The stored case
-  carries the reference's answer, as every other case does.
-- **Only an input that killed is kept.** An input that killed nothing catches
-  nothing, and every later verification would run it. The reference is run on
-  the kept inputs alone, so the rest cost one execution each.
-- **The first input that kills a mutant is the input kept.** The pass builds
-  smallest first, so the kept case is the smallest that separates. A second
-  input killing the same mutant adds a case that decides nothing new.
-- **A kept input is shrunk before it is stored.** A kept input is as large as
-  the size it was built at, and the mistake it catches usually needs a few
-  elements. The shrink is paid once, and every verification that runs the case
-  saves the difference.
-- **The shrink is checked against the mutants that input killed**, not against
-  the whole set. A smaller input killing fewer of those mutants would lose a
-  kill the pass already counted, and nothing else would catch it.
-- **Only lists shrink.** A shorter list is the same question asked of less. A
-  smaller number is a different question, and nothing says the smaller number
-  is still legal under the statement.
-- **The shrunk input carries its own answer.** The canonical is run again on
-  the shrunk input. A case keeping the answer to the input it was shrunk from
-  would fail the solution it was written from.
-- **The ceiling is checked after the shrink.** An input over the ceiling is
-  storable once it is only as large as the kill needs. Checking before the
-  shrink would lose the kill with the size.
-- **The shrink runs on a budget of candidate inputs.** Each candidate costs a
-  run of the canonical and one run per mutant it must keep killing, so an
-  input nothing shrinks would otherwise spend the pass's whole runtime.
-- **A built input the canonical cannot answer drops the case**, as a proposed
-  input does. No check runs a built input against the constraints the
-  statement gives, so a crash there is as likely to be an input the problem
-  excludes as a defect in the canonical.
-- **A kept input the canonical and the reference answer differently rejects
-  the problem**, as a round's proposal does. The pass reaches boundaries the
-  first set never did, and the pass exists to find a canonical wrong at one of
-  those boundaries.
+- **The mutation loop that appends cases is in `flows.md`**: the fuzz pass,
+  the shrink and the rounds.
 
 ## Solutions
 
@@ -490,39 +288,6 @@ A solution the engine wrote for a problem, in one of three roles.
   against it. The reference once held both jobs, and the jobs conflict. The
   reference job needs a blind reading, and the naive job needs a solution that
   does not reach the form.
-- **The naive solution may not narrow its candidates the way the canonical
-  does.** A naive solution trying only the values the input carries has used
-  the insight the form is built on. The two solutions then run the same way,
-  and the search separates nothing.
-- **The naive solution may not be slower than the approach it stands for
-  either.** A naive solution trying every subset where the statement describes
-  a scan is separated at a few dozen elements, and a submission of the wrong
-  complexity passes every input that small.
-- **The prompt states both ends.** Two edits to the prompt have each fixed one
-  end and caused the other, so a prompt naming one end alone has been written
-  twice.
-- **The naive solution may be told which form to avoid**, where the reference
-  may not. The naive solution settles no case, rejects no draft and is
-  scored against nothing, so nothing it is shown can reach a verdict.
-- **A form's name does not bound the technique.** A card lists the forms it
-  teaches, and a model told to avoid one reaches the technique through a form
-  no template names. Tabulation stands in for a memo, and a rolling pair for a
-  scan taken twice. The vocabulary's criterion covers the forms nobody
-  authored, so the naive site is shown the criterion beside the trigger.
-- **The naive site is sampled, for the reason the generator is.** It produces
-  an artifact rather than a verdict, so asking again is a second draw rather
-  than the answer already stored.
-- **The naive solution is verified, and a failure is its own.** A wrong naive
-  solution measures nothing, so one that answers a case wrongly is not stored
-  and the draft is held. The failure never rejects the draft: being wrong
-  says nothing about the statement.
-- **A case the naive solution does not finish is not a failure.** Being slow
-  is the naive solution's purpose, and only a computed answer can be wrong.
-  The cases written with the statement are small, so a case the naive solution
-  cannot answer there is the same evidence the search looks for at size.
-- **The naive solution is written only where the template claims a speedup**,
-  as the search runs only there. A form that is its own optimum has nothing to
-  be measured against.
 - **The naive solution is excluded from what a canonical answers for**, as the
   reference is: no solution claim, no template match, no rung. It is the
   approach the card exists to replace.
@@ -538,10 +303,9 @@ A solution the engine wrote for a problem, in one of three roles.
   one. The matcher reads the canonical beside the statement, and the verdict
   is about the canonical.
 - **A problem may carry several canonicals, and together they say what it
-  teaches.** Two
-  approaches to one problem is the ordinary case, and two canonicals let one
-  rung cover a core template and an optional one. A problem carrying one
-  canonical can teach one form.
+  teaches.** Two approaches to one problem is the ordinary case, and two
+  canonicals let one rung cover a core template and an optional one. A
+  problem carrying one canonical can teach one form.
 - **A template is the origin of a problem, and never the origin of its later
   solutions.** The later canonicals are enumerated: a call over a landed
   problem proposes the approaches that solve it, and each proposal is
@@ -569,7 +333,7 @@ A solution the engine wrote for a problem, in one of three roles.
 A solution claim names which techniques a solution used. It is
 product-owned and global, as the solution is.
 
-- **A solution claim is its own record, not a attempt claim.** A claim is
+- **A solution claim is its own record, not an attempt claim.** A claim is
   testimony about the user's own attempt, and is private. A solution claim is
   a verdict about code the engine wrote, and ships with the corpus. One record
   type for both would also make the fallback a fold over records of the type it
@@ -583,15 +347,12 @@ product-owned and global, as the solution is.
 - **A solution claim is a machine record like any other**: provenance whole,
   staleness keyed on the prompt hash of what was sent, and re-derivable at any
   time. A claim carries one problem's criteria, and a solution claim carries
-  the
-  whole vocabulary's, so any criteria edit re-reads every canonical.
+  the whole vocabulary's, so any criteria edit re-reads every canonical.
 - **Two writers, and the user's stands first**, as a claim resolves. A user
   reading adjudicates rather than testifies: nobody sat for a canonical, so the
   user's reading is of code they did not produce. The user's solution claim
   stands all the same, and it is the reference a configuration is scored
   against.
-- **A problem's techniques are folded from its solution claims.** The union over
-  the standing solution claims of its canonicals, with the reference excluded.
 
 ## Verification runs
 
@@ -602,15 +363,16 @@ A verification run is one execution of a solution against a problem's cases.
   the runner rather than the solution. A result stored on the solution would
   claim a permanence it does not have.
 - **Re-running is legal and expected**, as re-deriving a solution claim is.
-  Two runs
-  of one solution are two records, and neither run supersedes the other.
+  Two runs of one solution are two records, and neither run supersedes the
+  other.
 - **The cap is stored beside the results.** The cap decided any timeout, and
   two runs under different caps are not comparable. No other field would show
   that the caps differ.
 - **The runner and the interpreter are named, as one opaque string.** A local
   subprocess and a container under a CPU limit decide a timeout differently,
   and nothing else separates two runs that disagree. Full environment
-  provenance is deferred, and subsumes this field rather than replacing it.
+  provenance is deferred, and subsumes this field rather than replacing it. A
+  separating size is likewise a fact about the runner that found it.
 - **The verification result is per case, and names how each case went**:
   passed, wrong, timed out or crashed. A share cannot say which input timed
   out, and the set of cases that passed cannot say why the rest did not. A
@@ -644,8 +406,7 @@ fixed here rather than by whatever executed it.
   booleans and lists of those. A floating-point answer is compared bit for bit,
   and two correct solutions computing a ratio in different orders disagree in
   the last bits. Such a draft is rejected as `disagreed` however sound the
-  statement is, and three weighted-dsu drafts were before the generator was
-  told. A ratio is asked for as a reduced numerator and denominator.
+  statement is. A ratio is asked for as a reduced numerator and denominator.
 - **A problem admitting several correct returns does not land.** The
   alternative is a checker per problem, and every stored verdict would then
   depend on code the record does not name. The statement says how ties are
@@ -675,9 +436,6 @@ fixed here rather than by whatever executed it.
 - **A runner fault is raised, never recorded.** A subprocess that fails to
   start says nothing about the solution, and a stored `CRASHED` would reject a
   sound draft over the runner's own defect.
-- **A run is comparable only within one runner.** A CPU limit changes what a
-  timing bar measures, so the smallest input separating a naive solution from a
-  canonical is a fact about the runner that found it.
 - **Comparison stays outside the runner.** A runner is handed code, the
   arguments and a cap, and returns what each call produced. The runner is
   never told what a case expects, so the rule deciding a case cannot vary by
@@ -687,10 +445,6 @@ fixed here rather than by whatever executed it.
   case returns. A reference that crashed or timed out is the ordinary path
   beyond its reach, and the case takes the canonical's answer, with
   `expected_from` naming the canonical.
-- **A reference that computed no case rejects the draft.** Every expected
-  output would then be the canonical's own, and `verified` would mean only that
-  the solution agrees with itself. Some cases beyond the reference's reach is
-  the ordinary path. All of them beyond it is no independent reading at all.
 - **The stored cap is the child's**, since that is the number the case was
   judged by. The parent runs a slack timer of its own, which the runner owns.
 - **A child reporting nothing is read from how it died.** The parent's timer

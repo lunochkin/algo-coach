@@ -47,8 +47,17 @@ The order matters because each step can reject what came before.
   draft.
 - **The naive solution is written the opposite way**, and told the form it may
   not use. The naive solution settles no case and rejects no draft, so what
-  the naive site is shown cannot reach a verdict. `corpus.md` gives what the
-  naive solution may never do.
+  the naive site is shown cannot reach a verdict.
+- **The naive solution stands for the approach the form replaces, at that
+  approach's cost.** One trying only the values the input carries has used the
+  form's insight, and the search then separates nothing. One trying every
+  subset where the statement describes a scan separates at a few dozen
+  elements, and a submission of the wrong complexity passes inputs that small.
+  The prompt states both ends, since a prompt naming one end produces the
+  other fault.
+- **The naive site is shown the technique's criterion beside the trigger.** A
+  model told to avoid one form reaches the technique through a form no
+  template names, as tabulation stands in for a memo.
 - **The generator's own expected values are a reading, not a gate.** The call
   that wrote the canonical also declared what each case returns, so the two
   share one reading of the statement, and a contradiction between them is that
@@ -120,20 +129,21 @@ The order matters because each step can reject what came before.
 - **Two proposals killing one mutant land the first.** The second proposal
   decides nothing the set does not already decide, so the order the round
   proposed them in settles which one lands. The fuzz pass keeps its inputs by
-  the same rule.
+  the same rule, building smallest first, so a kept input is the smallest that
+  separates.
 - **A dropped proposal is still shown to the next round.** The dropped
   proposal is not in the set, and a round shown neither the set nor the
   dropped proposal could propose an input that already killed nothing.
 - **The set written with the statement is exempt.** Those cases describe what
   the problem asks rather than what a mutant fails, so they land whether or
   not they kill.
-- **A proposed input the canonical cannot answer drops the case, not the
-  problem.** No check reads an input against the constraints the statement
+- **A proposed or built input the canonical cannot answer drops the case, not
+  the problem.** No check reads an input against the constraints the statement
   gives, so a crash or a timeout on a proposed input is as likely to be an
   input the problem excludes as a defect in the solution. The canonical was
   already run against the cases written with the statement, and those cases
   decide it.
-- **A proposed case the two solutions answer differently rejects the
+- **A proposed or kept case the two solutions answer differently rejects the
   draft**, as a disagreement on any other case does. The round asks for
   boundary inputs, and the loop exists to find a canonical wrong at a boundary
   the first set never reached.
@@ -145,8 +155,11 @@ The order matters because each step can reject what came before.
   that judges it, and its set was never measured against the bound. Landing
   the problem would store a set no round was paid for, where a resume asks
   the loop again.
-- **The loop stops on a bound, never on a score**, for the reason `corpus.md`
-  gives.
+- **The loop stops after two rounds, at one call each, never on a score.** A
+  survivor two rounds did not kill is usually equivalent to the canonical, and
+  no case kills an equivalent mutant. A round that kills nothing stops the loop
+  early. The bound was set before a corpus existed, and how much the second
+  round still kills revises it.
 - **The search runs before the loop and its case is appended after the
   loop.** The survivors are decided against the set as the statement left it,
   so the separating case may not join that set. Searching first catches a
@@ -172,6 +185,18 @@ The order matters because each step can reject what came before.
 - **A round is shown what the pass kept.** Those cases are in the set the
   survivors were decided against, so re-proposing one would win a case that
   kills nothing.
+- **The canonical is the oracle for killing, and the reference settles the
+  case.** A mutant is killed by answering a built input differently from the
+  canonical, which needs no expected value. The reference runs on the kept
+  inputs alone.
+- **A kept input is shrunk before it is stored.** The mistake it catches
+  usually needs a few elements, and every later verification saves the
+  difference. The shrink keeps every mutant that input killed, and shortens
+  lists alone, since a smaller number may break the statement's constraints.
+  It runs on a budget of candidates, each costing a run per mutant.
+- **The shrunk input is answered again, and weighed after the shrink.** The
+  canonical computes its answer, and an input over the ceiling may fit once it
+  is only as large as the kill needs.
 - **A search that fails holds the draft, as one that separated nothing does.**
   The input generator's code can crash, which says nothing about the
   statement. The case a landing needs is missing, and the run reports what
@@ -180,8 +205,27 @@ The order matters because each step can reject what came before.
   is claimed. No search ran, so the claim is undemonstrated for the same reason,
   and a resume starts at the input generator rather than at the search. The
   missing input generator costs the fuzz pass besides.
+- **A search that stored no case names one of two reasons, which assert
+  opposite things.** A separating size over the ceiling has established the
+  speedup, and the run reports the size and both timings. A naive solution
+  finishing at the largest storable input has established nothing. The walk
+  bisects up to the ceiling first, since a quadratic naive solution often
+  separates within the last factor of two.
+- **A naive solution finishing at the largest legal input is a defect in the
+  run, not in the problem.** The naive solution reached the form, the input
+  generator built a shape the form does not beat, or the template claims a
+  speedup it lacks. The run cannot tell the three apart.
+- **Such a draft is held, not rejected.** The statement, the cases and every
+  solution passed every gate that judges them. Rejecting would keep only the
+  problems one model happened to be slow at.
+- **A held draft leaves by one of four exits.** A resumed search separates it,
+  a second naive draw is slow, the template's `speedup` is corrected and the
+  search is skipped, or the draft is rejected by hand as `unexercised`. A naive
+  solution writing the form it was told to avoid is the strongest evidence the
+  problem does not exercise the form.
 - **The naive solution has to be correct on every case it answers**, and a
-  naive solution that is not holds the draft. A naive solution that is wrong
+  naive solution that is not holds the draft. A case it does not finish is no
+  failure, since being slow is its purpose. A naive solution that is wrong
   measures nothing, so a search against it would separate on a mistake rather
   than on the form.
 - **A wrong naive solution rejects nothing all the same.** The naive solution
@@ -256,8 +300,8 @@ a second generator call writes a different problem.
   agreed, built, paced, searched, hardened, landed. The names are the steps
   above and the order is theirs.
 - **A search that separated nothing stops the draft at `searched`.** The
-  search's result is recorded either way, and `corpus.md` gives the four exits
-  a held draft leaves by.
+  search's result is recorded either way, and a held draft leaves by the four
+  exits above.
 - **A draft that never reached the search stops earlier.** A speedup is
   claimed and no input generator was written, so the draft is held at
   `agreed` and a resume runs the input generator.
@@ -303,15 +347,19 @@ a second generator call writes a different problem.
   that read it again.
 - **The naive site is asked again where the naive solution finished at every
   size**, though its configuration and its prompt hash stand. The naive site is
-  the one sampled answering site, so a second call is a second draw. `corpus.md`
-  gives the second draw as an exit.
+  the one sampled answering site, so a second call is a second draw. A moved
+  bound is read before a second draw, since the search costs subprocesses
+  where a draw costs a call.
 - **Only that reason draws again.** A search that never ran is the inputs
   site's to repair. The draft holds the reason, so a resume can tell the two
-  apart.
+  apart. The reference is never asked again for this, since the search does
+  not measure against it.
 - **A draft whose walk stopped at a bound starts at the search once that bound
   moves.** The draft records the ceiling, the canonical's share of the cap, the
   count bound and the search's own revision, and a resume reads the four beside
-  the flag and the bench.
+  the flag and the bench. The revision is bumped where the walk's behaviour
+  changes, since a code change moves no bound. A hash of the code is not used,
+  because the search spans four modules.
 - **The local steps are taken again either way.** Running the canonical and
   settling the cases cost subprocesses rather than a call, so the draft stores
   neither, and the steps after them need both.

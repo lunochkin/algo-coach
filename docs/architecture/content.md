@@ -117,7 +117,7 @@ each technique, and a card and a mastery estimate share no data.
   optimum, so no input separates them from a reference. Generation cannot tell
   such a form from a reference written cleverly by mistake, so the template
   says which of the two holds. A missing separation where a speedup was
-  claimed is a defect in the run, and `corpus.md` names the three things that
+  claimed is a defect in the run, and `flows.md` names the three things that
   produce one.
 - **The claim is asymptotic: the form beats the naive approach by at least a
   factor of log n.** The search can demonstrate only part of that today. It
@@ -126,8 +126,8 @@ each technique, and a card and a mastery estimate share no data.
   linearithmic naive approach finishes such an input in milliseconds whatever
   the form does, so the search demonstrates the claim only where the naive
   approach is at least quadratic or exponential. A claim the search cannot
-  demonstrate holds the draft, and `corpus.md` names what would demonstrate
-  it.
+  demonstrate holds the draft. Timing one case run many times would
+  demonstrate it, and that is deferred.
 - **The statement is written for the solver, not for the search.** One lookup
   in a sorted array is sublinear for the form and linear for the scan it
   replaces. The form and the scan both finish within the cap, so no input
