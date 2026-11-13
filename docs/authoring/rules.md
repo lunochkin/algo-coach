@@ -50,6 +50,13 @@ The rules come from three review passes over the Python module in November
 3. **A `short` answer is the real output, and `accept` covers its equivalent
    spellings**, such as a qualified name, or the reply with and without
    quotes. *check*
+   - In a module written by concept, a `short` question has more than two
+     plausible replies. A reply with even odds is guessed rather than
+     recalled, so the question is a `choice`. The pilot's review found four
+     with two plausible values, such as 20 or 25. *check (the replies are
+     only `True` and `False`, or yes and no), review (any other pair)*
+   - `python` holds 11 questions the check would refuse, left as they are
+     while `py` replaces it.
 4. **A tool's output is produced by the tool, never written by hand.** Output
    from mypy, pyright or ruff is generated at the version the prompt names,
    line numbers included, and shown whole or with the cut marked `...`. A
@@ -92,6 +99,11 @@ The rules come from three review passes over the Python module in November
     `Exception` and prints the type's name, rather than catching the exception
     the learner must type. An error message in the prompt does not name the
     answer, and a choice does not echo the prompt's wording. *review*
+    - A kind does not reveal the answer either. Where a subtopic's `debug`
+      questions show code that is refused, one of them shows code that runs,
+      and one `output` question offers an error as a wrong choice. In the
+      pilot, all five `debug` questions were keyed `SyntaxError` under one
+      prompt.
 12. **Each choice's `why` explains that choice, and the mechanism explains the
     keyed answer.** A mechanism that only refutes a distractor leaves the
     learner without the reason the answer is right. *review*
@@ -203,8 +215,9 @@ describes. A module with no concept files is checked by rules 1 to 25 alone.
     interpreter, and each version and build `check.toml` names)*
 27. **A concept holds every field of its record, and a witness with its output
     or a quote of its source.** The source names a section, the level is 0 to
-    3, and the concept lists at least one misconception. A question naming an
-    unknown concept, or restating a field it derives from its concept, is
+    3, and the concept lists at least one misconception, each with an `id`
+    unique in the concept and a `text`. A question naming an unknown concept
+    or misconception, or restating a field it derives from its concept, is
     refused. *check*
 28. **Each `taught_by` names a section, and each section of a lesson teaching
     concepts is named by one.** A section no concept names asserts what no

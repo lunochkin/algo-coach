@@ -16,7 +16,7 @@ def concept(**fields) -> dict:
         "source": "https://docs.python.org/3/reference/compound_stmts.html#the-while-statement",
         "witness": "n = 0\nwhile n > 0:\n    print('body')\nprint('done')\n",
         "output": "done\n",
-        "misconceptions": ["A `while` body always runs once."],
+        "misconceptions": [{"id": "body-runs-once", "text": "A `while` body always runs once."}],
         "taught_by": "les#while",
     } | fields
 
@@ -31,6 +31,7 @@ def asking(name: str = "while-retests") -> dict:
         "answer": ["A"],
         "explain": "The condition is false first.",
         "why": ["a", "b", "c"],
+        "misconception": {"B": "body-runs-once", "C": "body-runs-once"},
     }
 
 
@@ -39,9 +40,17 @@ def module(tmp_path: Path, *concepts: dict, lesson: str = LESSON, q: dict | None
     (root / "concepts" / "t").mkdir(parents=True)
     body = ""
     for one in concepts or (concept(),):
-        body += "[[concept]]\n" + "".join(f"{k} = {json.dumps(v)}\n" for k, v in one.items())
+        body += "[[concept]]\n" + "".join(f"{k} = {_toml(v)}\n" for k, v in one.items())
     (root / "concepts" / "t" / "sub.toml").write_text(body)
     return root
+
+
+def _toml(value) -> str:
+    if isinstance(value, dict):
+        return "{ " + ", ".join(f"{k} = {_toml(v)}" for k, v in value.items()) + " }"
+    if isinstance(value, list):
+        return "[" + ", ".join(_toml(v) for v in value) + "]"
+    return json.dumps(value)
 
 
 def test_a_module_written_by_concept_holding_every_rule_reports_nothing(tmp_path):
@@ -125,3 +134,44 @@ def test_a_question_naming_no_concept_is_refused_where_concepts_file_questions(t
     errors = found(check(module(tmp_path, q=loose), run=False).report.errors, 19)
 
     assert errors == ["[19] banks/t/sub.toml w: names no concept"]
+
+
+def test_a_misconception_no_wrong_choice_embodies_is_warned(tmp_path):
+    """Rule 19: a known wrong belief no question tests."""
+    second = {"id": "stops-mid-body", "text": "A `while` loop stops mid-body."}
+    root = module(tmp_path, concept(misconceptions=[*concept()["misconceptions"], second]))
+
+    warnings = found(check(root, run=False).report.warnings, 19)
+
+    assert any("misconception stops-mid-body" in w for w in warnings)
+
+
+def test_a_keyed_choice_naming_a_misconception_is_refused(tmp_path):
+    """Rule 19: the right answer embodies no wrong belief."""
+    q = asking() | {"misconception": {"A": "body-runs-once", "B": "body-runs-once"}}
+
+    errors = found(check(module(tmp_path, q=q), run=False).report.errors, 19)
+
+    assert any("keyed choice A names a misconception" in e for e in errors)
+
+
+def test_two_misconceptions_sharing_an_id_are_refused(tmp_path):
+    """Rule 27: a choice naming the id could mean either belief."""
+    twice = [{"id": "x", "text": "One."}, {"id": "x", "text": "Two."}]
+
+    errors = found(
+        check(module(tmp_path, concept(misconceptions=twice)), run=False).report.errors, 27
+    )
+
+    assert any("share an id" in e for e in errors)
+
+
+def test_a_short_reply_of_only_true_or_false_is_refused(tmp_path):
+    """Rule 3: a reply with even odds is guessed, not recalled."""
+    q = {k: v for k, v in asking().items() if k not in ("choices", "answer", "why")}
+    q |= {"format": "short", "accept": ["True", "true"]}
+    del q["misconception"]
+
+    errors = found(check(module(tmp_path, q=q), run=False).report.errors, 3)
+
+    assert errors == ["[3] banks/t/sub.toml w: the reply is a yes or no, so the format is choice"]

@@ -55,7 +55,7 @@ the coverage map for a module written by concept.
 | `witness` | Code whose output shows the claim holds. |
 | `output` | The witness's output, the same on every supported build. |
 | `quote` | The source's sentence the claim rests on, where no witness can run. |
-| `misconceptions` | Wrong beliefs about the claim, one sentence each. |
+| `misconceptions` | Wrong beliefs about the claim, each `{ id, text }`. |
 | `taught_by` | The lesson section teaching the concept, as `<slug>#<anchor>`. |
 
 - **A witness is run on every supported build by the module check.** Its
@@ -105,9 +105,33 @@ the coverage map for a module written by concept.
 - **A question's level is its concept's level.**
 - **A question adds no claim.** The detail a client shows is the concept's
   claim and misconceptions. A question carries what is its own alone: the
-  prompt, the code, the choices or accepted replies, the answer, and a `why`
-  per choice.
-- **A wrong choice's `why` names the misconception it embodies.**
+  prompt, the code, the choices or accepted replies, the answer, a `why` per
+  choice, and an `explain` applying the claim to the question's own example.
+- **A question applies its claim inside a task its section does not show.**
+  The question shares no name, value, output or helper function with the
+  section, and does not restate an expression of the claim with new values,
+  since the section copies the claim's wording. The witness is never served,
+  so a question may share its shape.
+  A claim about one expression is asked inside a larger snippet, so the
+  learner has to see where the rule applies. A claim of level 0 is often one
+  expression, and the pilot's first questions repeated 17 of the lessons'
+  examples with only their names or values changed. A fresh generation
+  briefed with this rule still repeated 19 of 60. A review naming a new task
+  for each repeated question is the step that removes them, so stage 3's
+  review checks this rule question by question.
+- **The question changes, not the section**, where rule 15 of `rules.md` finds
+  a shared example. The section was approved in stage 2, before any question
+  existed.
+- **A question uses the constructs its subtopic teaches at its level or
+  below**, the subtopics it needs, and the module's baseline. A queue serves
+  questions by subtopic and level, never by lesson, so a question of the
+  conditions lesson may use a `for` loop taught at the same level.
+- **A wrong choice names the misconception it embodies, by its id**, as
+  `misconception = { B = "<id>" }`. An id stays when the misconception's text
+  is reworded. A removed or renamed misconception makes the check refuse
+  every question still naming it, where an index would shift silently onto
+  another belief. The lesson's common mistakes follow the concept at the next
+  seed, since the seed renders them.
 - **The kind called `concept` in `python` is called `principle` in a module
   written by concept.** A kind and a record would otherwise share one name.
 
@@ -173,9 +197,11 @@ back to a concept in the pilot broke one of them.
 
 The module check holds a module written by concept to rules 26 to 29 of
 `rules.md`: the witnesses, the concept records, the lessons' sections and
-the prose a program can check. Rule 19 files each question by its concept,
-and warns of a concept no question tests. Rule 15 compares a question with
-the section its concept names, as it does for any module.
+the prose a program can check. Rule 19 files each question by its concept.
+It warns of a concept no question tests, and of a misconception no wrong
+choice embodies. Rule 3 refuses a `short` question whose every accepted
+reply is `True`, `False`, yes or no. Rule 15 compares a question with the
+section its concept names, as it does for any module.
 
 ## The parallel module
 
@@ -200,8 +226,6 @@ the section its concept names, as it does for any module.
 
 ## Deferred
 
-- **How a wrong choice names its misconception**, as an index, an id or a
-  quoted sentence. The first questions written show which one reads well.
 - **Whether the engine generates a lesson or a question from a concept.** The
   pilot writes each lesson and question in its own authoring step first.
 - **When `py` replaces `python`**, and what happens to a user's answers in

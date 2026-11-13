@@ -2,6 +2,7 @@
 concept: its claims, its misconceptions and its lesson prose."""
 
 import re
+from typing import Any, cast
 
 from algo_coach.knowledge.authoring.course import Course, Report
 
@@ -57,8 +58,9 @@ def prose(course: Course, report: Report) -> None:
     for name, concept in course.concepts.items():
         at = f"{concept['_file']} {name}"
         _lint(report, at, concept.get("claim", ""))
-        for wrong in concept.get("misconceptions", []):
-            _lint(report, at, wrong)
+        for wrong in cast(list[object], concept.get("misconceptions", [])):
+            text = cast(dict[str, Any], wrong).get("text", "") if isinstance(wrong, dict) else wrong
+            _lint(report, at, str(text))
     taught = {c.get("taught_by", "").partition("#")[0] for c in course.concepts.values()}
     for slug in taught & course.lessons.keys():
         for para in FENCE.sub("", course.lessons[slug]).split("\n\n"):

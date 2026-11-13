@@ -30,12 +30,39 @@
           "title": "Choices",
           "type": "array"
         },
+        "concept": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Concept"
+        },
         "detail": {
           "$ref": "#/$defs/Detail"
         },
         "explain": {
           "title": "Explain",
           "type": "string"
+        },
+        "misconception": {
+          "anyOf": [
+            {
+              "additionalProperties": {
+                "type": "string"
+              },
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Misconception"
         },
         "why": {
           "items": {
@@ -137,6 +164,18 @@
       "additionalProperties": false,
       "description": "learn's `card`: the points the answer has to contain, and the traps.",
       "properties": {
+        "concept": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Concept"
+        },
         "detail": {
           "anyOf": [
             {
@@ -242,6 +281,18 @@
           "default": false,
           "title": "Case",
           "type": "boolean"
+        },
+        "concept": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Concept"
         },
         "detail": {
           "$ref": "#/$defs/Detail"

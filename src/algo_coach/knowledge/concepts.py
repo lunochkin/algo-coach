@@ -36,10 +36,19 @@ def derive(where: str, raw: dict[str, Any], concepts: dict[str, dict[str, Any]])
     if restated := [field for field in DERIVED if field in raw]:
         return [f"{at}: {field} is derived from concept {name}" for field in restated]
     concept = concepts[name]
+    ids = {m["id"] for m in concept["misconceptions"]}
+    # a choice's letter to the misconception it embodies, by its stable id
+    targeted = raw.get("misconception", {})
+    if unknown := sorted(set(targeted.values()) - ids):
+        return [f"{at}: no misconception {i} in concept {name}" for i in unknown]
     raw["lesson"] = concept["taught_by"]
     raw["level"] = concept["level"]
-    raw["detail"] = {"mechanism": concept["claim"], "pitfalls": concept["misconceptions"]}
+    raw["detail"] = {"mechanism": concept["claim"], "pitfalls": texts(concept)}
     return []
+
+
+def texts(concept: dict[str, Any]) -> list[str]:
+    return [m["text"] for m in concept["misconceptions"]]
 
 
 def rendered(slug: str, text: str, concepts: dict[str, dict[str, Any]]) -> str:
@@ -49,7 +58,7 @@ def rendered(slug: str, text: str, concepts: dict[str, dict[str, Any]]) -> str:
     if not taught:
         return text
     intro = f"This lesson covers {_listed(HEADING.findall(text))}."
-    mistakes = "".join(f"- Wrong: {m}\n" for c in taught for m in c["misconceptions"])
+    mistakes = "".join(f"- Wrong: {m}\n" for c in taught for m in texts(c))
     sources = dict.fromkeys(c["source"] for c in taught)
     links = "".join(f"- [{_label(url)}]({url})\n" for url in sources)
     return (

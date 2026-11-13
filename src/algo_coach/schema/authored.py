@@ -34,6 +34,10 @@ class ChoiceBody(Authored):
     why: list[str]  # one line per choice, in the same order
     explain: str
     detail: Detail
+    # a module written by concept: the concept the question tests, and each
+    # wrong choice's letter to the misconception it embodies, by its id
+    concept: str | None = None
+    misconception: dict[str, str] | None = None
 
     @model_validator(mode="after")
     def _choices_and_their_answer(self) -> ChoiceBody:
@@ -57,6 +61,7 @@ class ShortBody(Authored):
     case: bool = False
     explain: str
     detail: Detail
+    concept: str | None = None
 
     @model_validator(mode="after")
     def _something_accepted(self) -> ShortBody:
@@ -74,6 +79,7 @@ class OpenBody(Authored):
     detail: Detail | None = None
     key_detail: list[Text] | None = None
     traps_detail: list[Text] | None = None
+    concept: str | None = None
 
     @model_validator(mode="after")
     def _points_and_their_details(self) -> OpenBody:

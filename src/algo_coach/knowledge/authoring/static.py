@@ -1,5 +1,5 @@
-"""The rules read from the files alone, with no snippet run: 6, 8, 10, 13, 17,
-18, 19 and 21, and the kinds the seed refuses too."""
+"""The rules read from the files alone, with no snippet run: 3, 6, 8, 10, 13,
+17, 18, 19 and 21, and the kinds the seed refuses too."""
 
 import importlib.metadata
 import re
@@ -15,6 +15,7 @@ POSITIONAL = re.compile(
     r"\b(choice|option) [A-H]\b"
     r"|\b(the|see) (first|second|third|fourth|fifth|last) (choice|option)\b"
 )
+BINARY = frozenset({"true", "false", "yes", "no"})
 IGNORED_SECTIONS = {
     "go-deeper",
     "common-mistakes",
@@ -41,6 +42,14 @@ def choices(course: Course, report: Report) -> None:
             keyed, rest = sizes[at], max(s for i, s in enumerate(sizes) if i != at)
             if keyed > 1.3 * rest and keyed - rest > 15:
                 report.warn(10, where(q), f"keyed choice {keyed} chars, longest other {rest}")
+
+
+def replies(course: Course, report: Report) -> None:
+    """Rule 3, in a module written by concept: a `short` reply of only true or
+    false, or yes or no, is a guess."""
+    for q in course.questions:
+        if fmt(q) == "short" and {a.strip().lower() for a in q["accept"]} <= BINARY:
+            report.error(3, where(q), "the reply is a yes or no, so the format is choice")
 
 
 def positions(course: Course, report: Report) -> None:

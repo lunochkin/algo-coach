@@ -70,7 +70,9 @@ def said(q: Question) -> list[str]:
     """The words a question explains its answer in, and the calls and dunder
     names among them. Two questions on one fact explain it alike, whatever
     their snippets and prompts look like."""
-    text = " ".join([q.get("explain", ""), q["detail"]["mechanism"], *q.get("key", [])])
+    # a mechanism derived from a concept is the same for every question on it
+    mechanism = "" if "concept" in q else q["detail"]["mechanism"]
+    text = " ".join([q.get("explain", ""), mechanism, *q.get("key", [])])
     plain = [w for w in re.findall(r"[a-z_][a-z_0-9]{2,}", text.lower()) if w not in COMMON]
     named = re.findall(r"[A-Za-z_][\w.]*(?=\()|__\w+__|\b[a-z_]+\.[a-z_.]+\b", text)
     return plain + ["`" + name for name in named]

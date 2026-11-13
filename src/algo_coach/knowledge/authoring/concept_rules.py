@@ -3,6 +3,7 @@ docs/authoring/concepts.md."""
 
 import re
 from collections import defaultdict
+from typing import Any, cast
 
 from algo_coach.knowledge.authoring.course import Course, Report, where
 from algo_coach.knowledge.authoring.static import anchor
@@ -31,8 +32,7 @@ def records(course: Course, report: Report) -> None:
             report.error(27, at, "the source names no section")
         if concept.get("level") not in (0, 1, 2, 3):
             report.error(27, at, f"level {concept.get('level')!r}")
-        if not concept.get("misconceptions"):
-            report.error(27, at, "no misconception")
+        _misconceptions(report, at, concept)
 
 
 def taught(course: Course, report: Report) -> None:
@@ -62,14 +62,47 @@ def taught(course: Course, report: Report) -> None:
 
 def filed(course: Course, report: Report) -> None:
     """Rule 19 where the concepts replace the coverage map: every concept has a
-    question. A question is filed by its `concept`, which rule 27 resolves."""
+    question, and every misconception a wrong choice embodying it. A question
+    is filed by its `concept`, which rule 27 resolves."""
     asked = {q.get("concept") for q in course.questions}
+    targeted = {(q.get("concept"), i) for q in course.questions for i in _targets(q).values()}
     for name, concept in course.concepts.items():
+        at = f"{concept['_file']} {name}"
         if name not in asked:
-            report.warn(19, f"{concept['_file']} {name}", "no question tests this concept")
+            report.warn(19, at, "no question tests this concept")
+            continue
+        for wrong in concept.get("misconceptions", []):
+            if (name, wrong.get("id")) not in targeted:
+                report.warn(19, at, f"no wrong choice embodies misconception {wrong.get('id')}")
     for q in course.questions:
         if "concept" not in q:
             report.error(19, where(q), "names no concept")
+        elif q.get("format", "choice") == "choice":
+            wrong = {chr(65 + i) for i in range(len(q["choices"]))} - set(q["answer"])
+            if bare := sorted(wrong - _targets(q).keys()):
+                report.warn(19, where(q), f"wrong choice {', '.join(bare)} names no misconception")
+            if keyed := sorted(_targets(q).keys() & set(q["answer"])):
+                report.error(19, where(q), f"keyed choice {', '.join(keyed)} names a misconception")
+
+
+def _targets(q: dict[str, Any]) -> dict[str, str]:
+    found = q.get("misconception", {})
+    return cast(dict[str, str], found) if isinstance(found, dict) else {}
+
+
+def _misconceptions(report: Report, at: str, concept: dict[str, Any]) -> None:
+    found = concept.get("misconceptions")
+    if not isinstance(found, list) or not found:
+        report.error(27, at, "no misconception")
+        return
+    ids: list[str] = []
+    for wrong in cast(list[object], found):
+        if not isinstance(wrong, dict) or {"id", "text"} - cast(dict[str, Any], wrong).keys():
+            report.error(27, at, "a misconception is not { id, text }")
+            continue
+        ids.append(str(cast(dict[str, Any], wrong)["id"]))
+    if len(ids) != len(set(ids)):
+        report.error(27, at, "two misconceptions share an id")
 
 
 def _heads(text: str) -> set[str]:

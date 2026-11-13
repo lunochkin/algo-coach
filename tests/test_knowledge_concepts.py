@@ -20,7 +20,7 @@ id = "while-retests"
 level = 0
 claim = "`while` tests its condition before every iteration."
 source = "https://docs.python.org/3/reference/compound_stmts.html#the-while-statement"
-misconceptions = ["A `while` body always runs once."]
+misconceptions = [{ id = "body-runs-once", text = "A `while` body always runs once." }]
 taught_by = "flow-loops#while"
 """
 QUESTION = """[[q]]
@@ -83,6 +83,16 @@ def test_a_lesson_gets_its_intro_mistakes_and_links_from_its_concepts(tmp_path):
     assert text.startswith("This lesson covers `while`.\n\n## `while`")
     assert "## Common mistakes\n\n- Wrong: A `while` body always runs once.\n" in text
     assert "(https://docs.python.org/3/reference/compound_stmts.html#the-while-statement)" in text
+
+
+def test_a_choice_naming_an_unknown_misconception_is_unread(tmp_path):
+    """A misconception removed from the concept leaves no choice pointing at
+    nothing: the reading refuses the question until it is rewritten."""
+    bank = QUESTION + 'misconception = { B = "gone" }\n'
+
+    source = read_module(module(tmp_path, bank))
+
+    assert source.unread == ["core/flow:w-zero: no misconception gone in concept while-retests"]
 
 
 def test_a_module_without_concepts_reads_as_before(tmp_path):
