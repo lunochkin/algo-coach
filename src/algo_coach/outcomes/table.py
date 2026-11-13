@@ -1,7 +1,7 @@
 from sqlalchemy import CheckConstraint, Column, ForeignKey, Integer, Table, Text
 from sqlalchemy.dialects.postgresql import ARRAY
 
-from algo_coach.schema import CallSite, Gate
+from algo_coach.schema import CallSite, Gate, ProblemDifficulty
 from algo_coach.storage import appended_column, call_column, enumerated, metadata, timestamp
 
 site_outcomes = Table(
@@ -30,6 +30,7 @@ site_outcomes = Table(
     Column("repeats", Integer, nullable=False),
     Column("unseparated", Text),
     Column("largest", Integer),
+    Column("aimed_difficulty", enumerated(ProblemDifficulty)),
     # a site writes an outcome only where it made a call
     call_column(nullable=False),
     CheckConstraint("writing_id <> ''", name="writing_named"),
@@ -37,4 +38,5 @@ site_outcomes = Table(
     CheckConstraint("target_template_id IS NULL OR target_technique IS NULL", name="one_target"),
     CheckConstraint("repeats >= 1", name="called_at_least_once"),
     CheckConstraint("largest > 0", name="bound_positive"),
+    CheckConstraint("aimed_difficulty IS NULL OR site = 'generator'", name="aim_on_generator"),
 )

@@ -119,7 +119,13 @@ def write_one(
     # the problem, and the run reports what it cost
     notes("statement", "writing the statement, the canonical and the cases")
     generated, call = generate(
-        transport, calls, card, template, written=written, configuration=bench.generator
+        transport,
+        calls,
+        card,
+        template,
+        written=written,
+        aim=writing.aimed_difficulty,
+        configuration=bench.generator,
     )
     notes("statement", f"{generated.title!r}, {len(generated.cases)} case(s)", call)
     draft = held(drafts, writing.draft(generated, call))
@@ -350,6 +356,7 @@ def sites(writing: Writing, call: Call | None, p: Passage) -> None:
         mutants=p.bar.mutants,
         killed=p.bar.declared,
         misdeclared=len(p.first.misdeclarations),
+        aimed=True,
     )
     writing(CallSite.BLIND, p.blind, **blind_verdicts(p.first))
     # the counters as the last round left them, which is why the record cites

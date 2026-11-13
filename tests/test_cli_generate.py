@@ -713,6 +713,15 @@ def test_resume_is_aimed_at_nothing(root, monkeypatch, capsys):
     assert "aimed at nothing" in capsys.readouterr().err
 
 
+def test_resume_takes_no_difficulty(root, monkeypatch, capsys):
+    """A resume never re-asks the generator, the one site the level is sent
+    to."""
+    with pytest.raises(SystemExit):
+        resuming(monkeypatch, FakeWriter(), "--difficulty", "easy")
+
+    assert "aimed at nothing" in capsys.readouterr().err
+
+
 def test_a_replay_is_not_a_resume(root, monkeypatch, capsys):
     """One reads the corpus and the other the drafts, and a run doing both
     would report two things under one summary."""

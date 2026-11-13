@@ -1,11 +1,13 @@
+import pytest
 from generating import SLOW, FakeWriter
 from matching import card, seeded, template
+from pydantic import ValidationError
 
 from algo_coach.calls import CallLog
 from algo_coach.generation import BENCH, Bench, Corpus, write_problems
 from algo_coach.outcomes import OutcomeLog
 from algo_coach.problems import ProblemStore
-from algo_coach.schema import CallSite, Configuration, Gate
+from algo_coach.schema import CallSite, Configuration, Gate, ProblemDifficulty, SiteOutcome
 
 BUILDS = "def solve(size, seed):\n    return [list(range(size))]\n"
 # four mutation sites, where `len(xs)` has none: what makes the loop ask
@@ -339,3 +341,34 @@ def test_a_search_that_separated_nothing_says_why(database):
     one = sites(outcomes)[CallSite.INPUTS]
     assert one.separating is None
     assert one.unseparated == "naive_finished"
+
+
+def test_the_aim_is_on_the_generators_record_alone(database):
+    """A landed problem clears its draft, and only the generator's prompt
+    named the level, so its record is where the aim outlives the run."""
+    (one,) = seeded(database, card())
+    log = OutcomeLog(database)
+
+    write_problems(
+        FakeWriter(generator=BUILDS),
+        CallLog(database),
+        one,
+        one.templates[0],
+        Corpus.at(database),
+        outcomes=log,
+        aim=ProblemDifficulty.EASY,
+    )
+
+    aims = {record.site: record.aimed_difficulty for record in log.outcomes()}
+    assert aims.pop(CallSite.GENERATOR) is ProblemDifficulty.EASY
+    assert set(aims.values()) == {None}
+
+
+def test_an_aim_off_the_generator_is_refused(database):
+    _, _, outcomes = run(database, FakeWriter(generator=BUILDS))
+    blind = sites(outcomes)[CallSite.BLIND]
+
+    with pytest.raises(ValidationError):
+        SiteOutcome.model_validate(
+            blind.model_dump() | {"aimed_difficulty": ProblemDifficulty.EASY}
+        )

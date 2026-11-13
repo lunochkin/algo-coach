@@ -9,7 +9,15 @@ from dataclasses import dataclass, field
 from algo_coach import mint
 from algo_coach.generation.generator import Generated
 from algo_coach.ids import new_id
-from algo_coach.schema import Call, CallSite, Draft, Gate, MachineProvenance, SiteOutcome
+from algo_coach.schema import (
+    Call,
+    CallSite,
+    Draft,
+    Gate,
+    MachineProvenance,
+    ProblemDifficulty,
+    SiteOutcome,
+)
 
 
 @dataclass(frozen=True)
@@ -22,6 +30,7 @@ class Writing:
 
     target_template_id: str | None = None
     target_technique: str | None = None
+    aimed_difficulty: ProblemDifficulty | None = None
     into: list[SiteOutcome] | None = None
     id: str = field(default_factory=new_id)
 
@@ -60,6 +69,7 @@ class Writing:
         repeats: int = 1,
         unseparated: str | None = None,
         largest: int | None = None,
+        aimed: bool = False,
     ) -> None:
         # a site that made no call left no configuration to compare, so it
         # writes nothing rather than a record with provenance missing
@@ -84,6 +94,7 @@ class Writing:
                 repeats=repeats,
                 unseparated=unseparated,
                 largest=largest,
+                aimed_difficulty=self.aimed_difficulty if aimed else None,
                 provenance=MachineProvenance.of(call),
             )
         )

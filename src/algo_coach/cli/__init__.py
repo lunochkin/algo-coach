@@ -28,6 +28,7 @@ from algo_coach.cli.score import score
 from algo_coach.cli.seed import BadLine, seed
 from algo_coach.cli.user_log import user_log
 from algo_coach.runs import CONCURRENCY
+from algo_coach.schema import ProblemDifficulty
 from algo_coach.storage import Database
 
 # What a shell reports for a command its user stopped: 128 plus the signal.
@@ -227,6 +228,12 @@ def main() -> None:
         help="write for every core template carrying no match, rather than one named",
     )
     generate_parser.add_argument("--count", type=int, default=1, help="how many problems to write")
+    generate_parser.add_argument(
+        "--difficulty",
+        type=ProblemDifficulty,
+        choices=list(ProblemDifficulty),
+        help="the level the generator writes for; it picks one itself otherwise",
+    )
     generate_parser.add_argument(
         "--replay",
         action="store_true",

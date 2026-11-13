@@ -9,6 +9,7 @@ from enum import StrEnum
 
 from pydantic import Field, model_validator
 
+from algo_coach.schema.problem import ProblemDifficulty
 from algo_coach.schema.provenance import MachineProvenance
 from algo_coach.schema.target import one_target
 
@@ -87,10 +88,20 @@ class SiteOutcome(MachineProvenance):
     # separating size read without the bound it was searched under says
     # nothing about how far the search had left to look
     largest: int | None = Field(default=None, gt=0)
+    # the level `generate --difficulty` asked the generator for; absent where
+    # the generator picked one itself. The generator's record alone, since
+    # only its prompt names the level
+    aimed_difficulty: ProblemDifficulty | None = None
 
     @model_validator(mode="after")
     def _one_target(self) -> SiteOutcome:
         one_target(self.target_template_id, self.target_technique)
+        return self
+
+    @model_validator(mode="after")
+    def _aim_on_the_generator(self) -> SiteOutcome:
+        if self.aimed_difficulty is not None and self.site is not CallSite.GENERATOR:
+            raise ValueError("only the generator's prompt names a difficulty")
         return self
 
     @model_validator(mode="after")

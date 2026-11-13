@@ -355,3 +355,19 @@ def test_the_statements_are_the_template_s_own(database):
     ]
 
     assert written_for(corpus, mine) == ["Mine.", "Retired but mine."]
+
+
+def test_an_aimed_prompt_names_the_level(database):
+    """The generator picks a level of its own, which is rarely easy, so a
+    sweep filling easy rungs has to ask for one."""
+    (one,) = seeded(database, card())
+
+    content = prompt(one, one.templates[0], aim=ProblemDifficulty.EASY)
+
+    assert "Write a problem at difficulty easy" in content
+
+
+def test_an_unaimed_prompt_names_no_level(database):
+    (one,) = seeded(database, card())
+
+    assert "Write a problem at difficulty" not in prompt(one, one.templates[0])

@@ -89,6 +89,7 @@ def generate(args: argparse.Namespace, parser: argparse.ArgumentParser, root: Da
             on_step=on_step,
             outcomes=outcomes,
             drafts=DraftStore(root),
+            aim=args.difficulty,
         )
         reached.append((target, result))
         # A broken configuration fails the next template the same way, so the
@@ -128,7 +129,7 @@ def resumed(args: argparse.Namespace, parser: argparse.ArgumentParser, root: Dat
     write name nothing here. A rejected draft is terminal and is not among
     them.
     """
-    if args.card or args.template or args.gaps:
+    if args.card or args.template or args.gaps or args.difficulty:
         parser.exit(2, "generate: --resume reads the stored drafts, so it is aimed at nothing\n")
     drafts = DraftStore(root)
     swept(drafts)
@@ -189,7 +190,7 @@ def listed(args: argparse.Namespace, parser: argparse.ArgumentParser, root: Data
     spent. A rejected draft is terminal, so it is counted and not listed:
     `--all` prints it, and its gate is what says why nothing resumes it.
     """
-    if args.card or args.template or args.gaps:
+    if args.card or args.template or args.gaps or args.difficulty:
         parser.exit(2, "generate: --drafts reads the stored drafts, so it is aimed at nothing\n")
     stored = DraftStore(root).all()
     if not stored:
@@ -209,7 +210,7 @@ def shown(args: argparse.Namespace, parser: argparse.ArgumentParser, root: Datab
 
     It makes no call, as `--drafts` makes none.
     """
-    if args.card or args.template or args.gaps:
+    if args.card or args.template or args.gaps or args.difficulty:
         parser.exit(2, "generate: --draft names the draft it reads, so it is aimed at nothing\n")
     draft = one_of(DraftStore(root).all(), args.draft, parser, "draft")
     print(
@@ -232,7 +233,7 @@ def rejected_by_hand(
 
     It makes no call, as `--draft` makes none.
     """
-    if args.card or args.template or args.gaps:
+    if args.card or args.template or args.gaps or args.difficulty:
         parser.exit(2, "generate: --reject names the draft it rejects, so it is aimed at nothing\n")
     drafts = DraftStore(root)
     draft = one_of(drafts.all(), args.reject, parser, "draft")
@@ -251,7 +252,7 @@ def replayed(args: argparse.Namespace, parser: argparse.ArgumentParser, root: Da
     The corpus is the input rather than a template, so the flags that aim a
     write name nothing here.
     """
-    if args.card or args.template or args.gaps:
+    if args.card or args.template or args.gaps or args.difficulty:
         parser.exit(2, "generate: --replay reads the stored corpus, so it is aimed at nothing\n")
     api = transport(args, parser)
     bench = chosen_bench(args, parser)

@@ -405,6 +405,7 @@ def site_outcome(
     repeats: int = 1,
     unseparated: str | None = None,
     largest: int | None = None,
+    aimed_difficulty: ProblemDifficulty | None = None,
 ) -> SiteOutcome:
     """`problem_id` is filled by the caller that lands the problem: a rejected
     draft mints none, and `writing_id` is what groups the four sites either
@@ -430,6 +431,7 @@ def site_outcome(
         repeats=repeats,
         unseparated=unseparated,
         largest=largest,
+        aimed_difficulty=aimed_difficulty,
         **provenance.model_dump(),
     )
 

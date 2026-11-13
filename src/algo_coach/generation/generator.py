@@ -52,10 +52,13 @@ Produce four things.
    Include the edge cases the statement admits. They must separate a correct
    solution from a plausible wrong one: a solution that handles the ordinary
    input and gets the boundary wrong has to fail at least one case.
-4. A difficulty: easy, medium or hard. Easy is the form applied to what the
-   statement hands over. Medium needs the input transformed, or a state
-   chosen, before the form fits. Hard makes the form one step of a solution
-   whose rest has to be derived. Judge the problem you wrote, not the form.
+4. A difficulty: easy, medium or hard, as the public problem platforms label
+   their problems. Easy: a direct approach fits the limits, or one technique
+   applied unchanged. Medium: one standard technique the limits force, often
+   after the input is transformed or a state chosen. Hard: a technique few
+   solvers hold, or two ideas combined. A form that is itself hard to hold,
+   such as a monotonic deque, makes even its direct use medium or hard. Judge
+   the problem you wrote, not the form.
 
 The value `solve` returns is compared exactly, so it is built from integers,
 strings, booleans and lists of those. A problem whose answer is a ratio asks
@@ -98,7 +101,12 @@ thousand elements, since the stored input has to be large enough for the naive
 approach to exceed that limit."""
 
 
-def prompt(card: Card, template: Template, written: Sequence[str] = ()) -> str:
+def prompt(
+    card: Card,
+    template: Template,
+    written: Sequence[str] = (),
+    aim: ProblemDifficulty | None = None,
+) -> str:
     """The prompt: one form, and the technique it belongs to.
 
     Both cues, since they answer different questions: when to reach for the
@@ -117,9 +125,16 @@ def prompt(card: Card, template: Template, written: Sequence[str] = ()) -> str:
             "Form:",
             *(f"  {line}" for line in template.code.splitlines()),
             *([SPEEDUP] if template.speedup else []),
+            *aimed(aim),
             *already(written),
         ]
     )
+
+
+def aimed(aim: ProblemDifficulty | None) -> list[str]:
+    if aim is None:
+        return []
+    return ["", f"Write a problem at difficulty {aim}, and label it {aim}."]
 
 
 def already(written: Sequence[str]) -> list[str]:
@@ -248,6 +263,7 @@ def generate(
     template: Template,
     *,
     written: Sequence[str] = (),
+    aim: ProblemDifficulty | None = None,
     configuration: Configuration = GENERATOR_DEFAULT,
 ) -> tuple[Generated, Call]:
     # the call is returned beside the draft because the problem, the cases and
@@ -256,7 +272,7 @@ def generate(
         transport,
         log,
         system=SYSTEM,
-        content=prompt(card, template, written),
+        content=prompt(card, template, written, aim),
         schema=schema(),
         configuration=configuration,
         missing="no draft",

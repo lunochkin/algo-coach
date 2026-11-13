@@ -22,9 +22,29 @@
       ],
       "title": "Gate",
       "type": "string"
+    },
+    "ProblemDifficulty": {
+      "enum": [
+        "easy",
+        "medium",
+        "hard"
+      ],
+      "title": "ProblemDifficulty",
+      "type": "string"
     }
   },
   "properties": {
+    "aimed_difficulty": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/ProblemDifficulty"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
     "call_id": {
       "anyOf": [
         {

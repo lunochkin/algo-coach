@@ -30,6 +30,7 @@ from algo_coach.schema import (
     CaseOutcome,
     Draft,
     Gate,
+    ProblemDifficulty,
     SiteOutcome,
     Template,
     WritingState,
@@ -149,6 +150,7 @@ def write_problems(
     on_step: Callable[[Step], None] | None = None,
     outcomes: OutcomeLog | None = None,
     drafts: DraftStore | None = None,
+    aim: ProblemDifficulty | None = None,
 ) -> GenerationResult:
     """`count` problems for one template, each shown what came before it, and
     each stored as soon as its runs keep it.
@@ -163,7 +165,8 @@ def write_problems(
     # one recorder per problem, filled as the sites answer and stored once the
     # problem's fate is known, which is the first point there is an id to name
     writings = [
-        (index, Writing(target_template_id=template.id, into=[])) for index in range(1, count + 1)
+        (index, Writing(target_template_id=template.id, aimed_difficulty=aim, into=[]))
+        for index in range(1, count + 1)
     ]
 
     def ask(item: tuple[int, Writing]) -> Passage:
