@@ -278,6 +278,12 @@ without redefining them. Grouped by the file that specifies the record.
   since failed a review.
 - **Recall attempt**: one template reproduced from memory, with the hints
   taken.
+- **Short exercise**: a question about code answered in seconds with no
+  typing, such as judging a solution. Each kind is a record kind of its own.
+- **Judgement item**: a template's form, clean or carrying one mutant that
+  fails a case, served by the judging exercise. Product data.
+- **Judgement**: one user's answer to a judgement item: clean or flawed, and
+  the tapped line where flawed.
 - **Review**: one check that a user still holds a template's form or a
   question's fact. An answer to a seen question is a review of it. Which
   recall attempts and sittings count as a review is deferred to the schedule.
@@ -398,10 +404,12 @@ times. Each record class is specified in one of the files beside it.
 | Difficulty ratings | product | global | append-only | the store |
 | Verification runs | product | global | append-only | the store |
 | Template matches | product | global | append-only | the store |
+| Judgement items | product | global | created once; only its status moves | the store |
 | Site outcomes | product | global | append-only | the store |
 | Sittings | user | private | revised in place | the store |
 | Card runs | user | private | append-only | the store |
 | Recall attempts | user | private | append-only | the store |
+| Judgements | user | private | append-only | the store |
 | Attempts | user | private | append-only | the store |
 | Attempt verifications | user | private | append-only | the store |
 | Attempt claims | user | private | append-only | the store |

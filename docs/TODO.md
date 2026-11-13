@@ -167,10 +167,10 @@ mutant that fails at least one case, and the user judges it. Judging a
 solution is reading code for correctness and cost, the step a sitting ends on
 and a review of anyone's code begins with.
 
-- [ ] Write the design of a short exercise into `log.md`: its own record kind,
+- [x] Write the design of a short exercise into `log.md`: its own record kind,
       and that mastery never counts it as execution. A judged solution is not a
       solve
-- [ ] Write the judgement exercise into `log.md`: the solution, whether it is
+- [x] Write the judgement exercise into `log.md`: the solution, whether it is
       clean, the mutant's line, the case that separates it, and the answers it
       takes — correct or not, then the flawed line
 - [ ] Build the items from each card template's mutants that fail a case, with

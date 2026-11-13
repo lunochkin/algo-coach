@@ -228,6 +228,38 @@ starts at the roots and an experienced user sees where a card sits.
   waits on the graph, since the graph orders study rather than proving what
   the user may solve.
 
+## Judgement items
+
+The solutions a judging exercise serves, built from the templates. `log.md`
+gives the exercise and its answers.
+
+- **An item is one template's form, clean or carrying one mutant.** The
+  question it answers is the one the template's cases ask, so the user knows
+  what the code must do without a statement.
+- **A flawed item's mutant fails at least one of the template's cases.** A
+  mutant every case passes may be equivalent to the form, and calling it
+  flawed would teach a fault that does not exist. `card check` already
+  separates the two.
+- **An item stores the code it shows, its mutant's line and change, and the
+  separating case** with the value the mutant returned. The template's code
+  can change after the item was built, and an answer has to stay readable
+  against what the user saw.
+- **An item is product data, minted when the items are built, and never
+  edited.** A build appends items for templates not yet covered. A template
+  whose code changed has its old items retired, as a problem is retired, so
+  no answer loses its item.
+- **About a quarter of the items are clean.** With no clean item, calling
+  everything flawed would be right every time, and a false alarm could not be
+  counted.
+- **An item fits the phone's code column.** A form with a line wider than the
+  column yields no item, so no line scrolls sideways where a tap has to land on
+  it. The column's width is `pages.md`'s.
+- **A mutant on the input builder never makes an item.** The builder turns
+  JSON into nodes, and a flaw there is no flaw in the form the user studies.
+  How a template marks its builder lines is decided when the items are built.
+- **A mutant that only slows the form never makes an item.** A timeout is a
+  fact about the machine, and reading the code cannot find it.
+
 ## Template matches
 
 Which solutions display which of a card's templates. A form is displayed by

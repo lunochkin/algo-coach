@@ -512,6 +512,48 @@ One template reproduced from memory, and how it went.
   gap between recall fluency and solving fluency is the false fluency that
   blocked practice trains.
 
+## Short exercises
+
+A short exercise is a question about code that takes seconds to answer and
+needs no typing. Judging a solution is the first kind. It suits the phone,
+where a sitting's typing is slow.
+
+- **Each kind of short exercise is a record kind of its own.** Each kind
+  answers a different question, and its answer has a different shape. One
+  shared record would carry fields every kind but one leaves empty.
+- **A short exercise is not an `Attempt`.** No problem is served and nothing
+  is submitted, so no field keys it to a sitting.
+- **Mastery never counts a short exercise as execution.** Judging someone
+  else's solution is reading code, and execution is writing a correct
+  solution. Which reading a short exercise feeds, if any, is deferred to the
+  mastery work in Phase 18.
+- **An answer is private and append-only**, keyed to its user and to the item
+  it answered, as a recall attempt is.
+
+### Judging a solution
+
+The user reads one solution to a template's own question and says whether it
+is correct. A flawed solution carries one mutant of the form, and the user
+then taps the line that is wrong. `content.md` gives the items.
+
+- **A `Judgement` stores one answer**: its `id`, `user_id`, `item_id`,
+  `created_at`, whether the user called the solution clean, and the tapped
+  line where the user called it flawed.
+- **Correctness is derived from the item, never stored.** A clean item is
+  answered right by calling it clean. A flawed item is spotted by calling it
+  flawed, and located by tapping the mutant's line as well.
+- **Spotting and locating are counted apart.** A user who senses a flaw and
+  taps the wrong line reads code differently from one who finds the line, and
+  one number would hide which.
+- **After the answer, the item shows the separating case**: the arguments, the
+  expected value and what the flawed solution returned. The case is the
+  evidence the line is wrong, and reading it is the lesson.
+- **Two rates per technique are derived for the board**: the flawed items
+  spotted, and the clean items called flawed. A user calling everything flawed
+  would score every flaw found, and the second rate exposes that.
+- **The next item is picked unseen first, then by staleness**, until the
+  schedule in Phase 18 picks it.
+
 ## Mastery
 
 How well a user knows one technique. The engine computes mastery from the log
