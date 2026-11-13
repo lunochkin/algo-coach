@@ -5,8 +5,8 @@ The server is named by TEST_DATABASE_URL, from the environment or the repo's
 `.env`, and needs the right to create databases and to set
 `session_replication_role`, which a superuser has. A test taking the fixture is
 marked `integration`, and a run without a server deselects those. The databases
-the fixture creates are its own, `algo_coach_test_<worker>`, and never the one
-DATABASE_URL names.
+the fixture creates are its own, `algo_coach_test_<checkout>_<worker>`, and
+never the one DATABASE_URL names.
 """
 
 import hashlib
@@ -79,7 +79,9 @@ def database_engine(worker_id: str) -> Iterator[Engine]:
         # failed rather than skipped: a run without a server selects the unit
         # tests alone, `-m "not integration"`, and says so
         pytest.fail("TEST_DATABASE_URL names no Postgres server; run -m 'not integration'")
-    name = f"algo_coach_test_{worker_id}"
+    # per checkout: two worktrees running at once empty each other's tables
+    checkout = hashlib.sha256(str(ROOT).encode()).hexdigest()[:6]
+    name = f"algo_coach_test_{checkout}_{worker_id}"
     url = make_url(server).set(database=name)
     stamp = migrated()
     admin = create_engine(server, isolation_level="AUTOCOMMIT")
