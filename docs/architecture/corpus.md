@@ -88,6 +88,18 @@ architecture, and `README.md` is the map.
   raise a technique's solve rate because a problem was broken.
 - **Exclusion is a read-time rule, never a deletion.** The attempts stay
   readable, and the board stops counting them.
+- **The medium retirements came from one early batch, not from verification.**
+  Counted on 2026-11-13 over 80 problems: 24 of the 35 labelled medium were
+  retired `defective`, against 2 of the 45 labelled easy. All 26 defective
+  problems landed on 2026-09-05, before a statement had to end on `def
+  solve(...)`, and each lacks that line. No problem landed since is defective.
+- **The later shortage of medium problems was the generator's label.** Of the
+  47 problems landed after that batch, the generator labelled 37 easy. Rated
+  by hand against the criteria, 35 problems labelled easy read medium.
+  `--difficulty` and the ratings answer that cause, so a fix to verification
+  would raise no yield.
+- **`copied` retired 28 problems, 21 of them labelled easy.** The screen site
+  now rejects a copy before the reference is written.
 
 ## Difficulty ratings
 
