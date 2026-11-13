@@ -28,6 +28,7 @@ from algo_coach.schema.case import (
 from algo_coach.schema.configuration import Configuration
 from algo_coach.schema.diagnosis import Diagnosis
 from algo_coach.schema.draft import Draft, DraftCase, SettledCase, WritingState
+from algo_coach.schema.judgement import ItemStatus, JudgementItem
 from algo_coach.schema.knowledge import (
     BODIES,
     Answer,
@@ -103,7 +104,9 @@ __all__ = [
     "Gate",
     "GraphSettings",
     "Hint",
+    "ItemStatus",
     "Json",
+    "JudgementItem",
     "Kind",
     "KnowledgeRecord",
     "Lesson",

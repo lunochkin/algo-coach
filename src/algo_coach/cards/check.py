@@ -1,6 +1,7 @@
 """An authored card checked before it is seeded: what the author cannot see by
 reading the file. `content.md` gives what a template's cases are for."""
 
+import ast
 import json
 from collections.abc import Mapping
 from pathlib import Path
@@ -10,7 +11,7 @@ from pydantic import BaseModel, ValidationError
 from algo_coach.cards.graph import broken
 from algo_coach.mutation import Mutant, mutants, pace
 from algo_coach.runner import CaseRun, agrees, as_json, defines_solve, run
-from algo_coach.schema import CardSeed, Json, TemplateKind, TemplateSeed
+from algo_coach.schema import CardSeed, Json, Template, TemplateKind, TemplateSeed
 from algo_coach.techniques import is_known
 
 # the sitting's cap: a recall is judged under it
@@ -23,7 +24,7 @@ ORDINALS = {2: "nd", 3: "rd"}
 class Finding(BaseModel):
     card: str  # the file's stem, so a card that does not parse is still named
     template: str | None = None
-    check: str  # schema, technique, slug, graph, parse, solve, case, mutant or stale
+    check: str  # schema, technique, slug, graph, parse, harness, solve, case, mutant or stale
     message: str
 
 
@@ -68,9 +69,13 @@ def _template(template: TemplateSeed, *, mutate: bool) -> list[tuple[str, str]]:
     if template.kind is not TemplateKind.CODE:
         return []  # a procedure is steps to reproduce, not source
     try:
-        compile(template.code, template.slug, "exec")
+        tree = ast.parse(template.code, template.slug)
     except SyntaxError as error:
         return [("parse", f"does not parse: {error}")]
+    defined = {node.name for node in tree.body if isinstance(node, ast.FunctionDef | ast.ClassDef)}
+    missing = [name for name in template.harness if name not in defined]
+    if missing:
+        return [("harness", f"names no top-level definition: {', '.join(missing)}")]
     if not template.cases:
         return []  # read on the card, and never offered for recall
     if not defines_solve(template.code):
@@ -79,7 +84,7 @@ def _template(template: TemplateSeed, *, mutate: bool) -> list[tuple[str, str]]:
     failed = [
         ("case", f"case {index} {_reading(one)}")
         for index, (case, one) in enumerate(zip(template.cases, ran, strict=True))
-        if not _passes(one, case.expected, template)
+        if not passes(one, case.expected, template)
     ]
     if failed or not mutate:
         return failed
@@ -100,7 +105,7 @@ def _survivors(template: TemplateSeed, *, cap_ms: int) -> list[Mutant]:
     for mutant in mutants(template.code):
         ran = run(mutant.code, args, cap_ms=cap_ms, stop_early=True)
         if len(ran) == len(args) and all(
-            _passes(one, case.expected, template)
+            passes(one, case.expected, template)
             for case, one in zip(template.cases, ran, strict=True)
         ):
             standing.append(mutant)
@@ -123,11 +128,12 @@ def _ordinal(n: int) -> str:
     return f"{n}{ORDINALS.get(n, 'th')}"
 
 
-def _passes(ran: CaseRun, expected: Json, template: TemplateSeed) -> bool:
+def passes(ran: CaseRun, expected: Json, template: TemplateSeed | Template) -> bool:
+    """A case passed, a set answer compared in any order."""
     return ran.returned and agrees(_settled(ran.value, template), _settled(expected, template))
 
 
-def _settled(value: Json, template: TemplateSeed) -> Json:
+def _settled(value: Json, template: TemplateSeed | Template) -> Json:
     # a set answer's top level sorted: two correct reproductions emit it in
     # different orders
     if not template.unordered or not isinstance(value, list):
@@ -141,4 +147,4 @@ def _reading(ran: CaseRun) -> str:
     return f"{ran.outcome}" + (f": {ran.error.splitlines()[-1]}" if ran.error else "")
 
 
-__all__ = ["CAP_MS", "Finding", "check_card", "siblings"]
+__all__ = ["CAP_MS", "Finding", "check_card", "passes", "siblings"]

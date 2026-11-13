@@ -146,3 +146,9 @@ def test_two_mutants_making_one_change_on_one_line_are_named_apart(tmp_path):
     named = [message for check, message in findings(tmp_path) if check == "mutant"]
     assert len(named) == len(set(named))
     assert any("(2nd)" in message for message in named)
+
+
+def test_a_harness_naming_no_definition_is_named(tmp_path):
+    written(tmp_path, card(templates=[template(harness=["TreeNode"])]))
+
+    assert [check for check, _ in findings(tmp_path, mutate=False)] == ["harness"]

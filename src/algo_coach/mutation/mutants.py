@@ -82,6 +82,11 @@ class Mutant:
     operator: Operator
     change: str
     line: int
+    # where the change sits in the source, and the changed node as text, so a
+    # reader can be shown the author's own code with the one change spliced in.
+    # Absent where the node spans lines
+    span: tuple[int, int, int] | None = None  # line, first column, end column
+    text: str | None = None
 
 
 def mutants(code: str) -> list[Mutant]:
@@ -95,14 +100,22 @@ class _Site:
     operator: Operator
     change: str
     line: int
+    span: tuple[int, int, int] | None = None
 
 
 def _mutate(code: str, target: int, site: _Site) -> Mutant:
     # a parse per mutant: the walk rewrites in place, so one tree cannot carry
     # two changes
-    tree = _Walk(target=target).visit(ast.parse(code))
+    walk = _Walk(target=target)
+    tree = walk.visit(ast.parse(code))
+    text = ast.unparse(walk.rewritten) if walk.rewritten is not None and site.span else None
     return Mutant(
-        code=ast.unparse(tree), operator=site.operator, change=site.change, line=site.line
+        code=ast.unparse(tree),
+        operator=site.operator,
+        change=site.change,
+        line=site.line,
+        span=site.span if text is not None else None,
+        text=text,
     )
 
 
@@ -112,6 +125,7 @@ class _Walk(ast.NodeTransformer):
     def __init__(self, target: int | None = None) -> None:
         self.target = target
         self.sites: list[_Site] = []
+        self.rewritten: ast.AST | None = None
 
     def collect(self, tree: ast.AST) -> list[_Site]:
         self.visit(tree)
@@ -125,8 +139,19 @@ class _Walk(ast.NodeTransformer):
         rewrite: Callable[[], ast.AST],
     ) -> ast.AST | None:
         hit = len(self.sites) == self.target
-        self.sites.append(_Site(operator, change, getattr(node, "lineno", 0)))
-        return rewrite() if hit else None
+        line = getattr(node, "lineno", 0)
+        span = (
+            (node.lineno, node.col_offset, node.end_col_offset)
+            if isinstance(node, ast.expr | ast.stmt)
+            and node.end_lineno == node.lineno
+            and node.end_col_offset is not None
+            else None
+        )
+        self.sites.append(_Site(operator, change, line, span))
+        if not hit:
+            return None
+        self.rewritten = rewrite()
+        return self.rewritten
 
     def visit_Compare(self, node: ast.Compare) -> ast.AST:
         self.generic_visit(node)

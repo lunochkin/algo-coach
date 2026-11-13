@@ -77,6 +77,13 @@
           "title": "Code",
           "type": "string"
         },
+        "harness": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Harness",
+          "type": "array"
+        },
         "id": {
           "title": "Id",
           "type": "string"

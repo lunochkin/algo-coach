@@ -1418,6 +1418,8 @@ export interface components {
       unordered: boolean;
       /** Cases */
       cases?: components['schemas']['TemplateCase'][];
+      /** Harness */
+      harness?: string[];
     };
     /**
      * TemplateCase

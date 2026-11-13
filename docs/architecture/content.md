@@ -251,12 +251,18 @@ gives the exercise and its answers.
 - **About a quarter of the items are clean.** With no clean item, calling
   everything flawed would be right every time, and a false alarm could not be
   counted.
-- **An item fits the phone's code column.** A form with a line wider than the
-  column yields no item, so no line scrolls sideways where a tap has to land on
-  it. The column's width is `pages.md`'s.
-- **A mutant on the input builder never makes an item.** The builder turns
-  JSON into nodes, and a flaw there is no flaw in the form the user studies.
-  How a template marks its builder lines is decided when the items are built.
+- **An item shows the form without its comments and without its harness.** A
+  comment can state the very invariant the flaw breaks. The harness is the
+  code turning JSON into nodes and back, which a template names in `harness`,
+  and a flaw there is no flaw in the form the user studies.
+- **An item's lines fit 60 characters**, the width the modules hold code to.
+  A phone fits some forty, so a longer line wraps once under its indent and
+  never scrolls sideways where a tap has to land. A form wider than 60 yields
+  no item.
+- **A template yields one clean item and three flawed ones**, the flaws on
+  three different lines, which makes the quarter of clean items.
+- **A mutant on the harness never makes an item.** The user never sees the
+  harness, so a flaw there could be neither read nor tapped.
 - **A mutant that only slows the form never makes an item.** A timeout is a
   fact about the machine, and reading the code cannot find it.
 

@@ -173,7 +173,7 @@ and a review of anyone's code begins with.
 - [x] Write the judgement exercise into `log.md`: the solution, whether it is
       clean, the mutant's line, the case that separates it, and the answers it
       takes — correct or not, then the flawed line
-- [ ] Build the items from each card template's mutants that fail a case, with
+- [x] Build the items from each card template's mutants that fail a case, with
       about a quarter of the items clean. A clean item makes a false alarm
       countable
 - [ ] Serve the exercise at the phone's width first, on both clients, with the

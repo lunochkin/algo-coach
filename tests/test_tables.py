@@ -32,6 +32,7 @@ from algo_coach.drafts.table import (
     draft_settled_cases,
     drafts,
 )
+from algo_coach.judgements.table import judgement_items
 from algo_coach.knowledge.table import (
     answers,
     certification_exams,
@@ -89,6 +90,7 @@ from algo_coach.schema import (
     Draft,
     DraftCase,
     Focus,
+    JudgementItem,
     Lesson,
     LessonMark,
     LimitRaise,
@@ -176,6 +178,7 @@ STORED: list[Stored] = [
         elsewhere=frozenset({"techniques"}),
     ),
     Stored(SolutionClaim, solution_claims, through_call=True),
+    Stored(JudgementItem, judgement_items),
     Stored(DifficultyRating, difficulty_ratings, through_call=True),
     Stored(TemplateMatch, template_matches, through_call=True),
     Stored(SiteOutcome, site_outcomes, through_call=True, required=frozenset({"call_id"})),

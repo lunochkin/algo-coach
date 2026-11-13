@@ -94,6 +94,9 @@ class Template(BaseModel):
     # what a recall is checked against; a template carrying none is read and
     # never recalled, as `content.md` gives it
     cases: list[TemplateCase] = Field(default_factory=list[TemplateCase])
+    # the top-level definitions turning JSON into nodes and back, which a
+    # judgement item neither shows nor mutates: `content.md`
+    harness: list[str] = Field(default_factory=list[str])
 
 
 class Card(BaseModel):

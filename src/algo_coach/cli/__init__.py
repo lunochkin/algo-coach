@@ -18,6 +18,7 @@ from algo_coach.cli.gaps import gaps
 from algo_coach.cli.generate import generate
 from algo_coach.cli.hand_match import hand_match
 from algo_coach.cli.invite import invitation
+from algo_coach.cli.judge import judge
 from algo_coach.cli.knowledge import knowledge
 from algo_coach.cli.match import match
 from algo_coach.cli.module import module
@@ -365,6 +366,12 @@ def main() -> None:
     # named every time: the history is one person's, never a default's
     import_parser.add_argument("--user", required=True, help="whose history it is")
 
+    judge_parser = _command(sub, "judge", "the judging exercise's items")
+    judge_action = judge_parser.add_subparsers(dest="action", required=True)
+    judge_action.add_parser(
+        "build", help="build items for every template not yet served at its current code"
+    )
+
     card_parser = _command(sub, "card", "an authored card's file, before it is seeded")
     card_action = card_parser.add_subparsers(dest="action", required=True)
     card_check = card_action.add_parser(
@@ -444,6 +451,7 @@ COMMANDS: dict[str, Callable[[argparse.Namespace, argparse.ArgumentParser, Datab
     "log": user_log,
     "knowledge": knowledge,
     "card": lambda args, parser, _root: card(args, parser),
+    "judge": lambda args, _parser, root: judge(args, root),
     "module": lambda args, parser, _root: module(args, parser),
     "invite": invitation,
 }

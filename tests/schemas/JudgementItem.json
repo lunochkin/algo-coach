@@ -1,0 +1,121 @@
+{
+  "$defs": {
+    "CaseOutcome": {
+      "enum": [
+        "passed",
+        "wrong",
+        "timeout",
+        "crashed"
+      ],
+      "title": "CaseOutcome",
+      "type": "string"
+    },
+    "ItemStatus": {
+      "enum": [
+        "served",
+        "retired"
+      ],
+      "title": "ItemStatus",
+      "type": "string"
+    }
+  },
+  "properties": {
+    "case_args": {
+      "anyOf": [
+        {
+          "items": {},
+          "type": "array"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Case Args"
+    },
+    "case_expected": {
+      "default": null,
+      "title": "Case Expected"
+    },
+    "change": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Change"
+    },
+    "clean": {
+      "title": "Clean",
+      "type": "boolean"
+    },
+    "code": {
+      "minLength": 1,
+      "title": "Code",
+      "type": "string"
+    },
+    "created_at": {
+      "format": "date-time",
+      "title": "Created At",
+      "type": "string"
+    },
+    "form_digest": {
+      "minLength": 1,
+      "title": "Form Digest",
+      "type": "string"
+    },
+    "id": {
+      "title": "Id",
+      "type": "string"
+    },
+    "line": {
+      "anyOf": [
+        {
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Line"
+    },
+    "outcome": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/CaseOutcome"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "returned": {
+      "default": null,
+      "title": "Returned"
+    },
+    "status": {
+      "$ref": "#/$defs/ItemStatus",
+      "default": "served"
+    },
+    "template_id": {
+      "title": "Template Id",
+      "type": "string"
+    }
+  },
+  "required": [
+    "id",
+    "created_at",
+    "template_id",
+    "form_digest",
+    "code",
+    "clean"
+  ],
+  "title": "JudgementItem",
+  "type": "object"
+}

@@ -3458,6 +3458,13 @@
             },
             "type": "array",
             "title": "Cases"
+          },
+          "harness": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Harness"
           }
         },
         "type": "object",
