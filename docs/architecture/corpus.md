@@ -156,6 +156,9 @@ templates alone.
 | `tree-traversal` | `inorder-stack`, `inorder-neighbours`, `level-order` |
 | `breadth-first-search` | `unweighted-distance` |
 | `depth-first-search` | `component-count`, `grid-flood-area` |
+| `heap` | `top-k-bounded`, `combine-smallest-two` |
+| `binary-search-tree` | `descend-floor-ceiling`, `range-sum-prune` |
+| `greedy` | `smallest-sufficient-match` |
 
 - **`converge-sorted-pair` admits easy only in its plainest uses**: a
   palindrome check, squaring a sorted array. A pair sum on a sorted array is

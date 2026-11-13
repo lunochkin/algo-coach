@@ -84,7 +84,9 @@ graph, and `log.md` gives when a card is locked.
       pointers, prefix sum, sorting, stack and queue, linked list, tree
       traversal, breadth-first search and depth-first search. Each is a root
       or requires another root
-- [ ] Author the middle cards: heap, binary search tree, greedy and intervals
+- [x] Author the middle cards: heap, binary search tree and greedy. The
+      interval forms sit on sorting, greedy and heap, so a card of their own
+      would split one form's recall history across two cards
 - [x] Redraw the `/cards` wireframe by depth, then build it: the web draws
       the edges, and the phone names the required cards on each row
 - [x] Name the unlocked cards not yet started on the board, by depth
