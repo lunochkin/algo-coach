@@ -10,6 +10,9 @@ FENCE = re.compile(r"^```(\w*)\n(.*?)^```", re.S | re.M)
 # a layout: columns aligned by spaces, arrows, an underline, an ordering
 DRAWN = re.compile(DIAGRAM.pattern + r"|\S {2,}\S|->|[→←⇒▲▼✓✗]|\|=|[~^]{3}| < .* < ", re.M)
 WIDE = 60
+# a module written by concept holds a question's code to what a phone shows
+NARROW = 40
+LONGEST = 12
 BOX = re.compile(r"[─│┌┐└┘├┤┬┴┼═║╔╗╚╝╭╮╰╯]")
 # a tool's own output may hold them, as `uv tree` prints
 HOLDS_BOX = ("text", "output", "console")
@@ -61,22 +64,26 @@ def _boxed(char: str) -> str:
     return f"{char!r} draws outside a `text` block: a structure is Mermaid, a table is markdown"
 
 
-def _wide(code: str) -> str | None:
-    over = [len(line) for line in code.splitlines() if len(line) > WIDE]
+def _wide(code: str, limit: int = WIDE) -> str | None:
+    over = [len(line) for line in code.splitlines() if len(line) > limit]
     if not over:
         return None
     lines = "line" if len(over) == 1 else "lines"
-    return f"{len(over)} {lines} over {WIDE} characters, the longest {max(over)}"
+    return f"{len(over)} {lines} over {limit} characters, the longest {max(over)}"
 
 
 def widths(course: Course, report: Report) -> None:
+    narrow = NARROW if course.concepts else WIDE
     for q in course.questions:
         for name, code in (
             ("code", q.get("code")),
             ("example", q.get("detail", {}).get("example")),
         ):
-            if isinstance(code, str) and (found := _wide(code)):
+            if isinstance(code, str) and (found := _wide(code, narrow)):
                 report.warn(25, f"{where(q)} {name}", found)
+        lines = len(str(q.get("code", "")).strip().splitlines())
+        if course.concepts and lines > LONGEST:
+            report.warn(25, f"{where(q)} code", f"{lines} lines, over {LONGEST}")
     # a fence naming a language or `output` wraps; a `text` one is a drawing,
     # and a `mermaid` one is drawn to the screen's width
     for slug, text in course.lessons.items():

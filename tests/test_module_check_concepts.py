@@ -195,3 +195,32 @@ def test_a_keyword_argument_or_a_builtin_shared_with_the_section_is_not_warned(t
     warnings = found(check(module(tmp_path, lesson=lesson, q=q), run=False).report.warnings, 15)
 
     assert warnings == []
+
+
+def test_a_why_opening_with_its_verdict_is_warned(tmp_path):
+    """Rule 12: the client marks each choice, so `Wrong:` repeats the mark."""
+    q = asking() | {"why": ["Right: a", "b", "c"]}
+
+    warnings = found(check(module(tmp_path, q=q), run=False).report.warnings, 12)
+
+    assert warnings == [
+        "[12] banks/t/sub.toml w: a why opens with its verdict, which the client shows"
+    ]
+
+
+def test_a_question_line_over_40_characters_is_warned(tmp_path):
+    """Rule 25: a phone wraps a question's line of 44 characters."""
+    q = asking() | {"kind": "output", "code": f"print({'1' * 40})\n"}
+
+    warnings = found(check(module(tmp_path, q=q), run=False).report.warnings, 25)
+
+    assert warnings == ["[25] banks/t/sub.toml w code: 1 line over 40 characters, the longest 47"]
+
+
+def test_a_snippet_over_12_lines_is_warned(tmp_path):
+    """Rule 25: a task grown past what one claim needs."""
+    q = asking() | {"kind": "output", "code": "x = 1\n" * 13}
+
+    warnings = found(check(module(tmp_path, q=q), run=False).report.warnings, 25)
+
+    assert warnings == ["[25] banks/t/sub.toml w code: 13 lines, over 12"]

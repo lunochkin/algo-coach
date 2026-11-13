@@ -16,6 +16,7 @@ POSITIONAL = re.compile(
     r"|\b(the|see) (first|second|third|fourth|fifth|last) (choice|option)\b"
 )
 BINARY = frozenset({"true", "false", "yes", "no"})
+VERDICT = re.compile(r"^(Right|Wrong|Correct|Incorrect)\b[:.,]", re.I)
 IGNORED_SECTIONS = {
     "go-deeper",
     "common-mistakes",
@@ -50,6 +51,14 @@ def replies(course: Course, report: Report) -> None:
     for q in course.questions:
         if fmt(q) == "short" and {a.strip().lower() for a in q["accept"]} <= BINARY:
             report.error(3, where(q), "the reply is a yes or no, so the format is choice")
+
+
+def verdicts(course: Course, report: Report) -> None:
+    """Rule 12, in a module written by concept: the client marks each choice
+    right or wrong, so a `why` opening with the verdict repeats it."""
+    for q in course.questions:
+        if fmt(q) == "choice" and any(VERDICT.match(w) for w in q["why"]):
+            report.warn(12, where(q), "a why opens with its verdict, which the client shows")
 
 
 def positions(course: Course, report: Report) -> None:

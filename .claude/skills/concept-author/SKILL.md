@@ -76,7 +76,8 @@ Every agent runs code from the engine repo root with `uv run`, and runs
    - Each distractor is what a learner holding its misconception would
      predict, not something an unrelated fact rules out.
    - Each `why` is true and explains its own choice. No `why` claims more than
-     the concept states.
+     the concept states, and none opens with "Right:" or "Wrong:", since the
+     client marks each choice.
    - Report a rule 15 table: each question, its section, what differs.
 2. **Review.** Brief: check every question against rules 1–25, the question
    bullets of `concepts.md` and the writer's checklist. Run every snippet.

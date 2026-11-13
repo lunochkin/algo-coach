@@ -104,10 +104,13 @@ The rules come from three review passes over the Python module in November
       questions show code that is refused, one of them shows code that runs,
       and one `output` question offers an error as a wrong choice. In the
       pilot, all five `debug` questions were keyed `SyntaxError` under one
-      prompt.
+      prompt. *review*
 12. **Each choice's `why` explains that choice, and the mechanism explains the
     keyed answer.** A mechanism that only refutes a distractor leaves the
     learner without the reason the answer is right. *review*
+    - In a module written by concept, a `why` does not open with "Right:" or
+      "Wrong:". The client marks each choice with a tick or a cross, so the
+      word repeats the mark. *check*
 
 ## Open questions
 
@@ -147,7 +150,9 @@ The rules come from three review passes over the Python module in November
     - A section heading stating a question's verdict is a shared example. The
       heading names the subject instead.
     - The lesson changes, not the question: the lesson can teach the concept
-      on any example, and the question tests it on its own.
+      on any example, and the question tests it on its own. A module written
+      by concept is the exception: its lessons are approved before any
+      question exists, so the question changes, as `concepts.md` gives.
     *check (warning: the snippet's lines in the lesson, as written or with the
     names changed; an expression of the snippet or of the prompt with its
     values; a keyed output the lesson prints; in a module written by concept,
@@ -166,6 +171,10 @@ The rules come from three review passes over the Python module in November
     titles stale. *check (warning), review*
 19. **Every concept in a coverage map has a question at its own level, and a
     question is filed under the concept it tests.** *check, review*
+    - In a module written by concept, the concepts replace the coverage map.
+      Every concept has a question, every misconception is named by a wrong
+      choice, and a keyed choice names none. *check (an untested concept or
+      misconception, and a wrong choice naming none, are warnings)*
 
 ## Ids
 
@@ -205,6 +214,15 @@ The rules come from three review passes over the Python module in November
     40 characters and wraps a longer line behind a `↪`. In a snippet read for
     its output, a reader can take that wrap for a line break. *check (a block
     with a line over 60 is warned)*
+    - In a module written by concept, a question's `code` holds at most 40
+      characters a line. A phone of 2026 wrapped a line of 44. A lesson keeps
+      the limit of 60, since its prose can introduce a block split over
+      several statements. *check (warning)*
+    - A question's snippet holds only what its task needs, and at most 12
+      lines in a module written by concept. A task invented to avoid a
+      lesson's example grows, and the pilot's level 0 questions reached 15
+      lines for one chained comparison. *check (warning above 12 lines),
+      review*
 
 ## Concepts
 

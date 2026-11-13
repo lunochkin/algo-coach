@@ -155,8 +155,10 @@ is approved.
    reviewer checks each against its concept and the section teaching it,
    and names a new task for each question repeating its section. The
    findings are fixed in place, and the stage ends on the stopping rule of
-   stage 1. A finding about a concept goes to the author of the module
-   first, since it reopens stage 1.
+   stage 1. The stopping rule waives a full review of the fixed bank, not
+   rule 23: a second reader reviews the fix pass on its diff. A finding
+   about a concept goes to the author of the module first, since it reopens
+   stage 1.
 
 Each stage is written by one agent and reviewed by another, which wrote
 nothing it reviews. The `concept-author` skill in `.claude/skills/` holds the

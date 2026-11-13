@@ -26,6 +26,7 @@ from algo_coach.knowledge.authoring.static import (
     positions,
     replies,
     reused_ids,
+    verdicts,
 )
 from algo_coach.knowledge.authoring.tools import tool_outputs, transcripts
 from algo_coach.knowledge.authoring.witnesses import witnesses
@@ -48,7 +49,7 @@ STATIC = (
 )
 # a module written by concept files each question by its concept, where
 # another files it in the coverage map: docs/authoring/concepts.md
-BY_CONCEPT = (records, taught, prose, filed, replies, shared)
+BY_CONCEPT = (records, taught, prose, filed, replies, shared, verdicts)
 
 
 @dataclass
