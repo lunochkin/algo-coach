@@ -17,6 +17,7 @@ from algo_coach.knowledge.authoring.prose import prose
 from algo_coach.knowledge.authoring.repeats import repeats
 from algo_coach.knowledge.authoring.snippets import snippets, versions
 from algo_coach.knowledge.authoring.static import (
+    centres,
     choices,
     coverage,
     kinds,
@@ -51,7 +52,7 @@ STATIC = (
 )
 # a module written by concept files each question by its concept, where
 # another files it in the coverage map: docs/authoring/concepts.md
-BY_CONCEPT = (records, taught, prose, filed, replies, shared, verdicts)
+BY_CONCEPT = (records, taught, prose, filed, replies, shared, verdicts, centres)
 
 
 @dataclass

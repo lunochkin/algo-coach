@@ -246,3 +246,33 @@ def test_a_question_the_seed_would_refuse_is_refused(tmp_path):
     errors = check(module(tmp_path, concept(misconceptions=many), q=q), run=False).report.errors
 
     assert any(e.startswith("[0] seed: ") and "pitfalls" in e for e in errors)
+
+
+def test_a_key_every_distractor_varies_by_one_part_is_warned(tmp_path):
+    """Rule 10: the key sits at the centre, and the choices alone give it."""
+    choices = ["True True", "False True", "True False"]
+    q = asking() | {"choices": choices, "why": ["a", "b", "c"]}
+
+    warnings = found(check(module(tmp_path, q=q), run=False).report.warnings, 10)
+
+    assert any("shares a part with every other choice" in w for w in warnings)
+
+
+def test_choices_sharing_parts_evenly_are_not_warned(tmp_path):
+    """Rule 10: two distractors sharing a part the key lacks hide the key."""
+    choices = ["True True", "False True", "False False"]
+    q = asking() | {"choices": choices, "why": ["a", "b", "c"]}
+
+    warnings = found(check(module(tmp_path, q=q), run=False).report.warnings, 10)
+
+    assert not any("shares a part" in w for w in warnings)
+
+
+def test_a_centred_key_among_tuples_is_warned(tmp_path):
+    """Rule 10: a tuple's items are its parts, as a choice's words are."""
+    choices = ["(2, None)", "(2, 'b')", "(0, None)"]
+    q = asking() | {"choices": choices, "why": ["a", "b", "c"]}
+
+    warnings = found(check(module(tmp_path, q=q), run=False).report.warnings, 10)
+
+    assert any("shares a part with every other choice" in w for w in warnings)

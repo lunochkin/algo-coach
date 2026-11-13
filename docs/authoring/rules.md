@@ -99,6 +99,13 @@ The rules come from three review passes over the Python module in November
     Choices are shuffled, so no "all/none of the above", and no prose names a
     choice by its letter or its position. *check (length is a warning, a
     position is an error), review*
+    - The key is not the one choice sharing a part with every other choice.
+      A distractor built by changing one part of the key leaves the key at
+      the centre, and a reader picks it from the choices alone. At least one
+      distractor differs from the key in two parts, so two distractors share
+      a part the key lacks. In the pilot, a reader shown the choices alone
+      found 22 keys of 97 this way. *check (in a module written by concept,
+      a warning), review*
 11. **Neither the prompt nor the code reveals the answer.** A snippet catches
     `Exception` and prints the type's name, rather than catching the exception
     the learner must type. An error message in the prompt does not name the

@@ -4,7 +4,7 @@
 import importlib.metadata
 import re
 import subprocess
-from collections import defaultdict
+from collections import Counter, defaultdict
 from pathlib import Path
 
 from algo_coach.knowledge.authoring.course import Course, Report, fmt, where
@@ -16,6 +16,9 @@ POSITIONAL = re.compile(
     r"|\b(the|see) (first|second|third|fourth|fifth|last) (choice|option)\b"
 )
 BINARY = frozenset({"true", "false", "yes", "no"})
+# a choice's parts: a bracketed or quoted group whole, else a word
+PART = re.compile(r"\[[^\]]*\]|\([^)]*\)|'[^']*'|\"[^\"]*\"|[^\s,]+")
+FILLER = frozenset({"then", "at", "the", "a", "an", "of", "is", "and"})
 VERDICT = re.compile(r"^(Right|Wrong|Correct|Incorrect)\b[:.,]", re.I)
 IGNORED_SECTIONS = {
     "go-deeper",
@@ -59,6 +62,41 @@ def verdicts(course: Course, report: Report) -> None:
     for q in course.questions:
         if fmt(q) == "choice" and any(VERDICT.match(w) for w in q["why"]):
             report.warn(12, where(q), "a why opens with its verdict, which the client shows")
+
+
+def centres(course: Course, report: Report) -> None:
+    """Rule 10, in a module written by concept: a key built as the choice each
+    distractor varies by one part is found from the choices alone."""
+    for q in course.questions:
+        if fmt(q) != "choice" or len(q["answer"]) != 1 or len(q["choices"]) < 3:
+            continue
+        parts = [_parts(c) for c in q["choices"]]
+        if min(map(len, parts)) == 0 or max(map(len, parts)) < 2:
+            continue
+        key = ord(q["answer"][0]) - 65
+        shared = [[_shared(a, b) for b in parts] for a in parts]
+        score = [sum(row) - row[i] for i, row in enumerate(shared)]
+        rivals = [score[i] for i in range(len(parts)) if i != key]
+        if all(shared[key][i] for i in range(len(parts)) if i != key) and score[key] > max(rivals):
+            report.warn(10, where(q), "the key shares a part with every other choice, the most")
+
+
+def _parts(choice: str) -> list[str]:
+    # a tuple or a list is compared item by item: "(2, None)", "(0, None)"
+    found: list[str] = []
+    for part in PART.findall(choice):
+        if part[:1] in "([" and part[-1:] in ")]":
+            found += [x.strip() for x in part[1:-1].split(",") if x.strip()]
+        elif part.lower() not in FILLER:
+            found.append(part)
+    return found
+
+
+def _shared(a: list[str], b: list[str]) -> int:
+    # one shape varies by position: "True False" against "False True"
+    if len(a) == len(b):
+        return sum(x == y for x, y in zip(a, b, strict=True))
+    return sum((Counter(a) & Counter(b)).values())
 
 
 def positions(course: Course, report: Report) -> None:

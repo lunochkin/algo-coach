@@ -103,16 +103,22 @@ reports, in a scratchpad folder of the stage's own.
    - A kind does not reveal the answer: rule 11.
    - Each distractor is what a learner holding its misconception would
      predict, not something an unrelated fact rules out.
+   - The key is not the one choice sharing a part with every other: at
+     least one distractor differs from the key in two parts (rule 10).
    - Each `why` is true and explains its own choice. No `why` claims more than
      the concept states, and none opens with "Right:" or "Wrong:", since the
      client marks each choice.
-2. **Review.** Brief: check every question against rules 1–25, the question
+2. **Solve.** Run the `solver` skill over the new bank, and hand its
+   findings to the reviewer of step 3 as findings to verify. The solver
+   answers without the key, so it catches a wrong or ambiguous key that a
+   reviewer reading the key passes.
+3. **Review.** Brief: check every question against rules 1–25, the question
    bullets of `concepts.md` and the writer's checklist. Run every snippet.
    Compare each question with its section yourself. For each rule 15
    finding, name a new task, and check that task against the section too:
    two proposed tasks repeated a section in the pilot. Sort findings as
    WRONG, DEFECT or STYLE, with concept and lesson findings apart.
-3. **Fix** in place from the review. A concept or lesson finding goes to the
+4. **Fix** in place from the review. A concept or lesson finding goes to the
    user at the end of the stage, which goes on without the change. In the pilot, the review's new task per
    question removed every repeated example that two fresh generations had
    kept.
