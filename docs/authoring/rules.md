@@ -121,20 +121,20 @@ The rules come from three review passes over the Python module in November
       `--near` holds 100 among its 1070. A pair the warning names that asks
       two facts is listed under `skip.same-fact` in `check.toml`, as
       `"<id> ~ <id>"` with the reason.
-15. **A lesson and its question share a concept, never a case.** A question
-    may ask a fact its lesson states, since recalling that fact is what the
-    schedule trains. The question puts the fact on a case the lesson does not
-    show. Otherwise the learner recognises the lesson's example instead of
-    recalling the rule.
-    - A case is shared when the lesson holds the question's snippet, names,
-      values or keyed output, in a block, in prose or in a table.
-    - A copy with its names changed is the same case. So is the same shape
+15. **A lesson and its question share a concept, never an example.** A
+    question may ask a fact its lesson states, since recalling that fact is
+    what the schedule trains. The question puts the fact on an example the
+    lesson does not show. Otherwise the learner recognises the lesson's
+    example instead of recalling the rule.
+    - An example is shared when the lesson holds the question's snippet,
+      names, values or keyed output, in a block, in prose or in a table.
+    - A copy with its names changed is the same example. So is the same shape
       with only its values changed, and so is the prompt's scenario restated
       with its figures.
-    - A section heading stating a question's verdict is a shared case. The
+    - A section heading stating a question's verdict is a shared example. The
       heading names the subject instead.
     - The lesson changes, not the question: the lesson can teach the concept
-      on any case, and the question tests it on its own.
+      on any example, and the question tests it on its own.
     *check (warning: the snippet's lines in the lesson, as written or with the
     names changed; an expression of the snippet or of the prompt with its
     values; a keyed output the lesson prints), review (the same shape with its

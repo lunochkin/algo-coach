@@ -289,6 +289,11 @@ without redefining them. Grouped by the file that specifies the record.
   `short` or `open`.
 - **Open question**: a question the user answers in their own head, then
   grades by ticking the points of its key they recalled.
+- **Concept**: one claim about a module's subject, with its source, its
+  witness and the wrong beliefs about it. A lesson section teaches it and a
+  question tests it. `docs/authoring/concepts.md` gives the record.
+- **Witness**: code whose output shows a concept's claim holds, run on every
+  supported build by the module check.
 - **Key**: the two to six points an open question's answer has to contain.
 - **Trap**: a known wrong claim, listed on an open question.
 - **Answer**: one reply to a question, by one user. Distinct from an attempt,

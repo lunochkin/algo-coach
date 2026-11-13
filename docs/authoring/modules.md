@@ -3,7 +3,8 @@
 How a knowledge module's files are written. `docs/architecture/knowledge.md`
 gives the records the seed builds from the files and the rules the engine
 applies to them. `rules.md` beside this file gives the numbered rules every
-bank and lesson holds, and this file does not repeat them.
+bank and lesson holds, and this file does not repeat them. `concepts.md`
+gives what changes for a module written from its concepts.
 
 A module lives in the content repository as `modules/<slug>/course.toml`
 beside `banks/<topic>/<subtopic>.toml`. A module's own `CLAUDE.md` there adds
