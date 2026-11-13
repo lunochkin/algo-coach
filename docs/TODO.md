@@ -85,7 +85,7 @@ graph, and `log.md` gives when a card is locked.
       traversal, breadth-first search and depth-first search. Each is a root
       or requires another root
 - [ ] Author the middle cards: heap, binary search tree, greedy and intervals
-- [ ] Redraw the `/cards` wireframe by depth, then build it: the web draws
+- [x] Redraw the `/cards` wireframe by depth, then build it: the web draws
       the edges, and the phone names the required cards on each row
 - [ ] Name the unlocked cards not yet started on the board, by depth
 

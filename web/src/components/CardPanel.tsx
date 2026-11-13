@@ -11,7 +11,16 @@ import { cn } from '@/lib/utils'
 // every block is the same panel: a family several cards teach carries a
 // header naming it, and the cards that teach a family of their own carry the
 // name on the row instead
-export function CardPanel({ technique, cards }: { technique: string | null; cards: ListedCard[] }) {
+export function CardPanel({
+  technique,
+  cards,
+  onHover,
+}: {
+  technique: string | null
+  cards: ListedCard[]
+  // the card graph's gutter brightens the edges of the row under the pointer
+  onHover?: (slug: string | null) => void
+}) {
   return (
     <section className="overflow-hidden rounded-xl border bg-card">
       {technique && (
@@ -32,7 +41,15 @@ export function CardPanel({ technique, cards }: { technique: string | null; card
       )}
       <PickList>
         {cards.map((card) => (
-          <CardRow key={card.slug} card={card} heading={technique} />
+          // `data-card` is where the graph's gutter reads a row's position
+          <div
+            key={card.slug}
+            data-card={card.slug}
+            onMouseEnter={onHover && (() => onHover(card.slug))}
+            onMouseLeave={onHover && (() => onHover(null))}
+          >
+            <CardRow card={card} heading={technique} />
+          </div>
         ))}
       </PickList>
     </section>
@@ -51,6 +68,7 @@ function CardRow({ card, heading }: { card: ListedCard; heading: string | null }
         )
       }
       stats={[{ label: '', value: row.aside }]}
+      dim={row.waits !== null}
       note={row.state}
       progress={
         row.progress && {
@@ -60,6 +78,7 @@ function CardRow({ card, heading }: { card: ListedCard; heading: string | null }
         }
       }
     >
+      {row.waits !== null && <p className="mt-1 text-meta text-muted-foreground">{row.waits}</p>}
       {row.trigger !== null && (
         <p className="mt-1 line-clamp-2 text-meta text-muted-foreground">{row.trigger}</p>
       )}

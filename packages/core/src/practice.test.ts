@@ -2,7 +2,8 @@ import { describe, expect, it } from 'vitest';
 
 import {
   boardView,
-  cardBlocks,
+  cardEdges,
+  cardNeeds,
   cardRow,
   briefParts,
   cardSections,
@@ -12,7 +13,7 @@ import {
   runLock,
   runStartLabel,
   ladderView,
-  notInProgress,
+  depthSections,
   problemCards,
   problemFacts,
   problemTried,
@@ -57,6 +58,9 @@ const card = (slug: string, extra: Partial<ListedCard> = {}, status: Partial<Lis
     family: slug,
     templates: [template(`${slug}-a`)],
     selector: {},
+    depth: 0,
+    met: false,
+    waiting: [],
     ...extra,
     status: {
       started_at: null,
@@ -159,7 +163,6 @@ describe('the cards in progress', () => {
       card('new'),
     ];
     expect(inProgress(cards)).toEqual([]);
-    expect(notInProgress(cards).map((one) => one.slug)).toEqual(['done', 'lost', 'new']);
   });
 });
 
@@ -170,26 +173,54 @@ describe("a technique's cards", () => {
   });
 });
 
-describe("the cards list's blocks", () => {
-  it('heads a family several cards teach, and leaves a family of one unheaded', () => {
-    const cards = [card('dp', { family: 'dp' }), card('knapsack', { family: 'dp' }), card('bfs'), card('dfs')];
-    expect(cardBlocks(cards).map((one) => [one.technique, one.cards.map((c) => c.slug)])).toEqual([
-      ['dp', ['dp', 'knapsack']],
-      [null, ['bfs', 'dfs']],
+describe('the card graph', () => {
+  const needs = (slug: string, ...required: string[]) =>
+    card(slug, { requires: required.map((one) => ({ card: one, template: 'x', used_by: 'y' })) });
+
+  it('heads each depth, the roots first', () => {
+    const cards = [card('b', { depth: 1 }), card('a'), card('c', { depth: 2 }), card('d', { depth: 1 })];
+    expect(depthSections(cards).map((one) => [one.title, one.cards.map((c) => c.slug)])).toEqual([
+      ['Depth 0, roots', ['a']],
+      ['Depth 1', ['b', 'd']],
+      ['Depth 2', ['c']],
     ]);
+  });
+
+  it('draws one edge per required card, and none to a card not listed', () => {
+    const cards = [card('a'), needs('b', 'a', 'a'), needs('c', 'b', 'gone')];
+    expect(cardEdges(cards)).toEqual([
+      { from: 'a', to: 'b' },
+      { from: 'b', to: 'c' },
+    ]);
+  });
+
+  it("names a card's required cards with a tick on each met, and nothing on a root", () => {
+    const cards = [card('a', { met: true }), card('b'), needs('c', 'a', 'b')];
+    expect(cardNeeds(cards[2], cards)).toBe('needs a ✓, b');
+    expect(cardNeeds(cards[0], cards)).toBeNull();
   });
 });
 
 describe("a card's row", () => {
-  it('reads an unstarted card by its trigger and its templates', () => {
-    const row = cardRow(card('a', { templates: [template('x'), template('y', { optional: true })] }), null, NOW);
+  it('reads an unstarted card by its trigger', () => {
+    const row = cardRow(card('a'), null, NOW);
     expect(row).toMatchObject({
       technique: 'a',
-      aside: '2 templates, 1 optional',
+      aside: 'not started',
+      waits: null,
       trigger: 'When sorted',
       state: null,
       progress: null,
     });
+  });
+
+  it('reads a locked card by what it waits on, in place of its trigger', () => {
+    const row = cardRow(card('a', { waiting: [{ slug: 'h', title: 'Hashing' }] }), null, NOW);
+    expect([row.aside, row.waits, row.trigger]).toEqual(['locked', 'waits on Hashing', null]);
+  });
+
+  it('reads a met card as met', () => {
+    expect(cardRow(card('a', { met: true }), null, NOW).aside).toBe('met');
   });
 
   it('leaves the technique off a row its heading names', () => {

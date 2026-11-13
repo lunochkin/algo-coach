@@ -20,7 +20,18 @@ from algo_coach.board import (
     ungrouped,
 )
 from algo_coach.cards import CardStore
-from algo_coach.ladder import CardState, Gap, Rung, card_state, ladder, locked_by
+from algo_coach.cards.graph import depths
+from algo_coach.ladder import (
+    CardState,
+    Gap,
+    Ladder,
+    Rung,
+    card_state,
+    ladder,
+    locked_by,
+    met,
+    unmet,
+)
 from algo_coach.log import (
     AttemptLog,
     CardRunLog,
@@ -40,9 +51,7 @@ from algo_coach.schema import (
     Problem,
     ProblemDifficulty,
     RecallAttempt,
-    Solution,
     Template,
-    TemplateMatch,
 )
 from algo_coach.sitting import Carry, Seated, Served, carry, get, serve
 from algo_coach.solution_claims import load_problem, load_problems
@@ -174,6 +183,9 @@ class CardStatus(BaseModel):
 class ListedCard(Card):
     family: str  # the technique the cards list groups this card under
     status: CardStatus
+    depth: int  # the longest chain of requirements below it: `content.md`
+    met: bool  # the cards requiring it may start: `log.md`, Locked cards
+    waiting: list[Waiting]  # the required cards not yet met
 
 
 @router.get("/cards")
@@ -184,26 +196,28 @@ def every_card(root: Root, user_id: UserId) -> list[ListedCard]:
     matches = MatchLog(root).matches()
     runs = CardRunLog(root)
     recalls = RecallLog(root)
+    cards = CardStore(root).all()
+    held: dict[str, tuple[CardRun | None, Ladder]] = {}
+    for card in cards:
+        run = runs.started(user_id, card.id)
+        since = run.started_at if run else None
+        held[card.slug] = (run, ladder(card, problems, solutions, matches, attempts, since=since))
+    reached = {slug for slug, (run, resolved) in held.items() if met(run, resolved.rungs, attempts)}
+    deep = depths(cards)
+    titles = {card.slug: card.title for card in cards}
     listed = [
         ListedCard(
             **card.model_dump(),
             family=family(card.technique),
-            status=_status(
-                card,
-                runs.started(user_id, card.id),
-                problems,
-                solutions,
-                matches,
-                attempts,
-                recalls.for_card(user_id, card.id),
-            ),
+            status=_status(card, *held[card.slug], attempts, recalls.for_card(user_id, card.id)),
+            depth=deep[card.slug],
+            met=card.slug in reached,
+            waiting=[Waiting(slug=one, title=titles[one]) for one in unmet(card, reached)],
         )
-        for card in CardStore(root).all()
+        for card in cards
     ]
-    # a family's own cards first, then its narrower techniques'
-    return sorted(
-        listed, key=lambda one: (one.family, one.technique != one.family, one.technique, one.slug)
-    )
+    # the card graph's order: `pages.md`, the cards list reads it by depth
+    return sorted(listed, key=lambda one: (one.depth, one.slug))
 
 
 # by slug: a re-seed keeps the slug and the URL a page links to, where the id
@@ -249,14 +263,11 @@ def card(root: Root, user_id: UserId, slug: str) -> Studied:
 def _status(
     card: Card,
     run: CardRun | None,
-    problems: list[Problem],
-    solutions: list[Solution],
-    matches: list[TemplateMatch],
+    resolved: Ladder,
     attempts: list[Attempt],
     recalls: list[RecallAttempt],
 ) -> CardStatus:
     since = run.started_at if run else None
-    resolved = ladder(card, problems, solutions, matches, attempts, since=since)
     recall = _recall(card, recalls)
     taught = {rung.problem.id for rung in resolved.rungs}
     touched = [

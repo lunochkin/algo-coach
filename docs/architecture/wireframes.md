@@ -330,45 +330,64 @@ problem's path reads as its record, as "Every problem" gives.
 +------------------------------------------------------------------------+
 | Cards                                                                  |
 | One card teaches one technique: when to reach for it, and the forms to |
-| reproduce from memory.                                                 |
+| reproduce from memory. A card opens once its required cards are met.   |
 |                                                                        |
-| Studying                                                               |
-| +--------------------------------------------------------+             |
-| | Sliding window    sliding-window        2 days ago     |             |
-| | started 09-28 . ladder 5/8, required 4/5               |             |
-| | recall  ✓ ✓ ✗ · · -                                    |             |
-| +--------------------------------------------------------+             |
-|                                                                        |
-| Not started                                                            |
-| +--------------------------------------------------------+             |
-| | Monotonic stack   monotonic-stack          4 templates |             |
-| | For each element, the next or previous greater ...     |             |
-| | recall  ✓ ✓ · ·                                        |             |
-| +--------------------------------------------------------+             |
-| +--------------------------------------------------------+             |
-| | dynamic-programming                            3 cards |             |
-| | ------------------------------------------------------ |            |
-| | DP: knapsack, 0/1 and unbounded   knapsack  7 templates|             |
-| | Choose items to hit a target ...                       |             |
-| +--------------------------------------------------------+             |
+| Depth 0, roots                                          3 cards        |
+|      +----------------------------------------------------+            |
+| o----| Hashing            hashing            met          |            |
+| |    | started 11-02 . ladder 6/6, required 3/3           |            |
+| |    | recall  ✓ ✓ ·                                      |            |
+| |    +----------------------------------------------------+            |
+| |o---| Two pointers       two-pointers       2 days ago   |            |
+| ||   | started 11-10 . ladder 3/6, required 2/3           |            |
+| ||   | recall  ✓ ✗ · ·                                    |            |
+| ||   +----------------------------------------------------+            |
+| ||o--| Stack and queue    stack              met          |            |
+| |||  | started 11-04 . ladder 2/6, required 1/3           |            |
+| |||  | recall  ✓ ✓ ✓                                      |            |
+| |||                                                                    |
+| Depth 1                                                 2 cards        |
+| |||  +----------------------------------------------------+            |
+| **|o-| Sliding window     sliding-window     locked       |            |
+|   || | waits on Two pointers                              |            |
+|   || +----------------------------------------------------+            |
+| o-*+-| Monotonic stack    monotonic-stack    not started  |            |
+| |  | | For each element, the next greater ...             |            |
+| |  |                                                                   |
+| Depth 2                                                 1 card         |
+| |  | +----------------------------------------------------+            |
+| *--*-| Monotonic deque    sliding-window     locked       |            |
+|      | waits on Sliding window, Monotonic stack           |            |
 +------------------------------------------------------------------------+
 ```
 
-- The page is the user's dashboard of cards. The cards with a run open read
-  first, under "Studying", the most recently active first. The rest read under
-  "Not started", by depth in the card graph, as `pages.md` gives. The drawing
-  above still groups them by family, and is redrawn with the graph's page.
-- A started card's row reads its progress: when the run began, the ladder's
-  solved rungs, the required rungs among them, and when the card was last
-  active. The trigger gives way to that line, since the user already chose the
-  card.
+- The page reads the card graph by depth, as `pages.md` gives: the roots
+  first, then each depth under its own heading with its count. Within a
+  depth, the cards read in the order their slugs sort.
+- The gutter at the left draws the edges. An edge leaves a required card's
+  row at `o` and enters each card requiring it at `*`. Hovering a row
+  brightens its own edges and dims the rest, since a graph of twenty cards
+  draws more edges than a reader can follow at once.
+- Every card reads one row, wherever it stands. A started card's row reads
+  its progress where an unstarted card's reads its trigger, so the cards
+  being studied are not listed twice. The board names those cards in
+  progress first.
+- A row names its card state at the right: `met`, `locked`, `not started`,
+  or when a started card was last active. A met card lets the cards requiring
+  it start, as `log.md` gives.
+- A locked row reads `waits on` and the required cards not yet met, in place
+  of the trigger. The row still opens the card, since a locked card is read in
+  full.
 - Every row carries the recall state of its templates, one mark each in the
   card's order: `✓` recalled clean, `◐` passed with hints, `✗` failed, `·`
   never recalled, and `-` a template no case checks.
 - A gap reads on the row as `n forms uncovered`, as the card's own page
   reports it.
-- The card state and a due date are absent from the row. Phase 18 adds both,
-  and `log.md` gives the card states.
+- The phone reads the same sections and rows with no gutter. Each row of a
+  card that requires others names them on a line of its own: `needs Hashing ✓,
+  Two pointers`, a tick on each one met.
+- Graduated and lapsed read in the state's place once Phase 18 adds them, and
+  a due date beside them.
 
 ## A card
 

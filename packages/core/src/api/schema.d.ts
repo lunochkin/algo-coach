@@ -902,6 +902,12 @@ export interface components {
       /** Family */
       family: string;
       status: components['schemas']['CardStatus'];
+      /** Depth */
+      depth: number;
+      /** Met */
+      met: boolean;
+      /** Waiting */
+      waiting: components['schemas']['Waiting'][];
     };
     /**
      * Me

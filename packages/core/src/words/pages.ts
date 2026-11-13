@@ -60,10 +60,14 @@ export const TECHNIQUE_NONE = 'No served problem carries this technique.';
 // the cards, and a card
 export const CARDS_TITLE = 'Cards';
 export const CARDS_NOTE =
-  'One card teaches one technique: when to reach for it, and the forms to reproduce from memory.';
+  'One card teaches one technique: when to reach for it, and the forms to reproduce from memory. A card opens once its required cards are met.';
 export const CARDS_NONE = 'No card is seeded yet.';
-export const CARDS_STUDYING = 'Studying';
-export const CARDS_NOT_STARTED = 'Not started';
+// the cards list reads the card graph by depth: `pages.md`
+export const cardsDepth = (depth: number) => (depth === 0 ? 'Depth 0, roots' : `Depth ${depth}`);
+export const CARD_LOCKED = 'locked';
+export const CARD_MET = 'met';
+export const CARD_NOT_STARTED = 'not started';
+export const cardWaits = (titles: string[]) => `waits on ${titles.join(', ')}`;
 export const cardsCounted = (n: number) => (n === 1 ? '1 card' : `${n} cards`);
 export const CARD_TRIGGER = 'When to reach for it';
 export const CARD_BRIEF = 'The brief';

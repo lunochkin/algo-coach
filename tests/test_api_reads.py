@@ -4,7 +4,7 @@ from helpers import browsing, seed_problem
 from algo_coach.cards import CardStore
 from algo_coach.log import AttemptLog
 from algo_coach.problems import ProblemStore
-from algo_coach.schema import Attempt, Card, RetirementReason, Selector, Template
+from algo_coach.schema import Attempt, Card, Requirement, RetirementReason, Selector, Template
 
 USER = "u-4f9c2a"
 
@@ -129,24 +129,46 @@ def test_every_card_is_listed_by_technique_then_slug(client, database):
     ]
 
 
-def test_a_card_is_listed_under_the_family_its_technique_belongs_to(client, database):
-    """Knapsack is a kind of DP, so its card is read beside the DP cards
-    rather than apart from them."""
+def test_the_cards_are_listed_by_depth_then_slug(client, database):
+    """`pages.md`: the cards list reads the card graph by depth, the roots
+    first. Each card still names the family its technique belongs to."""
     store = CardStore(database)
-    for slug, technique in (
-        ("knapsack-01", "knapsack"),
-        ("windows", "sliding-window"),
-        ("linear", "dynamic-programming"),
-    ):
-        store.put(a_card(slug, technique))
+    store.put_all(
+        [
+            a_card("windows", "sliding-window").model_copy(
+                update={"requires": [Requirement(card="hashing", template="core", used_by="core")]}
+            ),
+            a_card("knapsack-01", "knapsack"),
+            a_card("hashing", "hashing"),
+        ]
+    )
 
     listed = client.get("/api/cards").json()
 
-    assert [(one["family"], one["slug"]) for one in listed] == [
-        ("dynamic-programming", "linear"),
-        ("dynamic-programming", "knapsack-01"),
-        ("sliding-window", "windows"),
+    assert [(one["depth"], one["slug"], one["family"]) for one in listed] == [
+        (0, "hashing", "hashing"),
+        (0, "knapsack-01", "dynamic-programming"),
+        (1, "windows", "sliding-window"),
     ]
+
+
+def test_a_listed_card_names_what_it_waits_on(client, database):
+    """A card no run met leaves the cards above it waiting, and a root waits
+    on nothing."""
+    store = CardStore(database)
+    store.put_all(
+        [
+            a_card("hashing", "hashing"),
+            a_card("windows", "sliding-window").model_copy(
+                update={"requires": [Requirement(card="hashing", template="core", used_by="core")]}
+            ),
+        ]
+    )
+
+    listed = {one["slug"]: one for one in client.get("/api/cards").json()}
+
+    assert (listed["hashing"]["met"], listed["hashing"]["waiting"]) == (False, [])
+    assert listed["windows"]["waiting"] == [{"slug": "hashing", "title": "hashing"}]
 
 
 def test_a_technique_s_cards_include_its_narrower_techniques(client, database):

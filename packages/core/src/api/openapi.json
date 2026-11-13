@@ -2199,6 +2199,21 @@
           },
           "status": {
             "$ref": "#/components/schemas/CardStatus"
+          },
+          "depth": {
+            "type": "integer",
+            "title": "Depth"
+          },
+          "met": {
+            "type": "boolean",
+            "title": "Met"
+          },
+          "waiting": {
+            "items": {
+              "$ref": "#/components/schemas/Waiting"
+            },
+            "type": "array",
+            "title": "Waiting"
           }
         },
         "type": "object",
@@ -2212,7 +2227,10 @@
           "templates",
           "selector",
           "family",
-          "status"
+          "status",
+          "depth",
+          "met",
+          "waiting"
         ],
         "title": "ListedCard"
       },

@@ -5,10 +5,15 @@ import { lessonParts } from './lessontext';
 import type { Outcome } from './sittingrun';
 import {
   CARD_BRIEF,
+  CARD_LOCKED,
+  CARD_MET,
+  CARD_NOT_STARTED,
   CARD_OPTIONAL,
   CARD_TEMPLATES,
   CARD_TRIGGER,
+  cardsDepth,
   cardsOffered,
+  cardWaits,
   FORM_NO_CASES,
   FORM_UNCHECKED,
   NO_DIFFICULTY,
@@ -101,11 +106,6 @@ export function inProgress(cards: ListedCard[]): ListedCard[] {
     .sort((a, b) => (b.status.last_at ?? '').localeCompare(a.status.last_at ?? ''));
 }
 
-/** Every card not in progress, in the API's order. */
-export function notInProgress(cards: ListedCard[]): ListedCard[] {
-  return cards.filter((card) => !STUDYING.includes(card.status.state));
-}
-
 /**
  * A technique's cards as the cards list reads them, in its order: `taught` is
  * what the engine names as teaching the technique or a narrower one.
@@ -115,24 +115,59 @@ export function techniqueCards(listed: ListedCard[], taught: { slug: string }[])
   return listed.filter((card) => slugs.has(card.slug));
 }
 
-// a family several cards teach is one block under its heading. A family of one
-// card joins the unheaded block beside it, since a heading over one row repeats it
-export interface CardBlock {
-  technique: string | null;
+/** The cards at one depth of the card graph, as the cards list heads them. */
+export interface DepthSection {
+  depth: number;
+  title: string;
   cards: ListedCard[];
 }
 
-/** The cards in blocks, in the API's order, which groups them by family. */
-export function cardBlocks(cards: ListedCard[]): CardBlock[] {
-  const out: CardBlock[] = [];
+/** The cards by depth, the roots first, each depth in the API's order. */
+export function depthSections(cards: ListedCard[]): DepthSection[] {
+  const depths = [...new Set(cards.map((card) => card.depth))].sort((a, b) => a - b);
+  return depths.map((depth) => ({
+    depth,
+    title: cardsDepth(depth),
+    cards: cards.filter((card) => card.depth === depth),
+  }));
+}
+
+/** An edge of the card graph: `from` is required by `to`. One per pair of cards. */
+export interface CardEdge {
+  from: string;
+  to: string;
+}
+
+/** Every edge among `cards`, in their order; a requirement on a card not listed draws none. */
+export function cardEdges(cards: Pick<ListedCard, 'slug' | 'requires'>[]): CardEdge[] {
+  const listed = new Set(cards.map((card) => card.slug));
+  const seen = new Set<string>();
+  const out: CardEdge[] = [];
   for (const card of cards) {
-    const last = out.at(-1);
-    const headed = cards.filter((one) => one.family === card.family).length > 1;
-    const technique = headed ? card.family : null;
-    if (last && last.technique === technique) last.cards.push(card);
-    else out.push({ technique, cards: [card] });
+    for (const one of card.requires ?? []) {
+      const key = `${one.card}>${card.slug}`;
+      if (listed.has(one.card) && !seen.has(key)) {
+        seen.add(key);
+        out.push({ from: one.card, to: card.slug });
+      }
+    }
   }
   return out;
+}
+
+/** The phone's line naming a card's required cards, a tick on each met. Null on a root. */
+export function cardNeeds(
+  card: Pick<ListedCard, 'requires'>,
+  cards: Pick<ListedCard, 'slug' | 'title' | 'met'>[],
+): string | null {
+  const bySlug = new Map(cards.map((one) => [one.slug, one]));
+  const required = [...new Set((card.requires ?? []).map((one) => one.card))];
+  if (required.length === 0) return null;
+  const named = required.map((slug) => {
+    const one = bySlug.get(slug);
+    return one ? `${one.title}${one.met ? ' ✓' : ''}` : slug;
+  });
+  return `needs ${named.join(', ')}`;
 }
 
 /** Markdown with its marks dropped, for a preview too short to render it. */
@@ -183,19 +218,15 @@ export function cardStateLine(status: ListedCard['status']): string {
   return `started ${started} · ladder ${status.solved}/${status.rungs}, required ${status.required_solved}/${status.required}${gaps}`;
 }
 
-function templateCount(card: ListedCard): string {
-  const count = card.templates.length;
-  const optional = card.templates.filter((one) => one.optional).length;
-  const all = count === 1 ? '1 template' : `${count} templates`;
-  return optional === 0 ? all : `${all}, ${optional} optional`;
-}
-
 export interface CardRowView {
   title: string;
   // the card's technique where no heading above the row names it
   technique: string | null;
-  // at the row's right: when a started card was last active, or the templates
+  // at the row's right: locked, met, when a started card was last active, or
+  // not started
   aside: string;
+  // a locked card's line, in the trigger's place: the required cards not met
+  waits: string | null;
   // a started card reads its progress; any other reads the trigger it is picked by
   state: string | null;
   trigger: string | null;
@@ -207,12 +238,15 @@ export interface CardRowView {
 export function cardRow(card: ListedCard, heading: string | null, now: number): CardRowView {
   const { status } = card;
   const started = Boolean(status.started_at);
+  const waiting = card.waiting ?? [];
+  const locked = waiting.length > 0;
   return {
     title: card.title,
     technique: card.technique === heading ? null : card.technique,
-    aside: started ? lastAt(status.last_at, now) : templateCount(card),
+    aside: locked ? CARD_LOCKED : card.met ? CARD_MET : started ? lastAt(status.last_at, now) : CARD_NOT_STARTED,
+    waits: locked ? cardWaits(waiting.map((one) => one.title)) : null,
     state: started ? cardStateLine(status) : null,
-    trigger: started ? null : plain(card.trigger),
+    trigger: started || locked ? null : plain(card.trigger),
     progress: started ? { solved: status.solved, rungs: status.rungs } : null,
     recall: recallMarks(card),
   };
