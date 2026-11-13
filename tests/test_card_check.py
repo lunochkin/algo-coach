@@ -111,3 +111,26 @@ def test_a_mutant_no_case_kills_is_named_with_its_line(tmp_path):
 
     survivors = [message for check, message in findings(tmp_path) if check == "mutant"]
     assert any(message.startswith("line 4: < → <=") for message in survivors)
+
+
+def test_a_survivor_accepted_as_equivalent_is_not_named(tmp_path):
+    """`+ 0` shifted to `+ 1` is a real survivor here, and the test accepts it
+    to check that an acceptance silences exactly that one."""
+    form = "def solve(xs):\n    return max(xs) + 0\n"
+    cases = [{"args": [[4, 9]], "expected": 9}]
+    written(tmp_path, card(templates=[template(code=form, cases=cases)]))
+    before = [message for check, message in findings(tmp_path) if check == "mutant"]
+    accepted = before[0].removesuffix(" survives every case")
+
+    written(tmp_path, card(templates=[template(code=form, cases=cases, equivalent=[accepted])]))
+
+    after = [message for check, message in findings(tmp_path) if check == "mutant"]
+    assert after == before[1:]
+
+
+def test_an_acceptance_no_survivor_matches_is_stale(tmp_path):
+    accepted = ["line 9: 0 → 1"]
+    written(tmp_path, card(templates=[template(equivalent=accepted)]))
+
+    stale = "line 9: 0 → 1 is accepted as equivalent, and no mutant survives as it"
+    assert ("stale", stale) in findings(tmp_path)

@@ -20,7 +20,7 @@ CAP_MS = 2000
 class Finding(BaseModel):
     card: str  # the file's stem, so a card that does not parse is still named
     template: str | None = None
-    check: str  # schema, technique, slug, graph, parse, solve, case or mutant
+    check: str  # schema, technique, slug, graph, parse, solve, case, mutant or stale
     message: str
 
 
@@ -81,9 +81,15 @@ def _template(template: TemplateSeed, *, mutate: bool) -> list[tuple[str, str]]:
     if failed or not mutate:
         return failed
     slowest = max((one.elapsed_ms or 0 for one in ran), default=0)
-    return [
-        ("mutant", f"line {one.line}: {one.change} survives every case")
+    standing = [
+        f"line {one.line}: {one.change}"
         for one in _survivors(template, cap_ms=pace(slowest, cap_ms=CAP_MS))
+    ]
+    accepted = set(template.equivalent)
+    return [("mutant", f"{one} survives every case") for one in standing if one not in accepted] + [
+        ("stale", f"{one} is accepted as equivalent, and no mutant survives as it")
+        for one in template.equivalent
+        if one not in standing
     ]
 
 

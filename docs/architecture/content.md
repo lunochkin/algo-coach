@@ -157,6 +157,10 @@ each technique, and a card and a mastery estimate share no data.
   mutant every case passes is a case the template may lack. A survivor
   refuses nothing, since a mutant can be equivalent to the form, and only the
   author can tell which.
+- **A survivor the author judged equivalent is named on the authored
+  template**, in `equivalent`, and the check stops reporting it. The list is
+  authoring alone, and the seed stores none. An entry no survivor matches any
+  longer is reported as stale, since an edit to the form moves its lines.
 - **The cases call `solve`**, as a problem's cases do. `corpus.md` gives why
   that name is fixed: a function called `lower_bound` announces the form the
   recall is asking for.

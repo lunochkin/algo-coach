@@ -27,6 +27,9 @@ class TemplateSeed(BaseModel):
     code: str
     unordered: bool = False
     cases: list[TemplateCase] = Field(default_factory=list[TemplateCase])
+    # the surviving mutants the author judged equivalent to the form, as `card
+    # check` names them. Authoring alone: the seed stores none
+    equivalent: list[str] = Field(default_factory=list[str])
 
 
 class CardSeed(BaseModel):

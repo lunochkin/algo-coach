@@ -183,11 +183,20 @@ file in place.
      defines. The cases call it, and the trainer gives that signature to type
      against, so a form naming its function anything else is a form the recall
      cannot run.
-   - **Three to six cases, each answering a different question**: the ordinary
-     shape, and every boundary the form's own lines are easy to get wrong at —
-     an empty input, one element, ties, a target past the end, the answer at
-     either edge. A second case of the shape the first already covers decides
+   - **Each case answers a different question**: the ordinary shape, and
+     every boundary the form's own lines are easy to get wrong at — an empty
+     input, one element, ties, a target past the end, the answer at either
+     edge. A second case of the shape the first already covers decides
      nothing and runs on every recall.
+   - **Enough cases to kill every mutant that is not equivalent.** `card
+     check` runs each one-change mutant of the form, and a survivor is a slip
+     a recall could make and still pass. Usually four to eight cases do it;
+     choose inputs where one case kills several survivors at once.
+   - **A survivor no case can kill goes in `equivalent`**, the template's list
+     of accepted survivors, copied exactly as `card check` names it (`"line 6:
+     61 → 62"`): a hash base, a sentinel, a bound the input never reaches, a
+     line of the input builder. Accept only after trying to kill it, since an
+     acceptance hides a missing case for good.
    - **The arguments and the expected value are JSON**: integers, strings,
      booleans and lists of those. A returned value is compared exactly, so a
      float is the one thing a case may not ask for.

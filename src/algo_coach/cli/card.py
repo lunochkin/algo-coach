@@ -26,8 +26,9 @@ def card(args: argparse.Namespace, parser: argparse.ArgumentParser) -> None:
                 print(f"  [{one.check}] {where}{one.message}")
     if args.json:
         print(json.dumps([one.model_dump() for one in found], indent=2))
-    # a survivor may be equivalent to the form, so it informs and blocks nothing
-    if any(one.check != "mutant" for one in found):
+    # a survivor may be equivalent to the form, and a stale acceptance names a
+    # line that moved, so neither blocks
+    if any(one.check not in ("mutant", "stale") for one in found):
         parser.exit(1)
 
 

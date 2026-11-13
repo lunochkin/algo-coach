@@ -72,7 +72,10 @@ def seed_cards(records: Iterable[Mapping[str, Any]], *, store: CardStore) -> Car
                 **seed.model_dump(exclude={"templates"}),
                 id=existing.id if existing else new_id(),
                 templates=[
-                    Template(**template.model_dump(), id=ids.get(template.slug) or new_id())
+                    Template(
+                        **template.model_dump(exclude={"equivalent"}),
+                        id=ids.get(template.slug) or new_id(),
+                    )
                     for template in seed.templates
                 ],
             )
