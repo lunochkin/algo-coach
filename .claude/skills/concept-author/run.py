@@ -12,6 +12,7 @@ background` gives the rest.
 
 import argparse
 import concurrent.futures as cf
+import os
 import subprocess
 import time
 import tomllib
@@ -117,8 +118,12 @@ def write(args: argparse.Namespace, topic: str, sub: str, title: str) -> str:
     log = runs / "logs" / f"{sub}-L{args.level}.log"
     with log.open("w") as out:
         subprocess.run(
-            ["claude", "-p", brief, "--permission-mode", "auto", "--output-format", "text"],
+            # stream-json writes each event as it happens
+            ["claude", "-p", brief, "--permission-mode", "auto"]
+            + ["--output-format", "stream-json", "--verbose"],
             cwd=ENGINE,
+            # a review agent often runs past the CLI's ten-minute wait
+            env=os.environ | {"CLAUDE_CODE_PRINT_BG_WAIT_CEILING_MS": "0"},
             stdout=out,
             stderr=subprocess.STDOUT,
             timeout=args.hours * 3600,
@@ -205,6 +210,32 @@ def schedule(args: argparse.Namespace, main_wt: Path, subs: list, needs: dict) -
     print(f"report: {report}")
 
 
+def status(args: argparse.Namespace) -> None:
+    """One line per subtopic: its state, its last progress line, and its last
+    activity, a silent one flagged."""
+    subs, _, _ = plan(args.source)
+    report = args.runs / f"report-L{args.level}.md"
+    states = {}
+    for line in report.read_text().splitlines() if report.exists() else []:
+        sub, _, verdict = line.split(" ", 3)[-1].partition(": ")
+        states[sub] = verdict.split(":")[0]
+    running = subprocess.run(["pgrep", "-fl", "claude -p"], capture_output=True, text=True).stdout
+    now = time.time()
+    for topic, sub, _ in subs:
+        name = f"{sub}-L{args.level}"
+        scratch, log = args.runs / "scratch" / name, args.runs / "logs" / f"{name}.log"
+        live = f"{topic}/{sub} " in running
+        state = "running" if live else states.get(sub, "queued").lower()
+        files = [p for p in [log, *scratch.rglob("*")] if p.is_file()]
+        if not files and state == "queued":
+            continue
+        quiet = (now - max(p.stat().st_mtime for p in files)) / 60 if files else 0
+        progress = scratch / "progress.md"
+        last = progress.read_text().splitlines()[-1] if progress.exists() else "-"
+        flag = "  SILENT" if state == "running" and quiet > 20 else ""
+        print(f"{topic}/{sub:24} {state:8} {quiet:5.0f} min ago  {last}{flag}")
+
+
 def main() -> None:
     p = argparse.ArgumentParser()
     p.add_argument("--module", default="py")
@@ -216,8 +247,11 @@ def main() -> None:
     p.add_argument("--runs", type=Path, default=ENGINE.parent / "py-runs")
     p.add_argument("--only", nargs="*", default=[])
     p.add_argument("--setup-only", action="store_true")
+    p.add_argument("--status", action="store_true")
     args = p.parse_args()
     (args.runs / "logs").mkdir(parents=True, exist_ok=True)
+    if args.status:
+        return status(args)
     main_wt, subs, needs = setup(args)
     if not args.setup_only:
         schedule(args, main_wt, subs, needs)

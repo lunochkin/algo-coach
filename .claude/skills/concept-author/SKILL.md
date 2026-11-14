@@ -158,8 +158,12 @@ nohup uv run python .claude/skills/concept-author/run.py --level 0 --jobs 2 \
 - **Order.** A subtopic starts once every subtopic it `needs` is merged, at
   most `--jobs` at a time. One that fails, or runs past `--hours`, stops the
   subtopics needing it, which the report marks as skipped.
-- **Watching and stopping.** `../py-runs/report-L<level>.md` gains a line
-  per subtopic, and `../py-runs/logs/` holds each session's output. Creating
+- **Watching and stopping.** `run.py --level <n> --status` prints a line
+  per subtopic: queued, running, done or failed, minutes since its last
+  activity, and its last line in `progress.md`, which each session appends
+  to after every step. A running subtopic silent for 20 minutes is flagged.
+  `../py-runs/report-L<level>.md` gains a line per finished subtopic, and
+  `../py-runs/logs/` holds each session's events as they happen. Creating
   `../py-runs/STOP` starts no new subtopic and lets the running ones finish.
   Running the same command again resumes: a subtopic with a digest on
   `py-auto` is skipped.
