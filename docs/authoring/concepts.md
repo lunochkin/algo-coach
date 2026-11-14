@@ -166,13 +166,24 @@ per fix cost the author's time and changed little.
   where a clause of the claim already refutes it, a rewritten choice or
   snippet, a pair kept as one fact asked twice, and a scope where the
   reviewer and the writer agree.
+- **A session also rewords or narrows a claim a review found false,** when
+  the review's fix makes the claim true. The next review of the fix's diff
+  checks the new wording. Waiting for the author left a false claim in the
+  files: one subtopic held two after its first stage.
 - **A session asks the author first, and goes on without the change:** a
-  claim reworded or narrowed, a scope the reviewer and the writer dispute,
-  and a change to `rules.md`, this file, a skill or the engine.
+  claim reworded for any reason other than being false, a scope the
+  reviewer and the writer dispute, a claim fix a diff review still
+  disputes, and a change to `rules.md`, this file, a skill or the engine.
 - **The digest** is `review/<topic>-<sub>-L<level>.md` in the module's
-  directory: what was written, each decision taken alone, and each open
-  question. The author reads the digests a topic at a time, and the concept
-  file's header records the topic's approval.
+  directory. It opens with `## For you`: at most three questions, ranked
+  as the list above gives them, a disputed scope first. The rest of the
+  digest is a log the author need not read: what was written, each
+  decision taken alone, and each scope deferred to a later level. The
+  author reads the `## For you` sections a topic at a time, and the
+  concept file's header records the topic's approval.
+- **A question about the rules, a skill or the engine** goes to one list
+  for the whole run, beside its report, since one such question recurs
+  across subtopics. The list holds each question once.
 
 1. **Concepts.** The concepts are written from the sources, and the module
    check runs every witness. A reviewer checks the concepts against the
@@ -210,8 +221,11 @@ seven new defects, which only a review of its diff found.
   review of the last fix pass's diff.** A stage runs at most two full
   reviews: after the second, each round reviews the diff even when the full
   review found a wrong claim. The stage ends when a diff review finds
-  nothing wrong and no defect, and its style findings are applied without a
-  further review. A fresh full review after each fix pass found
+  nothing wrong, and its defects and style findings are applied without a
+  further review. The module check still runs over that last fix pass. In
+  the first subtopic written in the background, the diff reviews after the
+  last wrong claim found one or two small defects each, at the cost of a
+  full round of review and fix every time. A fresh full review after each fix pass found
   one wrong claim each time in prose the fix pass had just written, and a
   review of the diff finds that prose too.
 - **A finding about an approved layer does not pause the stage.** The stage
