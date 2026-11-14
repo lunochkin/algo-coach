@@ -47,6 +47,9 @@ it. `docs/authoring/concepts.md` gives the order and the stages.
       phone and the web. The bank records it, and no client reads it
 - [ ] Write into `concepts.md` when `py` replaces `python`, and what happens
       to a user's answers in `python` then
+- [x] Seed a module in a few round trips: one batched upsert per table, and
+      no row the store already holds as authored. A seed of `python` through
+      the tunnel took three minutes, one round trip per row
 
 ### Problem difficulty
 

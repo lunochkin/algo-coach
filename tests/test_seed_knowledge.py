@@ -3,7 +3,7 @@ from pathlib import Path
 
 import pytest
 from commands import connected, run_cli
-from sqlalchemy import select
+from sqlalchemy import event, select
 
 from algo_coach.knowledge import read_module, refusals, seed_module
 from algo_coach.knowledge.table import lessons, modules, questions, subtopics, topics
@@ -138,6 +138,25 @@ def test_a_re_seed_keeps_every_minted_id(database, tmp_path):
     seed_module(source, root=database)
 
     assert {row["slug"]: row["id"] for row in rows(database, questions)} == first
+
+
+def test_a_re_seed_of_unchanged_files_writes_no_row(database, tmp_path):
+    """Through a tunnel each statement waits a round trip, so a re-seed sends
+    only the rows that changed, and none where nothing did."""
+    source = read_module(authored(tmp_path))
+    seed_module(source, root=database)
+    sent: list[str] = []
+
+    def record(conn, cursor, statement, *args):
+        sent.append(statement)
+
+    event.listen(database.engine, "before_cursor_execute", record)
+    try:
+        seed_module(source, root=database)
+    finally:
+        event.remove(database.engine, "before_cursor_execute", record)
+
+    assert not [one for one in sent if "ON CONFLICT" in one]
 
 
 def test_a_reworded_question_keeps_its_slug_and_its_id(database, tmp_path):

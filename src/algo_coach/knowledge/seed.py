@@ -6,6 +6,7 @@ from typing import Any
 
 from pydantic import BaseModel
 from sqlalchemy import ColumnElement, Connection, Table, insert, select, update
+from sqlalchemy.dialects.postgresql import insert as pg_insert
 
 from algo_coach.ids import new_id
 from algo_coach.knowledge.check import COLUMNS, refusals
@@ -103,24 +104,52 @@ def _topics(
 ) -> dict[str, str]:
     """Writes the topics and their subtopics, and returns each subtopic's id by
     its slug."""
-    held = {row["slug"]: row["id"] for row in _rows(conn, topics, topics.c.module_id == module_id)}
-    subs: dict[str, str] = {}
+    held = {row["slug"]: row for row in _rows(conn, topics, topics.c.module_id == module_id)}
+    stored = {row["id"]: row for row in held.values()}
     listed = sorted(source.course.get("topic", []), key=lambda one: one["tier"])
+    rows: list[dict[str, Any]] = []
     for position, topic in enumerate(listed):
-        values = {"module_id": module_id, "slug": topic["slug"], "retired_at": None}
-        values |= {"title": topic["title"], "tier": topic["tier"], "position": position}
-        topic_id = _put(conn, topics, held.pop(topic["slug"], None), values)
-        within = subtopics.c.topic_id == topic_id
-        held_subs = {row["slug"]: row["id"] for row in _rows(conn, subtopics, within)}
+        found = held.pop(topic["slug"], None)
+        rows.append(
+            {
+                "id": found["id"] if found else new_id(),
+                "module_id": module_id,
+                "slug": topic["slug"],
+                "retired_at": None,
+                "title": topic["title"],
+                "tier": topic["tier"],
+                "position": position,
+            }
+        )
+    _write(conn, topics, rows, stored)
+    ids = [row["id"] for row in rows]
+    held_subs = {
+        (row["topic_id"], row["slug"]): row
+        for row in _rows(conn, subtopics, subtopics.c.topic_id.in_(ids))
+    }
+    stored_subs = {row["id"]: row for row in held_subs.values()}
+    subs: dict[str, str] = {}
+    sub_rows: list[dict[str, Any]] = []
+    for topic, topic_id in zip(listed, ids, strict=True):
         titles = topic.get("sub_titles", {})
         for at, slug in enumerate(topic["subs"]):
-            values = {"topic_id": topic_id, "slug": slug, "retired_at": None, "position": at}
-            values["title"] = titles.get(slug)
-            subs[slug] = _put(conn, subtopics, held_subs.pop(slug, None), values)
+            found = held_subs.pop((topic_id, slug), None)
+            subs[slug] = found["id"] if found else new_id()
+            sub_rows.append(
+                {
+                    "id": subs[slug],
+                    "topic_id": topic_id,
+                    "slug": slug,
+                    "retired_at": None,
+                    "position": at,
+                    "title": titles.get(slug),
+                }
+            )
         result.subtopics += len(topic["subs"])
-        result.retired += _retire(conn, subtopics, held_subs.values())
+    _write(conn, subtopics, sub_rows, stored_subs)
+    result.retired += _retire(conn, subtopics, [row["id"] for row in held_subs.values()])
     result.topics = len(listed)
-    result.retired += _retire(conn, topics, held.values())
+    result.retired += _retire(conn, topics, [row["id"] for row in held.values()])
     return subs
 
 
@@ -132,15 +161,17 @@ def _questions(
     result: ModuleSeedResult,
 ) -> int:
     within = questions.c.module_id == module_id
-    held = {row["slug"]: row["id"] for row in _rows(conn, questions, within)}
-    count = 0
+    held = {row["slug"]: row for row in _rows(conn, questions, within)}
+    stored = {row["id"]: row for row in held.values()}
+    rows: list[dict[str, Any]] = []
     for bank in source.banks:
         for position, raw in enumerate(bank.questions):
             form = raw.get("format", "choice")
             found = held.pop(raw["id"], None)
+            # validated, so the JSONB columns hold what passed the model
             question = Question.model_validate(
                 {
-                    "id": found or new_id(),
+                    "id": found["id"] if found else new_id(),
                     "module_id": module_id,
                     "subtopic_id": subs[bank.sub],
                     "slug": raw["id"],
@@ -155,32 +186,38 @@ def _questions(
                     "body": {key: value for key, value in raw.items() if key not in COLUMNS},
                 }
             )
-            _stored(conn, questions, found, question)
-            count += 1
-    result.retired += _retire(conn, questions, held.values())
-    return count
+            rows.append(question.model_dump())
+    _write(conn, questions, rows, stored)
+    result.retired += _retire(conn, questions, [row["id"] for row in held.values()])
+    return len(rows)
 
 
 def _lessons(
     conn: Connection, source: ModuleSource, module_id: str, result: ModuleSeedResult
 ) -> int:
     within = lessons.c.module_id == module_id
-    held = {row["slug"]: row["id"] for row in _rows(conn, lessons, within)}
+    held = {row["slug"]: row for row in _rows(conn, lessons, within)}
+    stored = {row["id"]: row for row in held.values()}
     authored: dict[str, dict[str, Any]] = (source.graph or {}).get("lesson", {})
+    rows: list[dict[str, Any]] = []
     for slug, lesson in authored.items():
-        values = {
-            "module_id": module_id,
-            "slug": slug,
-            "retired_at": None,
-            "title": lesson["title"],
-            "text": source.lesson_texts[slug],
-            "minutes": lesson.get("minutes"),
-            "pretest": lesson.get("pretest", 2),
-            "teaches": lesson.get("teaches", []),
-            "needs": lesson.get("needs", []),
-        }
-        _put(conn, lessons, held.pop(slug, None), values)
-    result.retired += _retire(conn, lessons, held.values())
+        found = held.pop(slug, None)
+        rows.append(
+            {
+                "id": found["id"] if found else new_id(),
+                "module_id": module_id,
+                "slug": slug,
+                "retired_at": None,
+                "title": lesson["title"],
+                "text": source.lesson_texts[slug],
+                "minutes": lesson.get("minutes"),
+                "pretest": lesson.get("pretest", 2),
+                "teaches": lesson.get("teaches", []),
+                "needs": lesson.get("needs", []),
+            }
+        )
+    _write(conn, lessons, rows, stored)
+    result.retired += _retire(conn, lessons, [row["id"] for row in held.values()])
     return len(authored)
 
 
@@ -188,16 +225,31 @@ def _rows(conn: Connection, table: Table, condition: ColumnElement[bool]) -> lis
     return [dict(row) for row in conn.execute(select(table).where(condition)).mappings()]
 
 
-def _put(conn: Connection, table: Table, found: str | None, values: dict[str, Any]) -> str:
-    if found is None:
-        found = new_id()
-        conn.execute(insert(table).values(id=found, **values))
-    else:
-        conn.execute(update(table).where(table.c.id == found).values(**values))
-    return found
+def _write(
+    conn: Connection, table: Table, rows: list[dict[str, Any]], stored: dict[str, dict[str, Any]]
+) -> None:
+    """The rows that are new or differ from what is stored, in one statement.
+    Through a tunnel each statement waits a round trip, so none is sent per
+    row, and a row already stored as authored is not sent at all."""
+    changed = [
+        row
+        for row in rows
+        if (held := stored.get(row["id"])) is None
+        or any(held.get(name) != value for name, value in row.items())
+    ]
+    if not changed:
+        return
+    statement = pg_insert(table)
+    columns = [name for name in changed[0] if name != "id"]
+    conn.execute(
+        statement.on_conflict_do_update(
+            index_elements=["id"], set_={name: statement.excluded[name] for name in columns}
+        ),
+        changed,
+    )
 
 
-def _stored(conn: Connection, table: Table, found: str | None, record: Module | Question) -> str:
+def _stored(conn: Connection, table: Table, found: str | None, record: Module) -> str:
     """A validated record, so the JSONB columns hold what passed the model."""
     if found is None:
         conn.execute(insert(table).values(record.model_dump()))
