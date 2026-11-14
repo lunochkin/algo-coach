@@ -1,27 +1,38 @@
-"""Write a module's subtopics in the background, one headless session each.
+"""Write a module's subtopics in the background, one headless session a step.
 
-    run.py --level 0 [--jobs 2] [--only SUB ...] [--setup-only]
+    run.py --level 0 [--jobs 1] [--only SUB ...] [--setup-only]
 
 Each subtopic is written in a git worktree of the content repository, on a
-branch of its own cut from the run's branch, by `claude -p` following the
-concept-author skill. A subtopic whose check passes is committed and merged
-into the run's branch, which the author reviews by digest and merges to main.
+branch of its own cut from the run's branch. `stages.py` takes it through
+the concept-author skill's stages, each step a `claude -p` session. A
+subtopic whose check passes is committed and merged into the run's branch,
+which the author reviews by digest and merges to main.
 Touch `<runs>/STOP` to start no new subtopic. SKILL.md `## Running in the
 background` gives the rest.
 """
 
 import argparse
 import concurrent.futures as cf
-import os
 import subprocess
 import time
 import tomllib
 from pathlib import Path
 
+import stages
+
 ENGINE = Path(__file__).resolve().parents[3]
 CONTENT = ENGINE / "content"
 # the subtopic py already wrote under another slug than python's
 RENAMED = {"functions-scope": "functions"}
+# the model of each role; the fixer's is on trial against a diff review
+MODELS = {
+    "writer": "opus",
+    "reviewer": "opus",
+    "fixer": "haiku",
+    "solver": "opus",
+    "form": "haiku",
+    "digest": "sonnet",
+}
 
 
 def git(*args: str, cwd: Path = CONTENT, check: bool = True) -> str:
@@ -93,41 +104,39 @@ def register(
     (base / "graph.toml").write_text(graph[:at] + lines + graph[at:])
 
 
-# the brief each headless session is given, filled per subtopic
-BRIEF = (Path(__file__).parent / "brief.md").read_text()
-
-
 def write(args: argparse.Namespace, topic: str, sub: str, title: str) -> str:
     runs: Path = args.runs
-    branch = f"{args.branch}-{sub}-L{args.level}"
-    wt = runs / "wt" / f"{sub}-L{args.level}"
-    scratch = runs / "scratch" / f"{sub}-L{args.level}"
-    scratch.mkdir(parents=True, exist_ok=True)
+    name = f"{sub}-L{args.level}"
+    branch = f"{args.branch}-{name}"
+    wt, scratch = runs / "wt" / name, runs / "scratch" / name
     if not wt.exists():
         git("worktree", "add", "-B", branch, str(wt), args.branch)
-    brief = BRIEF.format(
+    if (scratch / "progress.md").exists() and not (scratch / "state.json").exists():
+        # a session of the one-session runner left this: keep its concepts alone
+        scratch.rename(scratch.with_name(f"{name}-old"))
+    scratch.mkdir(parents=True, exist_ok=True)
+    job = stages.Job(
+        engine=ENGINE,
+        module=args.module,
         topic=topic,
         sub=sub,
         title=title,
-        module=args.module,
         level=args.level,
-        engine=ENGINE,
         wt=wt,
         scratch=scratch,
+        log=runs / "logs" / f"{name}.log",
+        models={k: getattr(args, k) for k in MODELS},
+        hours=args.hours,
+        shadow=args.shadow,
     )
-    log = runs / "logs" / f"{sub}-L{args.level}.log"
-    with log.open("w") as out:
-        subprocess.run(
-            # stream-json writes each event as it happens
-            ["claude", "-p", brief, "--permission-mode", "auto"]
-            + ["--output-format", "stream-json", "--verbose"],
-            cwd=ENGINE,
-            # a review agent often runs past the CLI's ten-minute wait
-            env=os.environ | {"CLAUDE_CODE_PRINT_BG_WAIT_CEILING_MS": "0"},
-            stdout=out,
-            stderr=subprocess.STDOUT,
-            timeout=args.hours * 3600,
-        )
+    concepts = wt / "modules" / args.module / "concepts" / topic / f"{sub}.toml"
+    if concepts.exists() and not job.state():
+        job.mark("s1-write")
+    try:
+        if not stages.run(job, args.stop_after):
+            return f"{sub}: STOPPED after stage {args.stop_after}"
+    except stages.Failed as error:
+        return f"{sub}: FAILED: {error}"
     digest = wt / "modules" / args.module / "review" / f"{topic}-{sub}-L{args.level}.md"
     first = digest.read_text().splitlines()[0] if digest.exists() else "FAILED: no digest"
     if not first.startswith("DONE"):
@@ -210,6 +219,14 @@ def schedule(args: argparse.Namespace, main_wt: Path, subs: list, needs: dict) -
     print(f"report: {report}")
 
 
+def cwd_of(pid: str) -> Path | None:
+    out = subprocess.run(
+        ["lsof", "-a", "-d", "cwd", "-Fn", "-p", pid], capture_output=True, text=True
+    )
+    paths = [line[1:] for line in out.stdout.splitlines() if line.startswith("n")]
+    return Path(paths[0]) if paths else None
+
+
 def status(args: argparse.Namespace) -> None:
     """One line per subtopic: its state, its last progress line, and its last
     activity, a silent one flagged."""
@@ -219,12 +236,15 @@ def status(args: argparse.Namespace) -> None:
     for line in report.read_text().splitlines() if report.exists() else []:
         sub, _, verdict = line.split(" ", 3)[-1].partition(": ")
         states[sub] = verdict.split(":")[0]
-    running = subprocess.run(["pgrep", "-fl", "claude -p"], capture_output=True, text=True).stdout
+    sessions = subprocess.run(["pgrep", "-f", "claude -p"], capture_output=True, text=True)
     now = time.time()
     for topic, sub, _ in subs:
         name = f"{sub}-L{args.level}"
         scratch, log = args.runs / "scratch" / name, args.runs / "logs" / f"{name}.log"
-        live = f"{topic}/{sub} " in running
+        # a session runs in its subtopic's worktree; its prompt names others
+        live = sessions.stdout and any(
+            cwd_of(pid) == args.runs / "wt" / name for pid in sessions.stdout.split()
+        )
         state = "running" if live else states.get(sub, "queued").lower()
         files = [p for p in [log, *scratch.rglob("*")] if p.is_file()]
         if not files and state == "queued":
@@ -241,12 +261,16 @@ def main() -> None:
     p.add_argument("--module", default="py")
     p.add_argument("--source", default="python")
     p.add_argument("--level", type=int, required=True)
-    p.add_argument("--jobs", type=int, default=2)
-    p.add_argument("--hours", type=float, default=4)
+    p.add_argument("--jobs", type=int, default=1)
+    p.add_argument("--hours", type=float, default=1, help="the limit on one step")
+    for role, model in MODELS.items():
+        p.add_argument(f"--{role}", default=model)
     p.add_argument("--branch", default="py-auto")
     p.add_argument("--runs", type=Path, default=ENGINE.parent / "py-runs")
     p.add_argument("--only", nargs="*", default=[])
     p.add_argument("--setup-only", action="store_true")
+    p.add_argument("--shadow", action="store_true", help="run each review again as shadow.py gives")
+    p.add_argument("--stop-after", type=int, default=3, help="the last stage, for a trial")
     p.add_argument("--status", action="store_true")
     args = p.parse_args()
     (args.runs / "logs").mkdir(parents=True, exist_ok=True)

@@ -1,0 +1,1 @@
+Do stage 2 step 1 of SKILL.md, the writer's: write each lesson section of this subtopic from the concepts naming it in `taught_by`, under the headings stage 1 laid out. Read the concepts at {wt}/modules/{module}/concepts/{topic}/{sub}.toml. End when the module check reports 0 errors.

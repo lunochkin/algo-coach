@@ -33,7 +33,9 @@ Read both files, and the module's `CLAUDE.md`, before the first step.
 - **The fixer** applies a review in place. It may be the session itself.
 
 Every agent runs code from the engine repo root with `uv run`, and runs
-`uv run algo-coach module check <module>` before it reports. A reviewer
+`uv run algo-coach module check <module> --sub <sub>` before it reports.
+`--sub` lists the subtopic's own findings and counts the rest, so the
+output stays short as the module grows. A reviewer
 judges no prose line's width, since markdown reflows prose.
 
 A reviewer runs the check first and checks nothing the check reports by
@@ -47,7 +49,8 @@ spends its time on what only a reader can judge.
 Each stage ends on `concepts.md`'s stopping rule: a full review finds nothing
 WRONG, or two full reviews have run, the other findings are fixed in place,
 and each later round reviews the last fix pass on its diff (rule 23), until
-a diff review finds nothing WRONG and no DEFECT. Keep a copy of the layer
+a diff review finds nothing WRONG, whose findings are fixed without a
+further review. Keep a copy of the layer
 before each fix pass, and the reports, in a scratchpad folder of the
 stage's own.
 
@@ -125,9 +128,14 @@ stage's own.
    runs on every choice question. The answer pass runs on the questions
    whose key no interpreter proves, `principle` and `pattern`, since the
    check already proves an `output` or `debug` key by running it.
-3. **Review.** Brief: check every question against rules 1–25, the question
-   bullets of `concepts.md` and the writer's checklist. Run every snippet.
-   Compare each question with its section yourself. For each rule 15
+3. **Review.** Brief: check every question against the rules the check does
+   not enforce, the question bullets of `concepts.md` and the writer's
+   checklist. The check runs every snippet and holds each `output` and
+   `debug` key to what it prints, so run a snippet only to test a
+   distractor's prediction. Spend the time on what only a reader judges:
+   each question against its section (rule 15), each distractor against
+   its misconception, each `why`, and whether a kind or a name gives the
+   key away. Compare each question with its section yourself. For each rule 15
    finding, name a new task, and check that task against the section too:
    two proposed tasks repeated a section in the pilot. Sort findings as
    WRONG, DEFECT or STYLE, with concept and lesson findings apart.
@@ -144,28 +152,53 @@ attending, one level at a time, as `concepts.md` `## Stages` allows once the
 author approves by exception.
 
 ```bash
-nohup uv run python .claude/skills/concept-author/run.py --level 0 --jobs 2 \
+nohup uv run python .claude/skills/concept-author/run.py --level 0 \
     > ../py-runs/run-L0.out 2>&1 &
 ```
 
+- **One session a step.** `stages.py` holds the order of the steps and the
+  stopping rule, and runs each step (write, review, fix, the solver's two
+  passes, the digest) as a `claude -p` session of its own, given the
+  step's brief from `briefs/`. A session that orchestrated every step
+  itself spent four fifths of the run's tokens, rereading a context that
+  grew to 115k on every turn. A review's first line is `COUNTS WRONG=<n>
+  DEFECT=<n> STYLE=<n>`, which the run reads to pick the next step. The run
+  stages the module in git before each fix pass, so `git diff` is the
+  fix's diff alone, and runs the module check after each writing step.
+- **A small context.** A session starts in the subtopic's worktree, with
+  no MCP server, no user settings and four tools: Bash, Read, Write and
+  Edit. It starts at 9k tokens, against 46k for a session in the engine,
+  and every turn reads that context again. `inputs.py` puts in its prompt
+  the parts of the docs its step needs, the files it judges, and the
+  check's output, so it spends no turn reading them.
+- **The models.** Opus writes, reviews and solves; Sonnet writes the
+  digest; Haiku reads the solver's form and fixes. A fix follows findings
+  written out in full, and a diff review reads every fix but the last. The
+  flags `--writer`, `--reviewer`, `--fixer`, `--solver`, `--form` and
+  `--digest` change a role's model. `scratch/<sub>-L<n>/tokens.tsv` holds
+  each step's tokens and cost.
 - **Where the work goes.** The content repository gets a branch, `py-auto`,
   and a worktree of it in `../py-runs/wt/integration`. Each subtopic is
-  written in a worktree of its own, on a branch cut from `py-auto`, by one
-  `claude -p` session given `brief.md`. A subtopic whose digest reads `DONE`
-  is committed there, the pre-commit hook running the module check, and
-  merged into `py-auto`. `main` is never touched: the author reads the
-  digests and merges `py-auto`.
+  written in a worktree of its own, on a branch cut from `py-auto`. A
+  subtopic whose digest reads `DONE` is committed there, the pre-commit hook
+  running the module check, and merged into `py-auto`. `main` is never
+  touched: the author reads the digests and merges `py-auto`.
 - **Order.** A subtopic starts once every subtopic it `needs` is merged, at
-  most `--jobs` at a time. One that fails, or runs past `--hours`, stops the
-  subtopics needing it, which the report marks as skipped.
+  most `--jobs` at a time. One that fails, or a step running past
+  `--hours`, stops the subtopics needing it, which the report marks as
+  skipped.
 - **Watching and stopping.** `run.py --level <n> --status` prints a line
   per subtopic: queued, running, done or failed, minutes since its last
-  activity, and its last line in `progress.md`, which each session appends
-  to after every step. A running subtopic silent for 20 minutes is flagged.
+  activity, and its last line in `progress.md`, which the run appends to
+  after every step. A running subtopic silent for 20 minutes is flagged.
   `../py-runs/report-L<level>.md` gains a line per finished subtopic, and
   `../py-runs/logs/` holds each session's events as they happen. Creating
   `../py-runs/STOP` starts no new subtopic and lets the running ones finish.
-  Running the same command again resumes: a subtopic with a digest on
-  `py-auto` is skipped.
+- **Resuming.** Running the same command again resumes: a subtopic with a
+  digest on `py-auto` is skipped, and `scratch/<sub>-L<n>/state.json`
+  names the steps a subtopic finished, so it goes on from the next.
+- **The usage limit.** A session ending on the usage limit fails nothing.
+  The step waits until the reset the message names, five minutes past it,
+  or 15 minutes when the message names no hour, then runs again.
 - **Before a long run,** write one subtopic with `--only <sub>` and read its
-  digest, since a fault in the brief repeats in every subtopic.
+  digest, since a fault in a brief repeats in every subtopic.
