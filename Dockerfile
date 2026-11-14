@@ -18,7 +18,7 @@ COPY packages/editor/ packages/editor/
 COPY web/ web/
 RUN npm run build --workspace web
 
-FROM python:3.15.2-slim AS engine
+FROM python:3.16.0a1-slim AS engine
 COPY --from=ghcr.io/astral-sh/uv:0.12 /uv /bin/uv
 WORKDIR /app
 ENV UV_COMPILE_BYTECODE=1 UV_LINK_MODE=copy
@@ -30,7 +30,7 @@ COPY src src
 # carries no source tree
 RUN uv sync --frozen --no-dev --no-editable
 
-FROM python:3.15.2-slim
+FROM python:3.16.0a1-slim
 # a submission runs in the container the broker starts rather than in this one,
 # and the process answering requests still owns nothing it does not need
 RUN useradd --create-home --uid 10001 engine
