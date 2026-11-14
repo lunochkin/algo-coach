@@ -4,7 +4,7 @@
 # server, the API and Postgres on it, and the broker starting a run's container.
 #
 # `.env` sits beside this file on the server and is held nowhere else. It names
-# the image to run, ALGO_COACH_IMAGE, by digest rather than by tag, so a
+# the image to run, CLIMB_IMAGE, by digest rather than by tag, so a
 # restart runs what the deploy pulled. It also names POSTGRES_USER,
 # POSTGRES_PASSWORD and POSTGRES_DB, the DATABASE_URL the engine reaches the
 # `db` service by, CLIMB_ORIGIN and CLIMB_SECRET, and each provider's
@@ -40,14 +40,14 @@ services:
   # a step inside the API's own command: a failed migration then stops the
   # deploy, where a failed step inside a restarting service retries forever
   migrate:
-    image: ${ALGO_COACH_IMAGE}
+    image: ${CLIMB_IMAGE}
     command: ["alembic", "upgrade", "head"]
     env_file: [.env]
     depends_on:
       db: {condition: service_healthy}
 
   api:
-    image: ${ALGO_COACH_IMAGE}
+    image: ${CLIMB_IMAGE}
     restart: unless-stopped
     env_file: [.env]
     ports:
@@ -67,7 +67,7 @@ services:
   # the one service holding the container runtime's socket. No env_file: the
   # process holding the socket reads no secret either
   broker:
-    image: ${ALGO_COACH_IMAGE}
+    image: ${CLIMB_IMAGE}
     restart: unless-stopped
     command: ["python", "-m", "climb.broker"]
     # the image's non-root user, in the host's docker group. The id differs
@@ -103,11 +103,11 @@ networks:
     internal: true
 
 volumes:
-  # the names predate the project's; pinned, so renaming the project leaves the
-  # data and the certificates where they are. The deployment repo creates the
-  # database volume on the disk that outlives the server
+  # both made by the deployment repo, outside compose: the database on the disk
+  # that outlives the server, so a rebuild finds it again
   database:
-    name: algo-coach_database
+    name: climb_database
     external: true
   certificates:
-    name: algo-coach_certificates
+    name: climb_certificates
+    external: true

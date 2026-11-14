@@ -21,7 +21,7 @@ def resolved(tmp_path_factory: pytest.TempPathFactory) -> dict[str, Any]:
         pytest.skip("the file is read as compose resolves it, which needs docker")
     where = tmp_path_factory.mktemp("deploy")
     shutil.copytree(DEPLOY, where, dirs_exist_ok=True)
-    (where / ".env").write_text("ALGO_COACH_IMAGE=engine\nDOCKER_GID=988\n")
+    (where / ".env").write_text("CLIMB_IMAGE=engine\nDOCKER_GID=988\n")
     done = subprocess.run(
         ["docker", "compose", "-f", str(where / "compose.yaml"), "config", "--format", "json"],
         capture_output=True,
