@@ -1,6 +1,6 @@
 from authoring import LESSON, found, question, rebanked, written
 
-from algo_coach.knowledge.authoring import check, load, near
+from algo_coach.knowledge.authoring import check, in_sub, load, near
 
 
 def checked(root, **flags):
@@ -243,3 +243,17 @@ def test_an_id_used_twice_is_refused(tmp_path):
     root = written(tmp_path, [question("a"), question("a")], coverage="")
 
     assert "[21] a: id used 2 times" in checked(root).errors
+
+
+def test_a_subtopic_scope_names_its_own_files_alone(tmp_path):
+    """`--sub` keeps a finding on the subtopic's bank, question, lesson or
+    coverage entry, and leaves another subtopic's."""
+    root = written(tmp_path, [question("a")], lessons={"les": (["sub@0"], LESSON)})
+    named = in_sub(load(root), "sub")
+
+    assert named("[19] banks/t/sub.toml a: wrong choice C names no misconception")
+    assert named("[18] lessons/les.md: no question points at #x")
+    assert named("[19] coverage/t.toml sub/c: no question at L0")
+    assert named("[21] a: id used 2 times")
+    assert not named("[19] banks/t/other.toml b: wrong choice C names no misconception")
+    assert not named("[19] coverage/t.toml other/c: no question at L0")

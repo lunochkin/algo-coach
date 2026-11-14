@@ -4,7 +4,7 @@ import os
 import sys
 from pathlib import Path
 
-from algo_coach.knowledge.authoring import Checked, check, load, near
+from algo_coach.knowledge.authoring import Checked, check, in_sub, load, near
 
 # set once the run has restarted itself with the module's libraries
 RESTARTED = "CHECK_REQUIREMENTS"
@@ -27,6 +27,14 @@ def module(args: argparse.Namespace, parser: argparse.ArgumentParser) -> None:
     checked = check(
         root, run=not args.no_run, other_versions=not args.no_versions, fresh=args.fresh
     )
+    elsewhere = ""
+    if args.sub:
+        report, named = checked.report, in_sub(load(root), args.sub)
+        errors = [e for e in report.errors if named(e)]
+        warnings = [w for w in report.warnings if named(w)]
+        others = (len(report.errors) - len(errors), len(report.warnings) - len(warnings))
+        report.errors, report.warnings = errors, warnings
+        elsewhere = f"outside {args.sub}: {others[0]} errors, {others[1]} warnings"
     if args.json:
         report = checked.report
         whole = {
@@ -39,6 +47,8 @@ def module(args: argparse.Namespace, parser: argparse.ArgumentParser) -> None:
     else:
         for line in summary(checked):
             print(line)
+        if elsewhere:
+            print(elsewhere)
     if checked.report.errors:
         parser.exit(1)
 

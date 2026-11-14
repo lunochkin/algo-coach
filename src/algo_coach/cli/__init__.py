@@ -411,6 +411,9 @@ def main() -> None:
         help="list the questions explained most alike, for one id or for all, and stop",
     )
     check_parser.add_argument("--json", action="store_true", help="emit the report as JSON")
+    check_parser.add_argument(
+        "--sub", help="report one subtopic's findings, and the rest of the module as counts"
+    )
 
     log_parser = _command(sub, "log", "one user's whole log, read out or erased")
     action = log_parser.add_subparsers(dest="action", required=True)

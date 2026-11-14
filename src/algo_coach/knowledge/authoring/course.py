@@ -4,6 +4,7 @@ report its rules fill."""
 import re
 import tomllib
 from collections import defaultdict
+from collections.abc import Callable
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
@@ -96,6 +97,25 @@ def fmt(q: Question) -> str:
 
 def where(q: Question) -> str:
     return f"{q['_file']} {q['id']}"
+
+
+def in_sub(course: Course, sub: str) -> Callable[[str], bool]:
+    """Whether a finding's location names one of the subtopic's files, lessons,
+    questions or coverage entries."""
+    files = {q["_file"] for q in course.questions if q["_sub"] == sub}
+    files |= {c["_file"] for c in course.concepts.values() if Path(c["_file"]).stem == sub}
+    files |= {
+        f"lessons/{slug}.md"
+        for slug, lesson in course.graph.get("lesson", {}).items()
+        if any(t.split("@")[0] == sub for t in lesson.get("teaches", []))
+    }
+    ids = {q["id"] for q in course.questions if q["_sub"] == sub}
+
+    def named(finding: str) -> bool:
+        at = finding.partition("] ")[2].partition(": ")[0].split()
+        return any(t in files or t in ids or t.startswith(f"{sub}/") for t in at)
+
+    return named
 
 
 def norm(text: str) -> str:
