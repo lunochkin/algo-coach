@@ -46,4 +46,23 @@ class JudgementItem(BaseModel):
         return self
 
 
-__all__ = ["ItemStatus", "JudgementItem"]
+class Judgement(BaseModel):
+    """One user's answer to one item: `log.md`, Judging a solution."""
+
+    model_config = ConfigDict(frozen=True)
+
+    id: str
+    created_at: datetime
+    user_id: str = Field(min_length=1)
+    item_id: str = Field(min_length=1)
+    called_clean: bool
+    line: int | None = None  # the tapped line, where the user called it flawed
+
+    @model_validator(mode="after")
+    def _a_flaw_is_tapped(self) -> Judgement:
+        if self.called_clean != (self.line is None):
+            raise ValueError("a line is tapped exactly where the solution is called flawed")
+        return self
+
+
+__all__ = ["ItemStatus", "Judgement", "JudgementItem"]

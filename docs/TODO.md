@@ -176,8 +176,12 @@ and a review of anyone's code begins with.
 - [x] Build the items from each card template's mutants that fail a case, with
       about a quarter of the items clean. A clean item makes a false alarm
       countable
-- [ ] Serve the exercise at the phone's width first, on both clients, with the
+- [x] Serve the exercise at the phone's width first, on both clients, with the
       shared fixtures passing in both suites
+- [ ] Tag each judgement item with a difficulty read from its answers: the
+      share answered right or located, once enough users answered it. A
+      template stores no difficulty, and a label made up before any answer
+      would mislead
 - [ ] Show the user's judgement as two rates per technique: flaws found, and
       clean solutions called flawed
 

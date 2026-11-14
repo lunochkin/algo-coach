@@ -6,6 +6,7 @@ import { Button, Text, useTheme } from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import {
+  judgeFrom,
   RECALL_THIS,
   RECALL_TITLE,
   type components,
@@ -82,6 +83,14 @@ export default function CardScreen() {
           {(data) => (
             <>
               {data.run ? <RunProgress studied={data} /> : null}
+              <Text
+                variant="bodyMedium"
+                accessibilityRole="link"
+                onPress={() => router.push({ pathname: '/judge', params: { card: data.card.slug } })}
+                style={{ color: theme.colors.primary }}
+              >
+                {judgeFrom(data.card.title)}
+              </Text>
               <PageSection of={sections} id="trigger" title={CARD_TRIGGER}>
                 <Markdown>{data.card.trigger}</Markdown>
               </PageSection>
@@ -92,12 +101,7 @@ export default function CardScreen() {
               ))}
               <Ladder studied={data} of={sections} />
               {data.probes.length > 0 ? <Probes studied={data} of={sections} /> : null}
-              <PageSection
-                of={sections}
-                id="templates"
-                title={CARD_TEMPLATES}
-                count={data.card.templates.length}
-              >
+              <PageSection of={sections} id="templates" title={CARD_TEMPLATES} count={data.card.templates.length}>
                 {data.card.templates.map((template) => (
                   <TemplateCard
                     key={template.slug}
@@ -115,12 +119,7 @@ export default function CardScreen() {
       {studied.data?.run ? (
         <NextRung studied={studied.data} bottom={insets.bottom} />
       ) : studied.data ? (
-        <RunStart
-          slug={slug}
-          lock={runLock(studied.data.waiting)}
-          bottom={insets.bottom}
-          onStarted={studied.reload}
-        />
+        <RunStart slug={slug} lock={runLock(studied.data.waiting)} bottom={insets.bottom} onStarted={studied.reload} />
       ) : null}
     </View>
   );
@@ -284,13 +283,7 @@ function Ladder({ studied, of }: { studied: Studied; of: Sections }) {
 
 function Probes({ studied, of }: { studied: Studied; of: Sections }) {
   return (
-    <PageSection
-      of={of}
-      id="probes"
-      title={PROBES_TITLE}
-      count={studied.probes.length}
-      aside={PROBES_ASIDE}
-    >
+    <PageSection of={of} id="probes" title={PROBES_TITLE} count={studied.probes.length} aside={PROBES_ASIDE}>
       <PickPanel>
         {studied.probes.map((one) => (
           <PickRow

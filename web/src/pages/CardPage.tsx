@@ -23,6 +23,7 @@ import {
   cardProgress,
   cardSections,
   startCardRun,
+  judgeFrom,
 } from '@algo-coach/core'
 import { useState } from 'react'
 import { Link, useParams } from 'react-router'
@@ -93,6 +94,13 @@ export function CardPage() {
                   lock={runLock(studied.waiting)}
                 />
               )}
+
+              <Link
+                to={`/judge?card=${encodeURIComponent(slug)}`}
+                className="text-meta underline-offset-4 hover:underline"
+              >
+                {judgeFrom(studied.card.title)}
+              </Link>
 
               <SectionBar items={items} current={current} onJump={jump} />
 

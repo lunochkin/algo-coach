@@ -309,3 +309,18 @@ recall_attempt_case_results = Table(
     CheckConstraint("error IS NULL OR outcome = 'crashed'", name="only_a_crash_names_an_error"),
     CheckConstraint("elapsed_ms >= 0", name="elapsed_counted"),
 )
+
+
+# one user's answers to the judging exercise: `log.md`, Judging a solution
+judgements = Table(
+    "judgements",
+    metadata,
+    Column("id", Text, primary_key=True),
+    appended_column(),
+    Column("created_at", timestamp(), nullable=False),
+    Column("user_id", Text, ForeignKey("users.id"), nullable=False, index=True),
+    Column("item_id", Text, ForeignKey("judgement_items.id"), nullable=False, index=True),
+    Column("called_clean", Boolean, nullable=False),
+    Column("line", Integer),
+    CheckConstraint("called_clean = (line IS NULL)", name="a_flaw_is_tapped"),
+)

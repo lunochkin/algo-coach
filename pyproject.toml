@@ -182,6 +182,8 @@ ignore_decorators = [
 ]
 ignore_names = [
     "model_config",
+    # the judging page reads what an item is about, and no module does
+    "card_title", "template_title", "example", "asks",
     # pytest reads the plugins a conftest names, and calls its hooks by name
     "pytest_plugins",
     "pytest_*",

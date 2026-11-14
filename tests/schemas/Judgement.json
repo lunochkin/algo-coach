@@ -1,0 +1,49 @@
+{
+  "description": "One user's answer to one item: `log.md`, Judging a solution.",
+  "properties": {
+    "called_clean": {
+      "title": "Called Clean",
+      "type": "boolean"
+    },
+    "created_at": {
+      "format": "date-time",
+      "title": "Created At",
+      "type": "string"
+    },
+    "id": {
+      "title": "Id",
+      "type": "string"
+    },
+    "item_id": {
+      "minLength": 1,
+      "title": "Item Id",
+      "type": "string"
+    },
+    "line": {
+      "anyOf": [
+        {
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Line"
+    },
+    "user_id": {
+      "minLength": 1,
+      "title": "User Id",
+      "type": "string"
+    }
+  },
+  "required": [
+    "id",
+    "created_at",
+    "user_id",
+    "item_id",
+    "called_clean"
+  ],
+  "title": "Judgement",
+  "type": "object"
+}

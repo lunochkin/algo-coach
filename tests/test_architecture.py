@@ -11,7 +11,7 @@ from algo_coach.calls import CallLog
 from algo_coach.cards import CardStore
 from algo_coach.cases import CaseLog
 from algo_coach.drafts import DraftStore
-from algo_coach.log import AttemptLog, SittingStore
+from algo_coach.log import AttemptLog, JudgementLog, SittingStore
 from algo_coach.matches import MatchLog
 from algo_coach.outcomes import OutcomeLog
 from algo_coach.problems import ProblemStore
@@ -246,6 +246,7 @@ APPEND_ONLY = (
     SolutionLog,
     SolutionClaimLog,
     RatingLog,
+    JudgementLog,
     OutcomeLog,
     MatchLog,
     CallLog,

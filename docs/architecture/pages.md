@@ -149,6 +149,7 @@ those steps at low fidelity.
 | `/problems` | picks a problem across every technique | Problems |
 | `/techniques/:technique` | picks a problem | Practice |
 | `/problems/:problem_id` | reads the statement, solves, submits and claims, or reads a retired problem | Practice |
+| `/judge` | judges one solution at a time, clean or flawed, and taps the wrong line | Practice |
 | `/cards` | reads where each card stands, and picks one | Cards |
 | `/cards/:slug` | reads a card and reveals its templates | Cards |
 | `/cards/:slug/recall` | opens the recall of the template the trainer draws | Cards |
@@ -226,6 +227,28 @@ those steps at low fidelity.
   path sends the browser to it. A reload then asks for the same form, and a
   user who means to practise one form reaches it by name. `flows.md` gives why
   naming the template costs the recall nothing.
+
+### Judging a solution
+
+The first short exercise, served at a phone's width on both clients. `log.md`
+gives the exercise and `content.md` the items.
+
+- **The page opens from the board and from a card.** The board's press serves
+  items from every card. A card's press adds `?card=`, and the page serves that
+  card's forms alone.
+- **The item reads as its template's title, one of its cases and the code.**
+  The case is the spec: `solve([3, 9, 4])` returns `9`. A statement would be a
+  second text to read for a question the case already asks.
+- **Each line of the code is numbered, and the whole line is the tap
+  target.** A tap on a wrapped line lands on the line it wraps from.
+- **The answer is two presses, Clean or Flawed.** Flawed then asks for the
+  wrong line, and a tap and Submit send it. The page sends nothing before the
+  user answers, so the item carries no answer the page could show early.
+- **The engine decides the answer, and the page shows the decision.** The
+  result reads as right, located, spotted on the wrong line, missed, or a
+  false alarm. The flawed line is marked, and the separating case shows its
+  arguments, the expected value and what the flawed code gave.
+- **Next serves the following item**, unseen first, then the stalest.
 
 ## The knowledge pages
 
@@ -473,6 +496,7 @@ what it offers. The inventory is the list both clients build to.
 | The press starting a card's run | `/cards/:slug` | Card, its bottom bar | same |
 | The required cards a locked card waits on, on that press | `/cards/:slug` | Card, its bottom bar | same |
 | A recall | `/cards/:slug/recall/:template` | Recall, from Card | same |
+| Judging a solution | `/judge` | Judge | same |
 | The knowledge home | `/knowledge` | Home | same |
 | A module | `/knowledge/modules/:module` | Module | same |
 | The start sheet | a dialog on the module page | a sheet on Module | same |

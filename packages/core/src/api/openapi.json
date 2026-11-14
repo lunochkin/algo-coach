@@ -1164,6 +1164,101 @@
           }
         }
       }
+    },
+    "/api/judging/next": {
+      "get": {
+        "summary": "Served",
+        "operationId": "served_api_judging_next_get",
+        "parameters": [
+          {
+            "name": "card",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Card"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/JudgedItem"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/judging/{item_id}": {
+      "post": {
+        "summary": "Decided",
+        "operationId": "decided_api_judging__item_id__post",
+        "parameters": [
+          {
+            "name": "item_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Item Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/JudgeAnswer"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/JudgeDecided"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -2071,6 +2166,147 @@
           "text"
         ],
         "title": "Hinted"
+      },
+      "JudgeAnswer": {
+        "properties": {
+          "called_clean": {
+            "type": "boolean",
+            "title": "Called Clean"
+          },
+          "line": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Line"
+          }
+        },
+        "type": "object",
+        "required": [
+          "called_clean"
+        ],
+        "title": "JudgeAnswer"
+      },
+      "JudgeDecided": {
+        "properties": {
+          "verdict": {
+            "$ref": "#/components/schemas/Verdict"
+          },
+          "line": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Line"
+          },
+          "correct": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Correct"
+          },
+          "case": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/SeparatingCase"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "verdict",
+          "line",
+          "correct",
+          "case"
+        ],
+        "title": "JudgeDecided"
+      },
+      "JudgeExample": {
+        "properties": {
+          "args": {
+            "items": {},
+            "type": "array",
+            "title": "Args"
+          },
+          "expected": {
+            "title": "Expected"
+          }
+        },
+        "type": "object",
+        "required": [
+          "args",
+          "expected"
+        ],
+        "title": "JudgeExample",
+        "description": "One of the template's cases, which states what the code must do."
+      },
+      "JudgedItem": {
+        "properties": {
+          "item_id": {
+            "type": "string",
+            "title": "Item Id"
+          },
+          "card_slug": {
+            "type": "string",
+            "title": "Card Slug"
+          },
+          "card_title": {
+            "type": "string",
+            "title": "Card Title"
+          },
+          "depth": {
+            "type": "integer",
+            "title": "Depth"
+          },
+          "template_title": {
+            "type": "string",
+            "title": "Template Title"
+          },
+          "asks": {
+            "type": "string",
+            "title": "Asks"
+          },
+          "example": {
+            "$ref": "#/components/schemas/JudgeExample"
+          },
+          "lines": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Lines"
+          }
+        },
+        "type": "object",
+        "required": [
+          "item_id",
+          "card_slug",
+          "card_title",
+          "depth",
+          "template_title",
+          "asks",
+          "example",
+          "lines"
+        ],
+        "title": "JudgedItem",
+        "description": "An item as the page shows it: no field says whether it is clean."
       },
       "Label": {
         "properties": {
@@ -3003,6 +3239,32 @@
         "title": "SelfLabel",
         "description": "The user's own verdict on why an attempt went the way it did."
       },
+      "SeparatingCase": {
+        "properties": {
+          "args": {
+            "items": {},
+            "type": "array",
+            "title": "Args"
+          },
+          "expected": {
+            "title": "Expected"
+          },
+          "outcome": {
+            "$ref": "#/components/schemas/CaseOutcome"
+          },
+          "returned": {
+            "title": "Returned"
+          }
+        },
+        "type": "object",
+        "required": [
+          "args",
+          "expected",
+          "outcome",
+          "returned"
+        ],
+        "title": "SeparatingCase"
+      },
       "Served": {
         "properties": {
           "title": {
@@ -3624,6 +3886,17 @@
           "type"
         ],
         "title": "ValidationError"
+      },
+      "Verdict": {
+        "type": "string",
+        "enum": [
+          "right",
+          "false_alarm",
+          "located",
+          "spotted",
+          "missed"
+        ],
+        "title": "Verdict"
       },
       "Waiting": {
         "properties": {

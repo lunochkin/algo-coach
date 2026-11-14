@@ -11,6 +11,7 @@ WEB = {
     "": "The board",
     "problems": "The problem listing",
     "cards": "The cards",
+    "judge": "Judging a solution",
     "cards/:slug": "A card's trigger, brief and templates",
     "cards/:slug/recall": "A recall",
     "cards/:slug/recall/:template": "A recall",
@@ -51,6 +52,7 @@ PHONE = {
     "login.tsx": "The login",
     "privacy.tsx": "The privacy policy",
     "recall.tsx": "A recall",
+    "judge.tsx": "Judging a solution",
 }
 # files that are no screen: the layouts, and the sign-in callback that only
 # hands the token over

@@ -523,6 +523,40 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  '/api/judging/next': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Served */
+    get: operations['served_api_judging_next_get'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/judging/{item_id}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** Decided */
+    post: operations['decided_api_judging__item_id__post'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -852,6 +886,53 @@ export interface components {
       hint: components['schemas']['Hint'];
       /** Text */
       text: string;
+    };
+    /** JudgeAnswer */
+    JudgeAnswer: {
+      /** Called Clean */
+      called_clean: boolean;
+      /** Line */
+      line?: number | null;
+    };
+    /** JudgeDecided */
+    JudgeDecided: {
+      verdict: components['schemas']['Verdict'];
+      /** Line */
+      line: number | null;
+      /** Correct */
+      correct: string | null;
+      case: components['schemas']['SeparatingCase'] | null;
+    };
+    /**
+     * JudgeExample
+     * @description One of the template's cases, which states what the code must do.
+     */
+    JudgeExample: {
+      /** Args */
+      args: unknown[];
+      /** Expected */
+      expected: unknown;
+    };
+    /**
+     * JudgedItem
+     * @description An item as the page shows it: no field says whether it is clean.
+     */
+    JudgedItem: {
+      /** Item Id */
+      item_id: string;
+      /** Card Slug */
+      card_slug: string;
+      /** Card Title */
+      card_title: string;
+      /** Depth */
+      depth: number;
+      /** Template Title */
+      template_title: string;
+      /** Asks */
+      asks: string;
+      example: components['schemas']['JudgeExample'];
+      /** Lines */
+      lines: string[];
     };
     /**
      * Label
@@ -1227,6 +1308,16 @@ export interface components {
       attempt_id: string;
       mode: components['schemas']['FailureMode'];
     };
+    /** SeparatingCase */
+    SeparatingCase: {
+      /** Args */
+      args: unknown[];
+      /** Expected */
+      expected: unknown;
+      outcome: components['schemas']['CaseOutcome'];
+      /** Returned */
+      returned: unknown;
+    };
     /** Served */
     Served: {
       /** Title */
@@ -1488,6 +1579,11 @@ export interface components {
       /** Context */
       ctx?: Record<string, never>;
     };
+    /**
+     * Verdict
+     * @enum {string}
+     */
+    Verdict: 'right' | 'false_alarm' | 'located' | 'spotted' | 'missed';
     /**
      * Waiting
      * @description A required card a locked card waits on, named as its page names it.
@@ -2392,6 +2488,72 @@ export interface operations {
         };
         content: {
           'application/json': components['schemas']['Synced'];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['HTTPValidationError'];
+        };
+      };
+    };
+  };
+  served_api_judging_next_get: {
+    parameters: {
+      query?: {
+        card?: string | null;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['JudgedItem'];
+        };
+      };
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['HTTPValidationError'];
+        };
+      };
+    };
+  };
+  decided_api_judging__item_id__post: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        item_id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['JudgeAnswer'];
+      };
+    };
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['JudgeDecided'];
         };
       };
       /** @description Validation Error */

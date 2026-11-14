@@ -55,3 +55,4 @@ export * from './sitting';
 export * from './sittingrun';
 export * from './claim';
 export * from './privacy';
+export * from './judging';

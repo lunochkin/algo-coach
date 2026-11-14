@@ -14,6 +14,8 @@ import {
   BOARD_NONE,
   BOARD_STUDYING,
   BOARD_NEXT,
+  JUDGE_NOTE,
+  JUDGE_TITLE,
   boardMoreCards,
   nextCards,
   BOARD_UNTOUCHED,
@@ -139,6 +141,10 @@ function BoardBody({ board, cards }: { board: Board; cards: ListedCard[] }) {
           <CardPanel technique={null} cards={studying} />
         </>
       ) : null}
+      {/* the short exercise, across every card: `pages.md`, Judging */}
+      <Panel>
+        <PickRow title={JUDGE_TITLE} note={JUDGE_NOTE} stats={[]} onPress={() => router.push('/judge')} />
+      </Panel>
       {next.cards.length > 0 ? (
         <>
           <Heading title={BOARD_NEXT} count={next.cards.length + next.more} />

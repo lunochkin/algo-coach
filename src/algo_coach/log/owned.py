@@ -18,6 +18,7 @@ from algo_coach.knowledge.table import (
     setting_changes,
     stints,
 )
+from algo_coach.log.judgements import JudgementLog
 from algo_coach.log.sittings import SittingStore
 from algo_coach.log.store import AttemptLog
 from algo_coach.log.table import (
@@ -28,6 +29,7 @@ from algo_coach.log.table import (
     card_run_probes,
     card_runs,
     diagnoses,
+    judgements,
     recall_attempt_case_results,
     recall_attempts,
     self_labels,
@@ -43,6 +45,7 @@ from algo_coach.schema import (
     CertificationExam,
     Diagnosis,
     Focus,
+    Judgement,
     LessonMark,
     LimitRaise,
     ModuleOrder,
@@ -79,6 +82,7 @@ class UserLog(BaseModel):
     claims: list[AttemptClaim]
     self_labels: list[SelfLabel]
     diagnoses: list[Diagnosis]
+    judgements: list[Judgement]
     calls: list[Call]
     # the knowledge log: `knowledge.md`, The records
     answers: list[Answer]
@@ -111,6 +115,7 @@ def whole_log(root: Database, user_id: str) -> UserLog:
             "claims": claims,
             "self_labels": log.self_labels(user_id),
             "diagnoses": diagnosed,
+            "judgements": JudgementLog(root).for_user(user_id),
             "calls": called,
             # rows, each validated into the record its field names
             **{name: _knowledge(root, table, user_id) for name, table in KNOWLEDGE.items()},
@@ -168,6 +173,7 @@ def erased(root: Database, user_id: str) -> dict[str, int]:
                 recall_attempt_case_results.c.recall_attempt_id.in_(recalled),
             ),
             (recall_attempts, recall_attempts.c.user_id == user_id),
+            (judgements, judgements.c.user_id == user_id),
             (card_run_probes, card_run_probes.c.card_run_id.in_(started)),
             (card_runs, card_runs.c.user_id == user_id),
             *((table, table.c.user_id == user_id) for table in KNOWLEDGE.values()),

@@ -1,6 +1,7 @@
 from algo_coach.log.apps import app_revoked, app_user_of, exchanged, issued
 from algo_coach.log.devices import DeviceKind, SignedInDevice, device_revoked, signed_in_devices
 from algo_coach.log.invitations import invitations_held, invite, invited, withdraw
+from algo_coach.log.judgements import JudgementLog
 from algo_coach.log.latest import latest_by_attempt
 from algo_coach.log.owned import erased, whole_log
 from algo_coach.log.recalls import RecallLog, latest_recalls
@@ -16,6 +17,7 @@ __all__ = [
     "AttemptLog",
     "CardRunLog",
     "DeviceKind",
+    "JudgementLog",
     "Provider",
     "RecallLog",
     "SignedInDevice",

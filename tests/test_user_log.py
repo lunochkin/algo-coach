@@ -128,6 +128,7 @@ def test_erasing_a_log_leaves_another_user_s_log_whole(practised):
         "claims": [],
         "self_labels": [],
         "diagnoses": [],
+        "judgements": [],
         "calls": [],
         "answers": [],
         "stints": [],
@@ -156,6 +157,7 @@ def test_erasing_counts_what_left_each_table(practised):
         # the card runs and the recalls of a user who studied no card
         "recall_attempt_case_results": 0,
         "recall_attempts": 0,
+        "judgements": 0,
         "card_run_probes": 0,
         "card_runs": 0,
         "answers": 1,

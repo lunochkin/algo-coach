@@ -9,6 +9,8 @@ import {
   BOARD_NONE,
   BOARD_STUDYING,
   BOARD_NEXT,
+  JUDGE_NOTE,
+  JUDGE_TITLE,
   boardMoreCards,
   nextCards,
   BOARD_UNTOUCHED,
@@ -83,6 +85,15 @@ export function BoardPage() {
               )}
 
               {/* what the card graph opens next, the shallowest first */}
+              {/* the short exercise, across every card: `pages.md`, Judging */}
+              <Link
+                to="/judge"
+                className="block rounded-xl border bg-card px-4 py-3 hover:bg-accent"
+              >
+                <span className="font-medium">{JUDGE_TITLE}</span>
+                <span className="mt-1 block text-meta text-muted-foreground">{JUDGE_NOTE}</span>
+              </Link>
+
               {next.cards.length > 0 && (
                 <section className="space-y-stack">
                   <SectionHeading title={BOARD_NEXT} count={next.cards.length + next.more} />
