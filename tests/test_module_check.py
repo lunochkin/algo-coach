@@ -1,4 +1,4 @@
-from authoring import LESSON, found, question, rebanked, written
+from authoring import LESSON, _bank, found, git, question, rebanked, written
 
 from algo_coach.knowledge.authoring import check, in_sub, load, near
 
@@ -236,6 +236,30 @@ def test_an_id_a_past_commit_retired_is_never_used_again(tmp_path):
     assert found(checked(root).errors, 21) == [
         "[21] banks/t/sub.toml b: reuses an id a past commit retired"
     ]
+
+
+def test_a_branch_cut_before_an_id_retires_nothing(tmp_path, monkeypatch):
+    """Rule 21: a branch merged after `b` was written, though dated later,
+    never held `b`, so it removed nothing."""
+
+    def at(day: int) -> None:
+        for name in ("GIT_AUTHOR_DATE", "GIT_COMMITTER_DATE"):
+            monkeypatch.setenv(name, f"2026-11-{day:02d}T12:00:00")
+
+    at(1)
+    root = written(tmp_path, [question("a")])
+    git(root, "checkout", "-q", "-b", "side")
+    at(3)
+    rebanked(root, [question("a"), question("c")])
+    git(root, "checkout", "-q", "-")
+    at(2)
+    (root / "banks" / "t" / "other.toml").write_text(_bank([question("b")]))
+    git(root, "add", "-A")
+    git(root, "commit", "-q", "-m", "other")
+    at(4)
+    git(root, "merge", "-q", "--no-edit", "side")
+
+    assert found(checked(root).errors, 21) == []
 
 
 def test_an_id_used_twice_is_refused(tmp_path):

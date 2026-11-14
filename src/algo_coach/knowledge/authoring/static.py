@@ -257,14 +257,22 @@ def reused_ids(course: Course, report: Report) -> None:
     root = course.root.resolve()
     repo = Path(_git(root, "rev-parse", "--show-toplevel", check=True).strip()).resolve()
     banks = str(root.relative_to(repo) / "banks")
-    commits = _git(repo, "rev-list", "--reverse", "HEAD", "--", banks, check=True).split()
-    seen: set[str] = set()
+    lines = _git(repo, "rev-list", "--parents", "HEAD", "--", banks, check=True).splitlines()
+    ids: dict[str, set[str]] = {}
+
+    def held(commit: str) -> set[str]:
+        if commit not in ids:
+            text = _git(repo, "grep", "-h", "-o", r'^id = "[^"]*"', commit, "--", banks)
+            ids[commit] = set(re.findall(r'"([^"]*)"', text))
+        return ids[commit]
+
+    # an id is retired where a commit drops it from one of its own parents: a
+    # branch cut before the id was written never held it
     retired: set[str] = set()
-    for commit in commits:
-        text = _git(repo, "grep", "-h", "-o", r'^id = "[^"]*"', commit, "--", banks)
-        now = set(re.findall(r'"([^"]*)"', text))
-        retired |= seen - now
-        seen |= now
+    for line in lines:
+        commit, *parents = line.split()
+        for parent in parents:
+            retired |= held(parent) - held(commit)
     for q in course.questions:
         if q["id"] in retired:
             report.error(21, where(q), "reuses an id a past commit retired")
