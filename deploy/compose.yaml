@@ -14,7 +14,7 @@
 # Caddy refuses to start without it. DOCKER_GID is the id of the host's docker
 # group, which the deployment repo writes per server.
 
-name: algo-coach
+name: climb
 
 services:
   db:
@@ -103,5 +103,11 @@ networks:
     internal: true
 
 volumes:
+  # the names predate the project's; pinned, so renaming the project leaves the
+  # data and the certificates where they are. The deployment repo creates the
+  # database volume on the disk that outlives the server
   database:
+    name: algo-coach_database
+    external: true
   certificates:
+    name: algo-coach_certificates
