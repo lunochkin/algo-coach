@@ -23,7 +23,8 @@ Read both files, and the module's `CLAUDE.md`, before the first step.
 - **The author of the module** is the user, who approves by exception, as
   `concepts.md` `## Stages` gives. A session applies each recommended fix
   and records it in the subtopic's digest, and writes there what it must
-  ask instead of stopping to ask.
+  ask instead of stopping to ask. A decide session then answers those
+  questions, and only two kinds reach the author.
 - **The writer** is one agent per step. It is given the brief below and the
   layer above, never the layer it replaces: a fresh generation reads no
   earlier version of its own file. The session may write a step itself when
@@ -167,6 +168,12 @@ nohup uv run python .claude/skills/concept-author/run.py --level 0 \
   DEFECT=<n> STYLE=<n>`, which the run reads to pick the next step. The run
   stages the module in git before each fix pass, so `git diff` is the
   fix's diff alone, and runs the module check after each writing step.
+- **The decide step answers the digest's questions.** After the digest,
+  a fresh Opus session decides each question in `## For you`, as
+  `concepts.md` `## Stages` gives, from `briefs/decide.md`. Diff reviews
+  then check its edits until one finds no WRONG, and the digest gains
+  `## Decided`. `--decide --only <sub> ...` runs the step over subtopics
+  already written, commits what it changed and merges it again.
 - **A WRONG finding names the case that shows it.** The reviewer writes
   each case into `review-<n>-cases.py` through a helper the brief gives,
   and the run executes that script after the review. A WRONG finding whose

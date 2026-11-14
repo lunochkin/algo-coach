@@ -209,6 +209,8 @@ def run(job: Job, last: int = 3) -> bool:
         job.session("digest", job.models["digest"], "digest", given=given, digest=digest)
         job.mark("digest")
         job.progress("digest written")
+    if not job.state().get("decide"):
+        decide(job)
     return True
 
 
@@ -252,8 +254,18 @@ def run_stage(job: Job, n: int) -> None:
     job.progress(f"stage {n} ends")
 
 
-def review(job: Job, n: int, r: int, full: bool, solver: Path) -> list[int]:
-    folder = job.scratch / f"stage{n}"
+def review(
+    job: Job,
+    n: int,
+    r: int,
+    full: bool,
+    solver: Path,
+    tag: str = "",
+    folder: Path | None = None,
+    label: str = "",
+) -> list[int]:
+    tag, label = tag or f"s{n}", label or f"stage {n}"
+    folder = folder or job.scratch / f"stage{n}"
     report = folder / f"review-{r}.md"
     shown = [job.scratch / "decisions.md"]
     if full:
@@ -276,7 +288,7 @@ def review(job: Job, n: int, r: int, full: bool, solver: Path) -> list[int]:
     given = job.given("review", n, shown)
     # a session stopped part way may have left half a report
     report.unlink(missing_ok=True)
-    step = f"stage {n} review {r} ({kind})"
+    step = f"{label} review {r} ({kind})"
     cases = cases_of(report)
     cases.unlink(missing_ok=True)
     job.session(
@@ -291,13 +303,13 @@ def review(job: Job, n: int, r: int, full: bool, solver: Path) -> list[int]:
     )
     first = report.read_text().splitlines()[0] if report.exists() else ""
     if not (m := COUNTS.match(first)):
-        raise Failed(f"stage {n} review {r}: no COUNTS line")
+        raise Failed(f"{label} review {r}: no COUNTS line")
     counts = list(map(int, m.groups()))
     if counts[0]:
         counts = confirm(job, report, cases, counts, step)
     if job.shadow:
         shadow.reviews(job, n, r, kind, given, scope, report)
-    job.mark(f"s{n}-r{r}-review", counts)
+    job.mark(f"{tag}-r{r}-review", counts)
     job.progress(f"{step}: {counts[0]} WRONG, {counts[1]} DEFECT, {counts[2]} STYLE")
     return counts
 
@@ -349,8 +361,18 @@ def confirm(job: Job, report: Path, cases: Path, counts: list[int], step: str) -
     return counts
 
 
-def fix(job: Job, n: int, r: int, report: Path) -> None:
-    key = f"s{n}-r{r}"
+def fix(
+    job: Job,
+    n: int,
+    r: int,
+    report: Path,
+    tag: str = "",
+    folder: Path | None = None,
+    label: str = "",
+) -> None:
+    tag, label = tag or f"s{n}", label or f"stage {n}"
+    folder = folder or job.scratch / f"stage{n}"
+    key = f"{tag}-r{r}"
     # the index holds the layer before the fix: the diff is the fix. A fix
     # stopped part way keeps the index it staged.
     if not job.state().get(f"{key}-staged"):
@@ -359,18 +381,67 @@ def fix(job: Job, n: int, r: int, report: Path) -> None:
     job.session(
         "fix",
         job.fixer(n),
-        f"stage {n} fix {r}",
+        f"{label} fix {r}",
         given=job.given("fix", n, [report, job.scratch / "decisions.md"]),
         stage=n,
         report=report,
     )
-    job.clean(n, f"fix {r}")
-    diff = subprocess.run(
+    job.clean(n, f"fix {r}" if tag == f"s{n}" else f"{label} fix {r}")
+    diff = staged_diff(job)
+    (folder / f"fix-{r}.diff").write_text(diff)
+    job.mark(f"{key}-fix")
+    job.progress(f"{label} fix {r}: {diff.count(chr(10))} diff lines, check 0 errors")
+
+
+def staged_diff(job: Job) -> str:
+    return subprocess.run(
         ["git", "diff", "--", "modules"], cwd=job.wt, capture_output=True, text=True
     ).stdout
-    (job.scratch / f"stage{n}" / f"fix-{r}.diff").write_text(diff)
-    job.mark(f"{key}-fix")
-    job.progress(f"stage {n} fix {r}: {diff.count(chr(10))} diff lines, check 0 errors")
+
+
+def decide(job: Job) -> None:
+    """A fresh session answers the digest's questions, and diff reviews check
+    its edits under the stopping rule, as concepts.md `## Stages` gives."""
+    digest = job.wt / "modules" / job.module / "review" / f"{job.topic}-{job.sub}-L{job.level}.md"
+    folder = job.scratch / "decide"
+    folder.mkdir(exist_ok=True)
+    if not job.state().get("decide-write"):
+        asked = digest.read_text().split("## Log")[0]
+        if "## For you" not in asked or "Nothing." in asked.split("## For you")[1][:40]:
+            job.mark("decide")
+            job.progress("decide: no question")
+            return
+        if not job.state().get("decide-staged"):
+            subprocess.run(["git", "add", "-A", "modules"], cwd=job.wt, check=True)
+            job.mark("decide-staged")
+        shown = [digest, job.scratch / "decisions.md"]
+        job.session(
+            "decide",
+            job.models["reviewer"],
+            "decide",
+            given=job.given("decide", 3, shown),
+            digest=digest,
+        )
+        job.clean(3, "decide")
+        diff = staged_diff(job)
+        (folder / "fix-0.diff").write_text(diff)
+        job.mark("decide-write")
+        job.progress(f"decide: {diff.count(chr(10))} diff lines, check 0 errors")
+    for r in range(1, MAX_ROUNDS + 1):
+        report = folder / f"review-{r}.md"
+        counts = job.state().get(f"d-r{r}-review")
+        if counts is None:
+            counts = review(job, 3, r, False, folder, tag="d", folder=folder, label="decide")
+        if sum(counts) == 0:
+            break
+        if not job.state().get(f"d-r{r}-fix"):
+            fix(job, 3, r, report, tag="d", folder=folder, label="decide")
+        if counts[0] == 0:
+            break
+    else:
+        raise Failed(f"decide: {MAX_ROUNDS} rounds and still a WRONG finding")
+    job.mark("decide")
+    job.progress("decide ends")
 
 
 def solve(job: Job, out: Path) -> None:

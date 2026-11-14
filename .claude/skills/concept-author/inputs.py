@@ -44,7 +44,7 @@ def docs(engine: Path, role: str, stage: int) -> list[tuple[str, str]]:
         return [*parts, (f"{CONCEPTS} `## Stages` (the approval)", stages)]
     parts.append((f"{SKILL} `## Stage {stage}`", section(skill, f"## Stage {stage}:")))
     parts += [(f"{CONCEPTS} `{h}`", section(concepts, h)) for h in STAGE_CONCEPTS[stage]]
-    if role in ("fix", "fix-check"):
+    if role in ("fix", "fix-check", "decide"):
         parts.append((f"{CONCEPTS} `## Stages` (the approval)", stages))
     if stage == 1:
         heads = ["## Facts and execution", "## Concepts"]

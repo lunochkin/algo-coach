@@ -144,13 +144,14 @@ def write(args: argparse.Namespace, topic: str, sub: str, title: str) -> str:
     if not first.startswith("DONE"):
         return f"{sub}: {first}"
     git("add", f"modules/{args.module}", cwd=wt)
-    git(
-        "commit",
-        "-q",
-        "-m",
-        f"feat({args.module}): write {topic}/{sub} at level {args.level}",
-        cwd=wt,
+    if not git("status", "--porcelain", cwd=wt):
+        return f"{sub}: DONE"
+    subject = (
+        f"fix({args.module}): decide the questions of {topic}/{sub}"
+        if args.decide
+        else f"feat({args.module}): write {topic}/{sub} at level {args.level}"
     )
+    git("commit", "-q", "-m", subject, cwd=wt)
     return f"{sub}: DONE"
 
 
@@ -183,7 +184,12 @@ def schedule(args: argparse.Namespace, main_wt: Path, subs: list, needs: dict) -
     # the pilot wrote these at levels 0 and 1 by hand
     finished = done | ({"control-flow", "functions"} if args.level <= 1 else set())
     known = {s for _, s, _ in subs}
-    todo = [x for x in subs if x[1] not in finished and (not args.only or x[1] in args.only)]
+    # --decide takes subtopics already written through the decide step
+    todo = [
+        x
+        for x in subs
+        if (args.decide or x[1] not in finished) and (not args.only or x[1] in args.only)
+    ]
     failed: set[str] = set()
     running: dict[cf.Future[str], str] = {}
 
@@ -274,10 +280,13 @@ def main() -> None:
     p.add_argument("--shadow", action="store_true", help="run each review again as shadow.py gives")
     p.add_argument("--stop-after", type=int, default=3, help="the last stage, for a trial")
     p.add_argument("--status", action="store_true")
+    p.add_argument("--decide", action="store_true", help="decide the --only subtopics' questions")
     args = p.parse_args()
     (args.runs / "logs").mkdir(parents=True, exist_ok=True)
     if args.status:
         return status(args)
+    if args.decide and not args.only:
+        p.error("--decide needs --only")
     main_wt, subs, needs = setup(args)
     if not args.setup_only:
         schedule(args, main_wt, subs, needs)
