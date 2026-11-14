@@ -71,6 +71,22 @@ the model a step runs on, to the stopping rule, or to what reaches the author.
                     └────────────────────────────────────────────────────┘
 ```
 
+`run.py --relevel` is a second path, over every written subtopic at once:
+
+```
+ assess (Opus): every claim, one table → proposed.json
+        │
+        ▼
+ verify (Opus, fresh): agree or drop each move → verified.json
+        │  only agreed moves go on
+        ▼
+ per subtopic with moves, on a branch of its own:
+   apply (Opus) → module check → diff review loop → merge into py-auto
+        │
+        ▼
+ run.py --release
+```
+
 - Each stage runs at most two full reviews, then reviews of the last fix's
   diff, until one finds no WRONG. That review's other findings are fixed with
   no further review.

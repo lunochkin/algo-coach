@@ -115,7 +115,7 @@ class Job:
         f = self.fields(**extra)
         text = (BRIEFS / f"{brief}.md").read_text().format(**f)
         # the solver's agents and the judge read their own files alone
-        if brief not in ("solve", "form", "judge"):
+        if brief not in ("solve", "form", "judge", "relevel-assess", "relevel-verify"):
             text = (BRIEFS / "common.md").read_text().format(**f) + text + given
         while True:
             start = log.stat().st_size if log.exists() else 0
@@ -438,21 +438,55 @@ def decide(job: Job) -> None:
         (folder / "fix-0.diff").write_text(diff)
         job.mark("decide-write")
         job.progress(f"decide: {diff.count(chr(10))} diff lines, check 0 errors")
+    diff_rounds(job, folder, "d", "decide")
+    job.mark("decide")
+    job.progress("decide ends")
+
+
+def diff_rounds(job: Job, folder: Path, tag: str, label: str) -> None:
+    """Review the edits in folder/fix-0.diff, and each fix after them, until a
+    review finds no WRONG."""
     for r in range(1, MAX_ROUNDS + 1):
         report = folder / f"review-{r}.md"
-        counts = job.state().get(f"d-r{r}-review")
+        counts = job.state().get(f"{tag}-r{r}-review")
         if counts is None:
-            counts = review(job, 3, r, False, folder, tag="d", folder=folder, label="decide")
+            counts = review(job, 3, r, False, folder, tag=tag, folder=folder, label=label)
         if sum(counts) == 0:
             break
-        if not job.state().get(f"d-r{r}-fix"):
-            fix(job, 3, r, report, tag="d", folder=folder, label="decide")
+        if not job.state().get(f"{tag}-r{r}-fix"):
+            fix(job, 3, r, report, tag=tag, folder=folder, label=label)
         if counts[0] == 0:
             break
     else:
-        raise Failed(f"decide: {MAX_ROUNDS} rounds and still a WRONG finding")
-    job.mark("decide")
-    job.progress("decide ends")
+        raise Failed(f"{label}: {MAX_ROUNDS} rounds and still a WRONG finding")
+
+
+def relevel(job: Job, moves: Path) -> None:
+    """Apply a subtopic's agreed level moves, as concepts.md
+    `### Re-levelling` step 3 gives, and review the change on its diff."""
+    digest = job.wt / "modules" / job.module / "review" / f"{job.topic}-{job.sub}-L{job.level}.md"
+    folder = job.scratch / "relevel"
+    folder.mkdir(exist_ok=True)
+    if not job.state().get("rl-write"):
+        if not job.state().get("rl-staged"):
+            subprocess.run(["git", "add", "-A", "modules"], cwd=job.wt, check=True)
+            job.mark("rl-staged")
+        job.session(
+            "relevel-apply",
+            job.models["reviewer"],
+            "relevel",
+            given=job.given("decide", 3, [moves, digest]),
+            moves=moves,
+            digest=digest,
+        )
+        job.clean(3, "relevel")
+        diff = staged_diff(job)
+        (folder / "fix-0.diff").write_text(diff)
+        job.mark("rl-write")
+        job.progress(f"relevel: {diff.count(chr(10))} diff lines, check 0 errors")
+    diff_rounds(job, folder, "rl", "relevel")
+    job.mark("relevel")
+    job.progress("relevel ends")
 
 
 def solve(job: Job, out: Path) -> None:

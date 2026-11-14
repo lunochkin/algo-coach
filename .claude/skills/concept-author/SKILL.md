@@ -202,6 +202,12 @@ nohup uv run python .claude/skills/concept-author/run.py --level 0 \
   subtopic whose digest reads `DONE` is committed there, the pre-commit hook
   running the module check, and merged into `py-auto`. A run never touches
   `main`.
+- **Re-levelling.** `run.py --relevel` re-levels the written concepts,
+  as `concepts.md` `### Re-levelling` gives. An assess session proposes
+  moves from a table of every claim, a fresh verify session keeps the moves
+  it agrees with, and each subtopic with agreed moves is changed on a branch
+  of its own, with diff reviews, then merged into `py-auto`. The proposals
+  and the verdicts stay in `../py-runs/relevel/`.
 - **Releasing.** `run.py --release`, given when the author says, merges
   `py-auto` into the content repository's `main` and seeds the module
   locally, then in prod through the deployment repo's tunnel. It rewrites

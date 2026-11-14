@@ -13,12 +13,14 @@ background` gives the rest.
 
 import argparse
 import concurrent.futures as cf
+import json
 import re
 import subprocess
 import time
 import tomllib
 from pathlib import Path
 
+import inputs
 import stages
 
 from algo_coach.knowledge.authoring.status import LEVELS, Topic, markdown, topics
@@ -267,6 +269,95 @@ def status(args: argparse.Namespace) -> None:
         print(f"{topic}/{sub:24} {state:8} {quiet:5.0f} min ago  {last}{flag}")
 
 
+def written_concepts(base: Path) -> list[dict]:
+    """Every written concept of the module, with its topic and subtopic."""
+    found = []
+    for path in sorted((base / "concepts").rglob("*.toml")):
+        for c in tomllib.loads(path.read_text()).get("concept", []):
+            found.append({"topic": path.parent.name, "subtopic": path.stem} | c)
+    return found
+
+
+def relevel(args: argparse.Namespace) -> None:
+    """Re-level the written concepts, as concepts.md `### Re-levelling` gives:
+    one session proposes moves, a fresh one verifies them, and each subtopic
+    with agreed moves is changed on a branch of its own."""
+    main_wt = args.runs / "wt" / "integration"
+    base = main_wt / "modules" / args.module
+    folder = args.runs / "relevel"
+    folder.mkdir(exist_ok=True)
+    table = "\n".join(
+        f"| {c['topic']}/{c['subtopic']} | {c['id']} | {c['level']} | {c['claim']} |"
+        for c in written_concepts(base)
+    )
+    rubric = inputs.section((ENGINE / inputs.CONCEPTS).read_text(), "## Levels")
+    given = (
+        f"\n\n# Given\n\n## {inputs.CONCEPTS} `## Levels`\n\n````\n{rubric}\n````\n\n"
+        "## Every written concept\n\n| Subtopic | Concept | Level | Claim |\n|---|---|---|---|\n"
+        f"{table}\n"
+    )
+    job = stages.Job(
+        engine=ENGINE,
+        module=args.module,
+        topic="",
+        sub="relevel",
+        title="",
+        level=args.level,
+        wt=main_wt,
+        scratch=folder,
+        log=args.runs / "logs" / "relevel.log",
+        models={k: getattr(args, k) for k in MODELS},
+        hours=args.hours,
+    )
+    proposed, verified = folder / "proposed.json", folder / "verified.json"
+    if not proposed.exists():
+        job.session("relevel-assess", args.reviewer, "relevel assess", given=given, out=proposed)
+    moves = json.loads(proposed.read_text())
+    print(f"proposed: {len(moves)} moves")
+    if moves and not verified.exists():
+        shown = given + f"\n## {proposed}\n\n````\n{proposed.read_text()}\n````\n"
+        job.session(
+            "relevel-verify",
+            args.reviewer,
+            "relevel verify",
+            given=shown,
+            proposed=proposed,
+            out=verified,
+        )
+    verdicts = {v["concept"]: v for v in json.loads(verified.read_text())} if moves else {}
+    agreed = [m for m in moves if verdicts.get(m["concept"], {}).get("agree")]
+    print(f"agreed: {len(agreed)} moves, dropped {len(moves) - len(agreed)}")
+    for topic, sub in dict.fromkeys((m["topic"], m["subtopic"]) for m in agreed):
+        mine = folder / f"{sub}.json"
+        mine.write_text(json.dumps([m for m in agreed if m["subtopic"] == sub], indent=1))
+        name, branch = f"{sub}-relevel", f"{args.branch}-relevel-{sub}"
+        wt = args.runs / "wt" / name
+        if not wt.exists():
+            git("worktree", "add", "-B", branch, str(wt), args.branch)
+        scratch = args.runs / "scratch" / name
+        scratch.mkdir(parents=True, exist_ok=True)
+        sub_job = stages.Job(
+            engine=ENGINE,
+            module=args.module,
+            topic=topic,
+            sub=sub,
+            title=sub,
+            level=args.level,
+            wt=wt,
+            scratch=scratch,
+            log=args.runs / "logs" / f"{name}.log",
+            models=job.models,
+            hours=args.hours,
+        )
+        if not sub_job.state().get("relevel"):
+            stages.relevel(sub_job, mine)
+        git("add", f"modules/{args.module}", cwd=wt)
+        if git("status", "--porcelain", cwd=wt):
+            git("commit", "-q", "-m", f"fix({args.module}): re-level {topic}/{sub}", cwd=wt)
+        git("merge", "-q", "--no-ff", "--no-edit", branch, cwd=main_wt)
+        print(f"{sub}: re-levelled")
+
+
 def release(args: argparse.Namespace) -> None:
     """Merge the run's branch into the content repository's main, seed it
     locally and in prod, and rewrite STATUS.md and the TODO's counts."""
@@ -347,12 +438,15 @@ def main() -> None:
     p.add_argument(
         "--release", action="store_true", help="merge the run's branch into main and seed it"
     )
+    p.add_argument("--relevel", action="store_true", help="re-level the written concepts")
     args = p.parse_args()
     (args.runs / "logs").mkdir(parents=True, exist_ok=True)
     if args.status:
         return status(args)
     if args.release:
         return release(args)
+    if args.relevel:
+        return relevel(args)
     if args.decide and not args.only:
         p.error("--decide needs --only")
     main_wt, subs, needs = setup(args)

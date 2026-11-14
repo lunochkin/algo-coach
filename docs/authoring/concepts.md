@@ -109,6 +109,33 @@ section gives the test the stage 1 writer applies and the reviewer checks.
   hold. `round-half-even` and `try-except-catches` stand at level 0, and
   `default-evaluated-once` and `late-binding` at level 1, as this test gives.
 
+### Re-levelling
+
+A module's written concepts are re-levelled against `## Levels` in three
+steps, with no step waiting for the author.
+
+1. **Assess.** One session reads every written concept's claim and level,
+   across the module, and proposes moves. Each move names the rule of
+   `## Levels` it rests on. One session reads the whole module, since drift
+   between subtopics shows only when they are read side by side.
+2. **Verify.** A fresh session, which proposed nothing, judges each move
+   against `## Levels`. A move it disputes is dropped, and the concept keeps
+   its level. A wrong rejection leaves a concept where it was, which costs
+   less than a wrong move.
+3. **Apply.** Each subtopic with agreed moves is changed on a branch of its
+   own: the concept's `level`, its lesson section, and the examples and
+   questions the move breaks. Diff reviews check the change under the
+   stopping rule, and the subtopic's digest gains `## Re-levelled`.
+
+- **A moved question keeps its id**, as rule 20 of `rules.md` gives, so its
+  answers still count. It leaves one group and joins another, and coverage
+  shifts between the two.
+- **A question changes only where a move forces it.** A re-level is not a
+  further review of the subtopic.
+- **A move that would retire a question on the content repository's `main`
+  goes to the digest's `## For you`**, and is not applied. The answers users
+  gave to that question would stop counting.
+
 ## Lessons and questions
 
 - **A lesson section asserts only the claims of the concepts that name it.**
