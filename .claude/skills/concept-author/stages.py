@@ -116,7 +116,12 @@ class Job:
                     + ["--output-format", "stream-json", "--verbose"],
                     cwd=self.wt,
                     stdin=subprocess.DEVNULL,
-                    env=os.environ | {"CLAUDE_CODE_PRINT_BG_WAIT_CEILING_MS": "0"},
+                    # a step lasts minutes: a 1h cache write costs 2x, 5m 1.25x
+                    env=os.environ
+                    | {
+                        "CLAUDE_CODE_PRINT_BG_WAIT_CEILING_MS": "0",
+                        "CLAUDE_CODE_PROMPT_CACHE_TTL": "5m",
+                    },
                     stdout=out,
                     stderr=subprocess.STDOUT,
                     timeout=self.hours * 3600,
