@@ -21,6 +21,10 @@ from the second block on.
 
 `python` is rewritten as `py`, by concept, and replaced by it once `py` covers
 it. `docs/authoring/concepts.md` gives the order and the stages.
+A subtopic counts once it is released at the level, on the content
+repository's `main`. `run.py --release` in the `concept-author` skill rewrites
+the counts from `algo-coach module status py`, and ticks a topic once it is
+complete. `modules/py/STATUS.md` gives each subtopic.
 
 - [x] Close the open findings of the content repository's review of the Python
       module, as its `PLAN.md` gives, and seed the result
@@ -39,8 +43,15 @@ it. `docs/authoring/concepts.md` gives the order and the stages.
       shows
 - [ ] Fix the Details heading "Your answer", which the phone sometimes cuts
       to "Your", after a cold start too
-- [ ] Write `py`'s remaining subtopics by the skill, one at a time, until `py`
-      covers every subtopic `python` holds
+- [x] Release `py` `core` at level 0: 7 of 7 subtopics
+- [ ] Release `py` `stdlib` at level 0: 2 of 8 subtopics
+- [ ] Release `py` `internals` at level 0: 0 of 7 subtopics
+- [ ] Release `py` `typing` at level 0: 0 of 7 subtopics
+- [ ] Release `py` `runtime` at level 0: 0 of 6 subtopics
+- [ ] Release `py` `concurrency` at level 0: 0 of 5 subtopics
+- [ ] Release `py` `production` at level 0: 0 of 7 subtopics
+- [ ] Release `py` `data` at level 0: 0 of 5 subtopics
+- [ ] Release `py` `security` at level 0: 0 of 5 subtopics
 - [ ] Run each lesson block on every supported build, as each witness runs.
       Rule 2 runs a block on the project's interpreter alone
 - [ ] Show the misconception a wrong choice embodies in its feedback, on the

@@ -60,12 +60,19 @@ the model a step runs on, to the stopping rule, or to what reaches the author.
                     │  reads "For you": usually Nothing, or a change to  │
                     │  rules or the baseline, or one retiring a released │
                     │  question                                          │
-                    │  releases: py-auto → main → seed locally and prod  │
+                    │  says when to release                              │
+                    └─────────────────────────────┬──────────────────────┘
+                                                  ▼
+                    ┌────────────────────────────────────────────────────┐
+                    │ run.py --release (code)                            │
+                    │  merge py-auto into main, seed locally, seed prod  │
+                    │  through the tunnel, commit STATUS.md, rewrite the │
+                    │  counts of the Release items in docs/TODO.md       │
                     └────────────────────────────────────────────────────┘
 ```
 
 - Each stage runs at most two full reviews, then reviews of the last fix's
   diff, until one finds no WRONG. That review's other findings are fixed with
   no further review.
-- The module check, the confirmation of WRONG findings, the merges and the
-  resume from `state.json` are code, and no model runs them.
+- The module check, the confirmation of WRONG findings, the merges, the
+  release and the resume from `state.json` are code, and no model runs them.

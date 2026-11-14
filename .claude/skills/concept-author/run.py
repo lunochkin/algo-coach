@@ -13,12 +13,15 @@ background` gives the rest.
 
 import argparse
 import concurrent.futures as cf
+import re
 import subprocess
 import time
 import tomllib
 from pathlib import Path
 
 import stages
+
+from algo_coach.knowledge.authoring.status import LEVELS, Topic, markdown, topics
 
 ENGINE = Path(__file__).resolve().parents[3]
 CONTENT = ENGINE / "content"
@@ -264,6 +267,66 @@ def status(args: argparse.Namespace) -> None:
         print(f"{topic}/{sub:24} {state:8} {quiet:5.0f} min ago  {last}{flag}")
 
 
+def release(args: argparse.Namespace) -> None:
+    """Merge the run's branch into the content repository's main, seed it
+    locally and in prod, and rewrite STATUS.md and the TODO's counts."""
+    if git("rev-parse", "--abbrev-ref", "HEAD") != "main" or git("status", "--porcelain"):
+        raise SystemExit(f"release: {CONTENT} is not a clean checkout of main")
+    if git("log", "--oneline", f"main..{args.branch}"):
+        git("merge", "-q", "--no-ff", "--no-edit", args.branch)
+        print(f"merged {args.branch} into main")
+    base = CONTENT / "modules" / args.module
+    found = topics(base)
+    page = base / "STATUS.md"
+    page.write_text(markdown(args.module, found))
+    if git("status", "--porcelain"):
+        git("add", str(page.relative_to(CONTENT)))
+        git("commit", "-q", "-m", f"chore({args.module}): refresh the status")
+        print("STATUS.md refreshed")
+    seed = ["seed", "knowledge", f"content/modules/{args.module}"]
+    for where, argv in [
+        ("local", ["just", "seed-module", args.module]),
+        ("prod", ["just", "prod", *seed]),
+    ]:
+        done = subprocess.run(argv, cwd=ENGINE, capture_output=True, text=True)
+        last = (done.stdout + done.stderr).strip().splitlines()[-1:] or [""]
+        if done.returncode:
+            # prod needs the deployment repo's tunnel, which nothing here opens
+            print(f"{where}: not seeded: {last[0]}")
+            if where == "local":
+                return
+        else:
+            print(f"{where}: seeded")
+    counted = todo(args.module, found)
+    print(f"TODO: {counted} counts rewritten, left uncommitted" if counted else "TODO: no count")
+
+
+def todo(module: str, found: list[Topic]) -> int:
+    """Rewrite each 'Release `<module>` `<topic>` at level <n>: k of m
+    subtopics' item of the TODO, and tick it once k is m."""
+    path = ENGINE / "docs" / "TODO.md"
+    tally = {(t.slug, n): (t.done(n), len(t.subtopics)) for t in found for n in LEVELS}
+    item = re.compile(
+        rf"^- \[[ x]\] Release `{module}` `([\w-]+)` at level (\d): \d+ of \d+ subtopics", re.M
+    )
+    count = 0
+
+    def counted(m: re.Match[str]) -> str:
+        nonlocal count
+        if (m[1], int(m[2])) not in tally:
+            return m[0]
+        done, total = tally[m[1], int(m[2])]
+        count += 1
+        mark = "x" if done == total else " "
+        return (
+            f"- [{mark}] Release `{module}` `{m[1]}` at level {m[2]}: {done} of {total} subtopics"
+        )
+
+    text = path.read_text()
+    path.write_text(item.sub(counted, text))
+    return count
+
+
 def main() -> None:
     p = argparse.ArgumentParser()
     p.add_argument("--module", default="py")
@@ -281,10 +344,15 @@ def main() -> None:
     p.add_argument("--stop-after", type=int, default=3, help="the last stage, for a trial")
     p.add_argument("--status", action="store_true")
     p.add_argument("--decide", action="store_true", help="decide the --only subtopics' questions")
+    p.add_argument(
+        "--release", action="store_true", help="merge the run's branch into main and seed it"
+    )
     args = p.parse_args()
     (args.runs / "logs").mkdir(parents=True, exist_ok=True)
     if args.status:
         return status(args)
+    if args.release:
+        return release(args)
     if args.decide and not args.only:
         p.error("--decide needs --only")
     main_wt, subs, needs = setup(args)

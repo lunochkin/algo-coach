@@ -200,8 +200,14 @@ nohup uv run python .claude/skills/concept-author/run.py --level 0 \
   and a worktree of it in `../py-runs/wt/integration`. Each subtopic is
   written in a worktree of its own, on a branch cut from `py-auto`. A
   subtopic whose digest reads `DONE` is committed there, the pre-commit hook
-  running the module check, and merged into `py-auto`. `main` is never
-  touched: the author reads the digests and merges `py-auto`.
+  running the module check, and merged into `py-auto`. A run never touches
+  `main`.
+- **Releasing.** `run.py --release`, given when the author says, merges
+  `py-auto` into the content repository's `main` and seeds the module
+  locally, then in prod through the deployment repo's tunnel. It rewrites
+  `modules/py/STATUS.md` from `algo-coach module status py` and commits it.
+  It also rewrites each `Release` item's count in `docs/TODO.md`, ticking a
+  complete topic, and leaves that change for a commit the author asks for.
 - **Order.** A subtopic starts once every subtopic it `needs` is merged, at
   most `--jobs` at a time. One that fails, or a step running past
   `--hours`, stops the subtopics needing it, which the report marks as
