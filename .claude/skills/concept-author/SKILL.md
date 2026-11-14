@@ -20,8 +20,10 @@ Read both files, and the module's `CLAUDE.md`, before the first step.
 
 ## Roles
 
-- **The author of the module** is the user. The user approves each stage and
-  decides each disputed scope.
+- **The author of the module** is the user, who approves by exception, as
+  `concepts.md` `## Stages` gives. A session applies each recommended fix
+  and records it in the subtopic's digest, and writes there what it must
+  ask instead of stopping to ask.
 - **The writer** is one agent per step. It is given the brief below and the
   layer above, never the layer it replaces: a fresh generation reads no
   earlier version of its own file. The session may write a step itself when
@@ -34,11 +36,20 @@ Every agent runs code from the engine repo root with `uv run`, and runs
 `uv run algo-coach module check <module>` before it reports. A reviewer
 judges no prose line's width, since markdown reflows prose.
 
+A reviewer runs the check first and checks nothing the check reports by
+itself: the witnesses and the snippets against their outputs, line widths
+and snippet lengths, names and literals shared with a section, a key at
+the centre of its choices, a `why` opening with its verdict, a `short`
+reply of yes or no, the concept and lesson records, and every refusal the
+seed makes. The reviewer reads the check's warnings and judges them, and
+spends its time on what only a reader can judge.
+
 Each stage ends on `concepts.md`'s stopping rule: a full review finds nothing
-WRONG, the other findings are fixed in place, and each later round reviews
-the last fix pass on its diff (rule 23), until a diff review finds nothing
-WRONG and no DEFECT. Keep a copy of the layer before each fix pass, and the
-reports, in a scratchpad folder of the stage's own.
+WRONG, or two full reviews have run, the other findings are fixed in place,
+and each later round reviews the last fix pass on its diff (rule 23), until
+a diff review finds nothing WRONG and no DEFECT. Keep a copy of the layer
+before each fix pass, and the reports, in a scratchpad folder of the
+stage's own.
 
 ## Stage 1: concepts
 
@@ -62,12 +73,13 @@ reports, in a scratchpad folder of the stage's own.
    text is false in every case the claim's scope reaches, and that each
    witness uses only the baseline and earlier concepts. For each
    misconception, name an output the claim gives and the misconception does
-   not, from code using only the baseline and earlier concepts. Sort each finding as
-   WRONG (false), GAP (a clause or misconception missing) or STYLE.
+   not, from code using only the baseline and earlier concepts. Sort each
+   finding as WRONG (false), GAP (a clause or misconception missing) or
+   STYLE.
 3. **Fix**, then repeat 2 with a fresh reviewer until a review finds no
-   WRONG. Bring the disputed scopes to the user, then ask for approval.
-   Record the approval in the file's header, with its date and the scopes
-   the user decided.
+   WRONG. Record each scope decided, and each disputed one, in the digest.
+   The concept file's header records the stage's date and the digest's
+   name.
 
 ## Stage 2: lessons
 
@@ -109,16 +121,47 @@ reports, in a scratchpad folder of the stage's own.
      the concept states, and none opens with "Right:" or "Wrong:", since the
      client marks each choice.
 2. **Solve.** Run the `solver` skill over the new bank, and hand its
-   findings to the reviewer of step 3 as findings to verify. The solver
-   answers without the key, so it catches a wrong or ambiguous key that a
-   reviewer reading the key passes.
+   findings to the reviewer of step 3 as findings to verify. The form pass
+   runs on every choice question. The answer pass runs on the questions
+   whose key no interpreter proves, `principle` and `pattern`, since the
+   check already proves an `output` or `debug` key by running it.
 3. **Review.** Brief: check every question against rules 1–25, the question
    bullets of `concepts.md` and the writer's checklist. Run every snippet.
    Compare each question with its section yourself. For each rule 15
    finding, name a new task, and check that task against the section too:
    two proposed tasks repeated a section in the pilot. Sort findings as
    WRONG, DEFECT or STYLE, with concept and lesson findings apart.
-4. **Fix** in place from the review. A concept or lesson finding goes to the
-   user at the end of the stage, which goes on without the change. In the pilot, the review's new task per
-   question removed every repeated example that two fresh generations had
-   kept.
+4. **Fix** in place from the review. A concept or lesson finding is decided
+   as `concepts.md` gives: applied and recorded in the digest, or written
+   there as a question for the user, the stage going on without it. In the
+   pilot, the review's new task per question removed every repeated example
+   that two fresh generations had kept.
+
+## Running in the background
+
+`run.py` beside this file writes a module's subtopics with no session
+attending, one level at a time, as `concepts.md` `## Stages` allows once the
+author approves by exception.
+
+```bash
+nohup uv run python .claude/skills/concept-author/run.py --level 0 --jobs 2 \
+    > ../py-runs/run-L0.out 2>&1 &
+```
+
+- **Where the work goes.** The content repository gets a branch, `py-auto`,
+  and a worktree of it in `../py-runs/wt/integration`. Each subtopic is
+  written in a worktree of its own, on a branch cut from `py-auto`, by one
+  `claude -p` session given `brief.md`. A subtopic whose digest reads `DONE`
+  is committed there, the pre-commit hook running the module check, and
+  merged into `py-auto`. `main` is never touched: the author reads the
+  digests and merges `py-auto`.
+- **Order.** A subtopic starts once every subtopic it `needs` is merged, at
+  most `--jobs` at a time. One that fails, or runs past `--hours`, stops the
+  subtopics needing it, which the report marks as skipped.
+- **Watching and stopping.** `../py-runs/report-L<level>.md` gains a line
+  per subtopic, and `../py-runs/logs/` holds each session's output. Creating
+  `../py-runs/STOP` starts no new subtopic and lets the running ones finish.
+  Running the same command again resumes: a subtopic with a digest on
+  `py-auto` is skipped.
+- **Before a long run,** write one subtopic with `--only <sub>` and read its
+  digest, since a fault in the brief repeats in every subtopic.
