@@ -122,10 +122,24 @@ def _expire(_signum: int, _frame: FrameType | None) -> None:
     raise Expired
 
 
+def answered(code: str, args: list[Any], cap_ms: int, repeats: int) -> dict[str, Any]:
+    """`execute`, so a child always has a result to write: the cap firing in
+    the window before its timer was disarmed is a timeout, and anything else
+    escaping the report, such as memory spent on a deep traceback, a crash."""
+    try:
+        return execute(code, args, cap_ms, repeats)
+    except Expired:
+        signal.setitimer(signal.ITIMER_REAL, 0)
+        return {"outcome": TIMEOUT, "value": None, "elapsed_ms": None}
+    except BaseException as error:
+        signal.setitimer(signal.ITIMER_REAL, 0)
+        return crashed(None, f"{type(error).__name__} while reporting the crash")
+
+
 def case(code: str, args: list[Any], cap_ms: int, repeats: int, result_path: str) -> None:
     """One case in a child the local runner forked for it."""
     _isolate()
-    result = execute(code, args, cap_ms, repeats)
+    result = answered(code, args, cap_ms, repeats)
     with open(result_path, "w") as handle:
         json.dump(result, handle)
 
@@ -171,7 +185,7 @@ def forked(code: str, args: list[Any], cap_ms: int, repeats: int) -> dict[str, A
             os.close(read)
             _isolate()
             _limit()
-            result = execute(code, args, cap_ms, repeats)
+            result = answered(code, args, cap_ms, repeats)
             with os.fdopen(write, "w") as channel:
                 channel.write(json.dumps(result) + "\n")
         finally:
