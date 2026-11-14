@@ -116,7 +116,8 @@ class Job:
         text = (BRIEFS / f"{brief}.md").read_text().format(**f)
         # the solver's agents and the judge read their own files alone
         if brief not in ("solve", "form", "judge", "relevel-assess", "relevel-verify"):
-            text = (BRIEFS / "common.md").read_text().format(**f) + text + given
+            text = (BRIEFS / "common.md").read_text().format(**f) + text
+        text += given
         while True:
             start = log.stat().st_size if log.exists() else 0
             with log.open("a") as out:
