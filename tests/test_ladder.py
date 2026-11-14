@@ -97,6 +97,33 @@ def test_the_fill_is_least_recently_attempted_first(database):
     assert [one.problem.id for one in resolved.rungs] == ["p-old", "p-new"]
 
 
+def test_an_easy_problem_fills_first_where_no_rung_is_easy(database):
+    """Ordered by attempts alone, a full ladder can hold no problem that
+    applies the form unchanged while the corpus holds one."""
+    held = a_card(database, size=2, selector={"difficulty": ["easy", "medium"]})
+    problems = [
+        problem(f"p-{one}", techniques=[TECHNIQUE]).model_copy(update={"difficulty": "medium"})
+        for one in range(3)
+    ] + [problem("p-easy", techniques=[TECHNIQUE]).model_copy(update={"difficulty": "easy"})]
+
+    resolved = ladder(held, problems, [], [], [])
+
+    assert [one.problem.id for one in resolved.rungs] == ["p-easy", "p-0"]
+
+
+def test_no_easy_rung_is_reserved_where_the_selector_admits_none(database):
+    """The reservation serves the selector's own levels, and adds none."""
+    held = a_card(database, size=1, selector={"difficulty": ["medium", "hard"]})
+    problems = [
+        problem("p-medium", techniques=[TECHNIQUE]).model_copy(update={"difficulty": "medium"}),
+        problem("p-easy", techniques=[TECHNIQUE]).model_copy(update={"difficulty": "easy"}),
+    ]
+
+    resolved = ladder(held, problems, [], [], [])
+
+    assert [one.problem.id for one in resolved.rungs] == ["p-medium"]
+
+
 def test_a_retired_problem_fills_no_rung(database):
     """A defective problem was never a fair test, so it neither covers a
     template nor fills the ladder out."""

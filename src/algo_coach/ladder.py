@@ -15,7 +15,15 @@ from algo_coach.board import candidates
 from algo_coach.log import CardRunLog
 from algo_coach.matches import coverage
 from algo_coach.mint import card_run
-from algo_coach.schema import Attempt, Card, CardRun, Problem, Solution, TemplateMatch
+from algo_coach.schema import (
+    Attempt,
+    Card,
+    CardRun,
+    Problem,
+    ProblemDifficulty,
+    Solution,
+    TemplateMatch,
+)
 
 # how many probes a start draws. One until use says otherwise, which
 # `flows.md` names as deferred
@@ -188,6 +196,12 @@ def ladder(
     ]
     # out to `size`, and never past a core template the corpus does not cover
     fill = [one for one in offered if one.id not in covering]
+    if ProblemDifficulty.EASY in card.selector.difficulty and not any(
+        rung.problem.difficulty == ProblemDifficulty.EASY for rung in rungs
+    ):
+        # `content.md`: a ladder whose selector admits easy holds an easy rung
+        easy = [one for one in fill if one.difficulty == ProblemDifficulty.EASY]
+        fill = easy[:1] + [one for one in fill if one not in easy[:1]]
     rungs += [
         Rung(problem=one, templates=[], required=False, solved=one.id in done)
         for one in fill[: max(0, card.selector.size - len(rungs))]
