@@ -131,8 +131,6 @@ export const cardsOffered = (n: number) => (n === 1 ? 'Card:' : 'Cards:');
 export const NO_DIFFICULTY = 'no difficulty';
 
 // the phone's own settings and sign-in: `pages.md`, The two clients
-export const ENGINE_ADDRESS = 'Engine address';
-export const ADDRESS_HINT = 'An address such as https://example.invalid';
 export const DEVICE_NAME = 'Device name';
 export const DEVICE_NAME_RULE = 'Letters, digits, - and _ only';
 export const REMINDER_HOUR = 'Reminder hour (0–23)';

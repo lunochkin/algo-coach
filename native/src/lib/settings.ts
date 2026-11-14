@@ -3,7 +3,7 @@ import * as SecureStore from 'expo-secure-store';
 import { getMeta, setMeta } from './db';
 
 export interface Settings {
-  origin: string; // the engine the app syncs with, e.g. https://example.invalid
+  origin: string; // the engine the app syncs with, fixed when the app is built
   device: string;
   reminderHour: number;
 }
@@ -27,7 +27,8 @@ export async function loadSettings(): Promise<Settings> {
     courseOrder: ___,
     ...saved
   } = raw ? (JSON.parse(raw) as Partial<Settings> & Legacy) : {};
-  return { ...DEFAULTS, ...saved, origin: saved.origin || DEFAULTS.origin };
+  // the build names the engine: an address an earlier build saved is dropped
+  return { ...DEFAULTS, ...saved, origin: DEFAULTS.origin };
 }
 
 // kept on the device before the settings and the module order became records of the log

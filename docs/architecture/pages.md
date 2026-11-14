@@ -42,9 +42,9 @@ those steps at low fidelity.
   the Study settings, the daily limit on new questions and the exam size.
   A reader of either client then finds a standing choice in the same place.
 - **A study setting is a record of the user's log**, so a change on one
-  client stands on the other. `knowledge.md` gives the records. The engine's
-  address, the device name and the reminder hour are about one phone, and
-  stay on the phone's screen alone.
+  client stands on the other. `knowledge.md` gives the records. The device
+  name and the reminder hour are about one phone, and stay on the phone's
+  screen alone.
 - **Problems is marked on the listing alone.** A picked problem is a step down
   from the board, from a technique or from a card, so Practice stays marked on
   it and the way back names where the pick came from.
@@ -541,7 +541,7 @@ what it offers. The inventory is the list both clients build to.
 | Sign out, naming unsent records | the account menu and the settings page | the account menu and Settings | same |
 | Revoke a signed-in device | the signed-in devices | the signed-in devices | same |
 | Choose the colour scheme | the switch in the navigation | Settings | by platform |
-| Set the engine's address, the device name or the reminder hour | none | Settings | phone only |
+| Set the device name or the reminder hour | none | Settings | phone only |
 
 - **The phone's sitting holds the statement and the editor as two tabs**,
   under one bar holding the clock, its press and End. The editor stays
@@ -632,9 +632,14 @@ what it offers. The inventory is the list both clients build to.
   holds a light and dark switch in its navigation, where a reader at a desk
   reaches it. The phone keeps the choice on the device and the web keeps it in
   the browser, since the choice is about the screen rather than the account.
-- **The engine's address, the device name and the reminder hour are
-  phone only.** Each one is about one phone, and the web reaches the engine
-  it was served from.
+- **The device name and the reminder hour are phone only.** Each one is
+  about one phone.
+- **Each build of the phone names the engine it syncs with, and no screen
+  changes it.** The release build reads the address from `native/.env` when
+  it is built. The dev build reaches the local engine at `localhost:8000`,
+  which `just native-dev` forwards over USB. An address saved on the phone
+  could go wrong, and a wrong one blocks the sign-in that would open
+  Settings. The web reaches the engine it was served from.
 
 ### To fix
 

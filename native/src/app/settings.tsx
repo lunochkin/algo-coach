@@ -23,8 +23,6 @@ import {
   SYNC_NOW,
   waitingToSend,
   PRIVACY_LINK,
-  ENGINE_ADDRESS,
-  ADDRESS_HINT,
   DEVICE_NAME,
   DEVICE_NAME_RULE,
   REMINDER_HOUR,
@@ -36,7 +34,6 @@ import {
   SIGNED_IN_DEVICES,
   validReminderHour,
   validDeviceName,
-  validOrigin,
   COLOUR_SCHEME,
   SCHEME_CHOICES,
 } from '@algo-coach/core';
@@ -57,7 +54,6 @@ export default function SettingsScreen() {
   const signOut = useSignOut();
   const stored: Record<SettingName, number> = { new_per_day: st.newPerDay, exam_size: st.examSize };
   const [form, setForm] = useState({
-    origin: st.settings.origin,
     device: st.settings.device,
     new_per_day: String(st.newPerDay),
     exam_size: String(st.examSize),
@@ -79,7 +75,6 @@ export default function SettingsScreen() {
 
   useEffect(() => {
     setForm({
-      origin: st.settings.origin,
       device: st.settings.device,
       new_per_day: String(st.newPerDay),
       exam_size: String(st.examSize),
@@ -91,10 +86,8 @@ export default function SettingsScreen() {
   const hour = Number(form.reminderHour);
   const hourOk = validReminderHour(hour);
   const deviceOk = validDeviceName(form.device);
-  const originOk = validOrigin(form.origin);
-  const valid = study.valid && hourOk && deviceOk && originOk;
+  const valid = study.valid && hourOk && deviceOk;
   const changed =
-    form.origin.trim() !== st.settings.origin ||
     form.device !== st.settings.device ||
     hour !== st.settings.reminderHour ||
     study.changed.length > 0;
@@ -103,7 +96,6 @@ export default function SettingsScreen() {
     if (!valid) return;
     await st.updateSettings({
       ...st.settings,
-      origin: form.origin.trim(),
       device: form.device,
       reminderHour: hour,
     });
@@ -138,8 +130,6 @@ export default function SettingsScreen() {
         keyboardShouldPersistTaps="handled"
       >
         <Heading title={ACCOUNT} />
-        {field('origin', ENGINE_ADDRESS)}
-        {!originOk ? <HelperText type="error">{ADDRESS_HINT}</HelperText> : null}
         <View style={styles.row}>
           {st.hasToken ? (
             <View style={{ flex: 1 }}>
