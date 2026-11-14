@@ -35,6 +35,7 @@ def reviews(job, n: int, r: int, kind: str, given: str, scope: str, report: Path
             stage=n,
             scope=scope,
             report=mine,
+            cases=mine.with_name(f"{mine.stem}-cases.py"),
         )
         if mine.exists():
             out = folder / f"review-{r}.{name}.json"

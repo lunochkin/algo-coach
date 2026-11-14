@@ -20,6 +20,10 @@ BRIEFS = Path(__file__).parent / "briefs"
 MAX_FULL = 2
 MAX_ROUNDS = 6
 COUNTS = re.compile(r"^COUNTS WRONG=(\d+) DEFECT=(\d+) STYLE=(\d+)")
+# a finding line opening on its severity, as a bullet or a numbered item
+FINDING_WRONG = re.compile(r"^\s*(?:[-*]|\d+\.)\s+\**WRONG\b")
+CASE_NAMED = re.compile(r"\[case ([\w.-]+)\]")
+CASE_HOLDS = re.compile(r"^CASE ([\w.-]+) HOLDS\b", re.M)
 LAYERS = {
     1: "the concept file concepts/{topic}/{sub}.toml, the lesson files graph.toml names "
     "for this subtopic as headings alone, and the subtopic's entries in course.toml "
@@ -273,17 +277,75 @@ def review(job: Job, n: int, r: int, full: bool, solver: Path) -> list[int]:
     # a session stopped part way may have left half a report
     report.unlink(missing_ok=True)
     step = f"stage {n} review {r} ({kind})"
+    cases = cases_of(report)
+    cases.unlink(missing_ok=True)
     job.session(
-        "review", job.models["reviewer"], step, given=given, stage=n, scope=scope, report=report
+        "review",
+        job.models["reviewer"],
+        step,
+        given=given,
+        stage=n,
+        scope=scope,
+        report=report,
+        cases=cases,
     )
     first = report.read_text().splitlines()[0] if report.exists() else ""
     if not (m := COUNTS.match(first)):
         raise Failed(f"stage {n} review {r}: no COUNTS line")
     counts = list(map(int, m.groups()))
+    if counts[0]:
+        counts = confirm(job, report, cases, counts, step)
     if job.shadow:
         shadow.reviews(job, n, r, kind, given, scope, report)
     job.mark(f"s{n}-r{r}-review", counts)
     job.progress(f"{step}: {counts[0]} WRONG, {counts[1]} DEFECT, {counts[2]} STYLE")
+    return counts
+
+
+def cases_of(report: Path) -> Path:
+    return report.with_name(f"{report.stem}-cases.py")
+
+
+def confirm(job: Job, report: Path, cases: Path, counts: list[int], step: str) -> list[int]:
+    """Demote to DEFECT each WRONG whose named case does not hold when the
+    run executes the reviewer's script, and rewrite the report's counts."""
+    held: set[str] = set()
+    if cases.exists():
+        done = subprocess.run(
+            ["uv", "run", "python", str(cases)],
+            cwd=job.engine,
+            capture_output=True,
+            text=True,
+            timeout=600,
+        )
+        held = set(CASE_HOLDS.findall(done.stdout))
+    lines = report.read_text().splitlines()
+    demoted = unverified = 0
+    author = False
+    for i, line in enumerate(lines):
+        if line.startswith("## "):
+            # a finding left open for the author is not counted, so not checked
+            author = line.startswith("## Open for the author")
+        if author or not FINDING_WRONG.match(line):
+            continue
+        if "[no case]" in line:
+            unverified += 1
+            continue
+        named = CASE_NAMED.search(line)
+        if not named or named[1] not in held:
+            lines[i] = FINDING_WRONG.sub(
+                lambda m: m[0].replace("WRONG", "DEFECT (a WRONG its case did not confirm)"),
+                line,
+                count=1,
+            )
+            demoted += 1
+    if demoted:
+        counts = [counts[0] - demoted, counts[1] + demoted, counts[2]]
+        lines[0] = "COUNTS WRONG={} DEFECT={} STYLE={}".format(*counts)
+        report.write_text("\n".join(lines) + "\n")
+    job.progress(
+        f"{step}: {demoted} WRONG demoted, unconfirmed by its case; {unverified} WRONG with no case"
+    )
     return counts
 
 

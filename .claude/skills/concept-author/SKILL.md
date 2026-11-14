@@ -167,6 +167,12 @@ nohup uv run python .claude/skills/concept-author/run.py --level 0 \
   DEFECT=<n> STYLE=<n>`, which the run reads to pick the next step. The run
   stages the module in git before each fix pass, so `git diff` is the
   fix's diff alone, and runs the module check after each writing step.
+- **A WRONG finding names the case that shows it.** The reviewer writes
+  each case into `review-<n>-cases.py` through a helper the brief gives,
+  and the run executes that script after the review. A WRONG finding whose
+  case is missing or does not hold is counted as a DEFECT, since only a
+  WRONG finding keeps a stage going. A finding no code can show says
+  `[no case]` and quotes its source.
 - **A small context.** A session starts in the subtopic's worktree, with
   no MCP server, no user settings and four tools: Bash, Read, Write and
   Edit. It starts at 9k tokens, against 46k for a session in the engine,
