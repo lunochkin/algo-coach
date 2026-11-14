@@ -128,8 +128,8 @@ without redefining them. Grouped by the file that specifies the record.
   remembers, since the engine holds no published problem to compare with.
 - **Copied**: reusing a published problem's example, values or wording. The
   gate the screen site rejects a draft by, and the retirement reason of a
-  problem it names. A published question retold in a new setting is not
-  copied.
+  problem it names. A published question retold in the engine's own words is
+  not copied.
 - **Blind site**: the site writing the reference from the statement alone.
 - **Inputs site**: the site writing the input generator.
 - **Input generator**: model-written code building an input of a given size and

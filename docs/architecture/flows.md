@@ -73,17 +73,24 @@ The order matters because each step can reject what came before.
   screen's call alone, rather than the four calls after it.
 - **The screen reads the statement and every declared case.** A published
   example reaches a draft as the worked example or as a case's arguments.
-- **A retold question is not copied.** An easy problem applies a template's
-  form unchanged, so its question is a published one in a new setting. The
-  screen rejects reused values and reused wording only.
+- **A retold question is not copied.** A question is free to reuse, and a
+  published statement's text and example values are not. An easy problem
+  applies a template's form unchanged, so its question is usually a published
+  one. The screen rejects reused values and reused wording only.
 - **The screen names the published problem it found**, in the site outcome's
   `detail`, so a reader can check the verdict. The record holds the name alone,
   never the published statement.
 - **The screen answers from memory, and a miss passes silently.** A model that
   does not remember a published example lets it through. Which configuration
   recalls the most is unmeasured.
-- **A copied draft is rejected, not held.** A second generator call writes a
-  different problem, so nothing would re-run this one.
+- **A copied draft is rejected, not held.** A second generator call writes
+  new values, so nothing would re-run this one.
+- **The generator is shown what the screen named on its template's earlier
+  drafts.** A rejected draft is never stored, so without the list the next call
+  receives the same prompt and reproduces the same published example. Each
+  `copied` site outcome's `detail` for the template is listed as an example to
+  avoid. On the greedy card, nine calls in a row reproduced the published
+  examples of Jump Game II, Gas Station and Remove K Digits.
 - **The problems already stored are screened by a replay**, `generate --replay
   --only screen`. They landed before the screen existed. A copy the replay
   names is retired by hand, as `copied`.
@@ -242,9 +249,12 @@ The order matters because each step can reject what came before.
 - **A run ends on what it reached, and prints no statement.** Each problem
   the run stored is a line naming the id, and `algo-coach problem <id>` reads
   one problem whole. Ten statements scroll the result out of the terminal.
-- **A statement may not name the domain its template's trigger names.** The
-  monotonic stack's trigger says "temperatures" and "a next warmer day". A
-  solver who recognises a problem has not derived its form.
+- **The first problem written for a template is the standard problem its
+  form is known by.** A learner meets the form first on the question it is
+  usually taught with. Many learners have not met that question, and the
+  later problems for the template train recognition. Each later problem asks a
+  question the earlier ones do not, in any setting, the trigger's own
+  included.
 - **Failing means two things on the cases written with the statement.** The
   first canonical is run before any expected value is settled, so it fails
   only by yielding no value on some case, and the draft is rejected. A

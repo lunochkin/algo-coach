@@ -14,6 +14,7 @@ from algo_coach.generation.checks import (
 )
 from algo_coach.generation.drafting import cleared, held, moved, swept
 from algo_coach.generation.generator import (
+    refused_for,
     written_for,
 )
 from algo_coach.generation.landing import Corpus, land
@@ -177,6 +178,8 @@ def write_problems(
             card,
             template,
             written,
+            # read per call: a draft this run rejected names its example too
+            refused=refused_for(outcomes.outcomes() if outcomes else [], template),
             bench=bench,
             cap_ms=cap_ms,
             notes=Notes(on_step, index=index, total=count),

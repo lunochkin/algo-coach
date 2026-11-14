@@ -2,6 +2,7 @@
 `flows.md` gives. Each step is asked again only where its own configuration or
 prompt hash moved."""
 
+from collections.abc import Sequence
 from dataclasses import dataclass, field, replace
 from time import monotonic
 
@@ -111,6 +112,7 @@ def write_one(
     template: Template,
     written: list[str],
     *,
+    refused: Sequence[str] = (),
     bench: Bench = BENCH,
     cap_ms: int = CAP_MS,
     notes: Notes = SILENT,
@@ -127,6 +129,7 @@ def write_one(
         template,
         written=written,
         aim=writing.aimed_difficulty,
+        refused=refused,
         configuration=bench.generator,
     )
     notes("statement", f"{generated.title!r}, {len(generated.cases)} case(s)", call)

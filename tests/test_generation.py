@@ -76,13 +76,13 @@ def test_the_entry_point_convention_is_stated():
     assert "`solve`" in SYSTEM
 
 
-def test_the_cue_s_own_settings_are_off_limits():
-    """The monotonic-stack cue says "temperatures", and the probe returned the
-    problem that cue was written from."""
+def test_the_first_problem_for_a_form_is_its_standard_one():
+    """A learner meets the form first on the question it is taught with, and
+    only its published text and values are off limits."""
     rule = " ".join(SYSTEM.split())
 
-    assert "Your statement uses none of them." in rule
-    assert "Choose a setting neither the cue nor the notes mentions." in rule
+    assert "write the standard problem the form is known by" in rule
+    assert "the cue's own included" in rule
 
 
 def draft(**overrides) -> str:

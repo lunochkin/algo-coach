@@ -16,8 +16,10 @@ from algo_coach.schema import (
     Card,
     Configuration,
     DraftCase,
+    Gate,
     Problem,
     ProblemDifficulty,
+    SiteOutcome,
     Template,
 )
 
@@ -86,15 +88,16 @@ for the numerator and the denominator, reduced. A floating-point value is
 compared bit for bit, and two correct solutions computing one in different
 orders disagree in the last bits, so the problem is then discarded.
 
-The cue and the notes name concrete settings so the form is recognisable: a
-domain, an object, a scenario. Your statement uses none of them. Such a setting
-is usually the published problem the cue was written from, and a solver who
-recognises that problem has not derived its form. Choose a setting neither the
-cue nor the notes mentions.
+Where nothing is listed as already written for this form, write the standard
+problem the form is known by: the question it is usually taught with, in your
+own words. A learner meets the form first on that question. Any setting will
+do, the cue's own included.
 
 Invent the worked example and every case. Do not reuse the example, the values
-or the wording of any published problem, even in a new setting. A solver who
-has met the published example recognises the answer before deriving it.
+or the wording of any published problem. A question is free to reuse, and a
+published statement's text and examples are not. Examples a screen found
+reused in earlier drafts for this form are listed after the brief, and your
+draft uses none of them.
 
 Any statements already written for this form are listed after the brief. Yours
 asks a different question. The same question in a new setting is a variant, and
@@ -130,6 +133,7 @@ def prompt(
     template: Template,
     written: Sequence[str] = (),
     aim: ProblemDifficulty | None = None,
+    refused: Sequence[str] = (),
 ) -> str:
     """The prompt: one form, and the technique it belongs to.
 
@@ -151,6 +155,7 @@ def prompt(
             *([SPEEDUP] if template.speedup else []),
             *aimed(aim),
             *already(written),
+            *reused(refused),
         ]
     )
 
@@ -170,6 +175,25 @@ def already(written: Sequence[str]) -> list[str]:
         "",
         "Already written for this form:",
         *(line for statement in written for line in ("<written>", statement, "</written>")),
+    ]
+
+
+def reused(refused: Sequence[str]) -> list[str]:
+    if not refused:
+        return []
+    return [
+        "",
+        "Rejected in earlier drafts for this form, as a published example reused:",
+        *(line for detail in refused for line in ("<reused>", detail, "</reused>")),
+    ]
+
+
+def refused_for(outcomes: Iterable[SiteOutcome], template: Template) -> list[str]:
+    # in the order they were written, so one log sends one prompt hash
+    return [
+        one.detail
+        for one in sorted(outcomes, key=lambda one: (one.created_at, one.id))
+        if one.gate is Gate.COPIED and one.target_template_id == template.id
     ]
 
 
@@ -297,6 +321,7 @@ def generate(
     *,
     written: Sequence[str] = (),
     aim: ProblemDifficulty | None = None,
+    refused: Sequence[str] = (),
     configuration: Configuration = GENERATOR_DEFAULT,
 ) -> tuple[Generated, Call]:
     # the call is returned beside the draft because the problem, the cases and
@@ -305,7 +330,7 @@ def generate(
         transport,
         log,
         system=SYSTEM,
-        content=prompt(card, template, written, aim),
+        content=prompt(card, template, written, aim, refused),
         schema=schema(),
         configuration=configuration,
         missing="no draft",

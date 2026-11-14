@@ -73,3 +73,45 @@ def test_a_copy_names_where_it_came_from():
     """A verdict naming no published problem cannot be checked by anyone."""
     with pytest.raises(ValidationError):
         Verdict(copied=True, published=None)
+
+
+def test_the_next_call_is_shown_the_example_a_copy_reused(database):
+    """A rejected draft is never stored, so without its screen's verdict the
+    next call is sent the same prompt and reproduces the same example."""
+    (one,) = seeded(database, card())
+    model = FakeWriter(generator=BUILDS, copied="Jump Game II: [2, 3, 1, 1, 4]")
+
+    write_problems(
+        model,
+        CallLog(database),
+        one,
+        one.templates[0],
+        Corpus.at(database),
+        count=2,
+        outcomes=OutcomeLog(database),
+        drafts=DraftStore(database),
+    )
+
+    first, second = model.prompts
+    assert "[2, 3, 1, 1, 4]" not in first
+    assert "[2, 3, 1, 1, 4]" in second
+
+
+def test_a_copy_on_another_template_is_not_shown(database):
+    """The examples listed are this form's alone: another form's published
+    problem is no likelier to recur here."""
+    run(database, FakeWriter(generator=BUILDS, copied="Gas Station: [1, 2, 3, 4, 5]"))
+    (one,) = seeded(database, card())
+    model = FakeWriter(generator=BUILDS)
+
+    write_problems(
+        model,
+        CallLog(database),
+        one,
+        one.templates[1],
+        Corpus.at(database),
+        outcomes=OutcomeLog(database),
+        drafts=DraftStore(database),
+    )
+
+    assert "Gas Station" not in model.prompts[0]

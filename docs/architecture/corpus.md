@@ -50,8 +50,8 @@ architecture, and `README.md` is the map.
   promotes to is an additive change when it comes.
 - **A statement's example and cases are the engine's own.** The generator's
   prompt forbids reusing the example, the values or the wording of a published
-  problem, and a published question retold in a new setting is accepted. The
-  screen site rejects a copy, and `flows.md` gives where it runs. The screen
+  problem. A published question retold in the engine's own words is accepted.
+  The screen site rejects a copy, and `flows.md` gives where it runs. The screen
   answers from the model's memory, since no repo may hold a published example
   to compare against.
 - **A problem is never edited, and only its status moves.** A statement that
