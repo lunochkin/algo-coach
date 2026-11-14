@@ -63,3 +63,11 @@ def test_the_brief_asks_for_a_value_that_compares_exactly():
     ratio in different orders disagree in the last bits."""
     assert "compared exactly" in SYSTEM
     assert "numerator and the denominator" in SYSTEM
+
+
+def test_a_reply_case_is_decoded_from_json_text():
+    """Strict structured output sends each case as text. A string answer
+    decodes to the string, which no later step decodes again."""
+    generated = read(draft(cases=[{"args": '["ab"]', "expected": '"ba"'}]))
+
+    assert [(one.args, one.expected) for one in generated.cases] == [(["ab"], "ba")]

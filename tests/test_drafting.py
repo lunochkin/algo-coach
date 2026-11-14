@@ -5,6 +5,7 @@ from matching import card, seeded, template
 from algo_coach.calls import CallLog
 from algo_coach.drafts import DraftStore
 from algo_coach.generation import Corpus, reject, write_problems
+from algo_coach.generation.drafting import moved
 from algo_coach.outcomes import OutcomeLog
 from algo_coach.problems import ProblemStore
 from algo_coach.schema import Draft, Gate, WritingState
@@ -232,3 +233,20 @@ def test_a_run_without_a_store_writes_no_draft(database):
     write_problems(FakeWriter(), CallLog(database), one, one.templates[0], Corpus.at(database))
 
     assert DraftStore(database).all() == []
+
+
+def test_a_draft_with_a_string_answer_moves_a_state():
+    """A decoded string answer re-validated by `moved` is not parsed as JSON a
+    second time, so a string-returning problem survives every step."""
+    draft = Draft.model_validate(
+        {
+            "id": "w1",
+            "title": "Reverse",
+            "statement": "Given s, return it reversed.",
+            "canonical": "def solve(s):\n    return s[::-1]\n",
+            "declared": [{"args": ["ab"], "expected": "ba"}, {"args": [""], "expected": ""}],
+            "difficulty": "easy",
+        }
+    )
+
+    assert moved(draft, WritingState.CHECKED).declared == draft.declared

@@ -96,7 +96,7 @@ class ProposedCase(BaseModel):
     @field_validator("args", mode="before")
     @classmethod
     def _decoded(cls, value: object) -> object:
-        # as `DraftCase`: strict structured output cannot express an
+        # as `GeneratedCase`: strict structured output cannot express an
         # unconstrained JSON value, so the arguments arrive as text
         return json.loads(value) if isinstance(value, str) else value
 

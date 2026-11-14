@@ -1,5 +1,3 @@
-import json
-
 from helpers import a_call
 
 from algo_coach.generation import Gate, agree, check, checks, stopped
@@ -13,8 +11,8 @@ CAP_MS = 1000
 
 def cases(*pairs) -> list[DraftCase]:
     """Cases as the generation call wrote them: the arguments, and the value
-    it declared `solve` returns. Both arrive as JSON text."""
-    return [DraftCase(args=json.dumps(list(args)), expected=json.dumps(one)) for args, one in pairs]
+    it declared `solve` returns, decoded."""
+    return [DraftCase(args=list(args), expected=one) for args, one in pairs]
 
 
 def checked(*pairs, canonical: str = DOUBLE, reference: str = TWICE, cap_ms: int = CAP_MS):

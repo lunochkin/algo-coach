@@ -1,4 +1,3 @@
-import json
 from collections.abc import Sequence
 from typing import Any
 
@@ -138,10 +137,8 @@ def _draft(
         fields[f"{site}_provenance"] = (
             None if call_id is None else configured({"call_id": call_id}, known)
         )
-    # back as JSON text, the shape the generator's answer arrives in: a string
-    # answer handed over as itself would be decoded a second time
     fields["declared"] = [
-        {"args": json.dumps(one["args"]), "expected": json.dumps(one["expected"])}
+        {"args": one["args"], "expected": one["expected"]}
         for one in declared
         if one["draft_id"] == row["id"]
     ]

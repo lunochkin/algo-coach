@@ -152,11 +152,11 @@ def test_a_revised_draft_holds_only_its_latest_cases(database):
 
 
 def test_a_declared_string_answer_reads_back(database):
-    """The generator sends an answer as JSON text, and a string answer must
-    not be decoded a second time when the draft is read back."""
+    """A string answer is a value once decoded, and reading it back does not
+    parse it as JSON a second time."""
     store = DraftStore(database)
     draft = make_draft(
-        declared=[{"args": '[["ab"]]', "expected": '"ba"'}, {"args": "[[]]", "expected": '""'}]
+        declared=[{"args": [["ab"]], "expected": "ba"}, {"args": [[]], "expected": ""}]
     )
     store.put(draft)
 

@@ -2,10 +2,11 @@
 the first test cases and how hard it is. One call for all of them."""
 
 import ast
+import json
 from collections.abc import Iterable, Sequence
 from typing import Any
 
-from pydantic import BaseModel, Field, model_validator
+from pydantic import BaseModel, Field, field_validator, model_validator
 
 from algo_coach.calls import CallLog, Transport
 from algo_coach.generation.contract import ALONE, ENTRY, POSITIONAL, RUNTIME, SIGNATURE
@@ -180,6 +181,15 @@ def notes(template: Template) -> list[str]:
     return ["Notes:", *(f"  {line}" for line in template.notes.splitlines())]
 
 
+class GeneratedCase(DraftCase):
+    @field_validator("args", "expected", mode="before")
+    @classmethod
+    def _decoded(cls, value: object) -> object:
+        # strict structured output cannot express an unconstrained JSON value,
+        # so the two arrive as text and are checked here, not by the provider
+        return json.loads(value) if isinstance(value, str) else value
+
+
 class Generated(BaseModel):
     """What one generation call returns, before anything has run. Apart from
     `Draft`, which is what the steps after it leave."""
@@ -189,7 +199,7 @@ class Generated(BaseModel):
     # the reference is a second call from the statement alone, so it is not
     # part of this reply
     canonical: str = Field(min_length=1)
-    cases: list[DraftCase] = Field(min_length=1)
+    cases: list[GeneratedCase] = Field(min_length=1)
     # asked for rather than derived: nothing else has read the problem yet
     difficulty: ProblemDifficulty
 

@@ -4,11 +4,10 @@ Working state rather than a log: a draft is revised in place and cleared at
 landing. `flows.md` gives the states and what a resume may not do.
 """
 
-import json
 from enum import StrEnum
 from typing import Any
 
-from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
+from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 from algo_coach.schema.case import ExpectedSource
 from algo_coach.schema.outcome import Gate
@@ -42,15 +41,10 @@ class DraftCase(BaseModel):
 
     # no id, no problem and no `expected_from`: none of the three exists until
     # the problem lands, and the reference recomputes `expected` before it does
+    # decoded values: a reply's text is decoded by `GeneratedCase`, since a
+    # stored string answer decoded again here would fail as JSON
     args: list[Any]
     expected: Any
-
-    @field_validator("args", "expected", mode="before")
-    @classmethod
-    def _decoded(cls, value: object) -> object:
-        # strict structured output cannot express an unconstrained JSON value,
-        # so the two arrive as text and are checked here, not by the provider
-        return json.loads(value) if isinstance(value, str) else value
 
 
 class SettledCase(BaseModel):

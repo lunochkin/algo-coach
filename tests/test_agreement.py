@@ -1,5 +1,3 @@
-import json
-
 import pytest
 from helpers import a_call
 
@@ -24,8 +22,8 @@ def cases(*args) -> list[list]:
 
 def declared(*pairs) -> list[DraftCase]:
     """Cases as the generation call wrote them, each carrying the value it
-    said `solve` returns. Both fields arrive as JSON text."""
-    return [DraftCase(args=json.dumps(list(args)), expected=json.dumps(one)) for args, one in pairs]
+    said `solve` returns, decoded."""
+    return [DraftCase(args=list(args), expected=one) for args, one in pairs]
 
 
 def test_a_canonical_answering_what_was_declared_reports_nothing():
