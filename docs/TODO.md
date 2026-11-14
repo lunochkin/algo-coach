@@ -687,6 +687,15 @@ one form its target named.
       expression in a code span, never TeX, and say so in `corpus.md`. A code
       span reads the same on both clients, where the phone reads TeX through a
       Unicode fallback. Triggered by the next generation sweep
+### Mutants for judging
+
+Four templates yield no judging item, since today's operators find nothing
+to change in a sort key, a call or a pointer rewiring.
+
+- [ ] Add statement-level operators for the judging build alone: swap two
+      assignments, drop a call around an argument, negate a key field. The
+      mutation loop keeps its operators, so no draft's survivors move
+
 ### Cases and verdicts
 
 - [ ] Choose how a case with several correct returns is decided, by a
