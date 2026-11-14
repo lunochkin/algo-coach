@@ -6,6 +6,7 @@ on:
   push:
     branches: [main]
   pull_request:
+  workflow_dispatch:
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -86,8 +87,9 @@ jobs:
   # compose file out of that image rather than cloning this repo.
   deploy:
     needs: check
-    # a pull request builds nothing: the push to main that merges it does
-    if: github.event_name == 'push'
+    # a pull request builds nothing: the push to main that merges it does, or
+    # a manual run on main
+    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     timeout-minutes: 20
     # a second push waits for this deploy rather than cancelling it halfway
