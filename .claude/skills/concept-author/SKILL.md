@@ -120,6 +120,8 @@ stage's own.
      predict, not something an unrelated fact rules out.
    - The key is not the one choice sharing a part with every other: at
      least one distractor differs from the key in two parts (rule 10).
+   - A choice predicting what a snippet does states the outcome alone, and
+     its reason goes in its `why` (rule 10).
    - Each `why` is true and explains its own choice. No `why` claims more than
      the concept states, and none opens with "Right:" or "Wrong:", since the
      client marks each choice.

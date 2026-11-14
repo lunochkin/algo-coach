@@ -106,6 +106,12 @@ The rules come from three review passes over the Python module in November
       a part the key lacks. In the pilot, a reader shown the choices alone
       found 22 keys of 97 this way. *check (in a module written by concept,
       a warning), review*
+    - A choice predicting what a snippet does states the outcome alone: what
+      it prints, what it raises, or that it runs. The reason goes in the
+      choice's `why`. A reason on some choices and not others marks a choice
+      by its form, and a reason taken from the section repeats the lesson
+      (rule 15). Two reviews of one bank asked for a reason, then for none.
+      *review*
 11. **Neither the prompt nor the code reveals the answer.** A snippet catches
     `Exception` and prints the type's name, rather than catching the exception
     the learner must type. An error message in the prompt does not name the
