@@ -8,7 +8,7 @@ from algo_coach.schema import Call, Card, Configuration, Problem, Solution, Temp
 
 MODEL = "openai/gpt-oss-120b"
 EFFORT = "medium"
-PIN = "deepinfra/bf16"
+PIN = "groq"
 # Greedy, as every machine record written into the log is.
 TEMPERATURE: float | None = 0.0
 

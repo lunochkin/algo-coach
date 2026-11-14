@@ -12,6 +12,10 @@ from algo_coach.calls.store import CallLog
 from algo_coach.calls.transport import Transport
 from algo_coach.schema import Call, Configuration
 
+# about twice the longest choice reply measured, 4,172 tokens: a reply stuck
+# emitting whitespace then stops at a quarter of the transport's own cap
+MAX_TOKENS = 8000
+
 
 def choice_schema(key: str, options: Sequence[str]) -> dict[str, Any]:
     return {
@@ -44,6 +48,7 @@ def offer(
         content=content,
         configuration=configuration,
         schema=choice_schema(key, options),
+        max_tokens=MAX_TOKENS,
     )
 
 

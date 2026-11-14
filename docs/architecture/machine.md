@@ -219,6 +219,15 @@ holds nothing about what the answer was for.
 - **Every request names one endpoint.** A provider that cannot honour the
   response schema is never chosen, and a request fails rather than falling back
   to a backend the record would not name.
+- **A strict schema can hold a reply in whitespace.** A grammar that permits
+  whitespace between tokens lets a model emit nothing else until the token cap.
+  On 2026-11-14 the matcher on `deepinfra/bf16` did this on 50 of 362 calls,
+  and a retry of the same prompt answered once in 38. `dekallm/bf16` stuck on 5
+  of 10 of those prompts, and `groq` on none, so the matcher is pinned to
+  `groq`.
+- **A choice reply is capped at 8,000 tokens**, about twice the longest one
+  measured. A reply stuck in whitespace on any endpoint then costs a quarter
+  of the transport's own cap of 32,000.
 - **The reasoning field holds what the call produced, not what was asked
   for.** A model that decides a question needs no thought returns none, and the
   empty field is a fact about the call rather than a gap in the record.

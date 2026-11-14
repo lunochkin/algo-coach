@@ -134,3 +134,13 @@ def test_the_call_is_recorded(database):
     (call,) = own(CallLog(database).all())
     assert json.loads(call.response)["templates"] == ["fixed-window"]
     assert call.provider == "fake"
+
+
+def test_a_reply_is_capped_below_the_transport(database):
+    """A strict schema can hold a reply in whitespace until the cap, and a
+    choice needs a fraction of the transport's 32,000 tokens."""
+    client = FakeTransport.answering(Verdict(["longest-valid-window"]))
+
+    read(database, client)
+
+    assert client.calls[0]["max_tokens"] == 8000
