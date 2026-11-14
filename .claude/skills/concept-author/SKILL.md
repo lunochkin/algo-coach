@@ -150,6 +150,7 @@ stage's own.
 
 ## Running in the background
 
+`workflow.md` beside this file draws the run as a diagram.
 `run.py` beside this file writes a module's subtopics with no session
 attending, one level at a time, as `concepts.md` `## Stages` allows once the
 author approves by exception.
