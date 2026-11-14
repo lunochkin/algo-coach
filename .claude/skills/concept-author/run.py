@@ -24,11 +24,13 @@ ENGINE = Path(__file__).resolve().parents[3]
 CONTENT = ENGINE / "content"
 # the subtopic py already wrote under another slug than python's
 RENAMED = {"functions-scope": "functions"}
-# the model of each role; the fixer's is on trial against a diff review
+# the model of each role. A stage 3 fix rewrites whole questions, and Haiku's
+# left the next diff review its own faults to find.
 MODELS = {
     "writer": "opus",
     "reviewer": "opus",
     "fixer": "haiku",
+    "fixer3": "sonnet",
     "solver": "opus",
     "form": "haiku",
     "digest": "sonnet",

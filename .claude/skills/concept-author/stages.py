@@ -78,6 +78,9 @@ class Job:
             "shared": self.scratch.parent.parent / f"author-L{self.level}.md",
         } | extra
 
+    def fixer(self, stage: int) -> str:
+        return self.models.get(f"fixer{stage}", self.models["fixer"])
+
     def given(self, role: str, stage: int, extra: list[Path] | None = None) -> str:
         module = self.wt / "modules" / self.module
         return inputs.given(self.engine, module, self.topic, self.sub, role, stage, extra or [])
@@ -169,7 +172,7 @@ class Job:
             return
         self.session(
             "fix-check",
-            self.models["fixer"],
+            self.fixer(stage),
             f"{step} check",
             given=self.given("fix-check", stage),
             stage=stage,
@@ -284,7 +287,7 @@ def fix(job: Job, n: int, r: int, report: Path) -> None:
         job.mark(f"{key}-staged")
     job.session(
         "fix",
-        job.models["fixer"],
+        job.fixer(n),
         f"stage {n} fix {r}",
         given=job.given("fix", n, [report, job.scratch / "decisions.md"]),
         stage=n,

@@ -174,10 +174,13 @@ nohup uv run python .claude/skills/concept-author/run.py --level 0 \
   the parts of the docs its step needs, the files it judges, and the
   check's output, so it spends no turn reading them.
 - **The models.** Opus writes, reviews and solves; Sonnet writes the
-  digest; Haiku reads the solver's form and fixes. A fix follows findings
-  written out in full, and a diff review reads every fix but the last. The
-  flags `--writer`, `--reviewer`, `--fixer`, `--solver`, `--form` and
-  `--digest` change a role's model. `scratch/<sub>-L<n>/tokens.tsv` holds
+  digest; Haiku reads the solver's form and fixes stages 1 and 2. A fix
+  there follows findings written out in full, and a diff review reads every
+  fix but the last. Sonnet fixes stage 3, since a stage 3 fix writes whole
+  questions anew: in `classes`, the diff review after Haiku's fix found six
+  DEFECTs, all on questions the fix rewrote. The flags `--writer`,
+  `--reviewer`, `--fixer`, `--fixer3`, `--solver`, `--form` and `--digest`
+  change a role's model. `scratch/<sub>-L<n>/tokens.tsv` holds
   each step's tokens and cost.
 - **Where the work goes.** The content repository gets a branch, `py-auto`,
   and a worktree of it in `../py-runs/wt/integration`. Each subtopic is
