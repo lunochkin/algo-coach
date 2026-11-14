@@ -156,10 +156,10 @@ A subtopic is written in three stages. A stage starts once the one before it
 meets the stopping rule.
 
 The author of the module approves by exception. A session applies each
-fix a review recommends and records the decision, and asks the author
-first only for what changes the subject taught or the rules. In the pilot
-the author approved the recommended fix nearly every time, so a question
-per fix cost the author's time and changed little.
+fix a review recommends and records the decision. A decide session answers
+the questions the stages leave, and only two kinds reach the author. In the
+pilot the author approved the recommended fix nearly every time, so a
+question per fix cost the author's time and changed little.
 
 - **A session decides alone, and records each decision in the subtopic's
   digest:** a fix that follows the written rules, a misconception added
@@ -170,17 +170,31 @@ per fix cost the author's time and changed little.
   the review's fix makes the claim true. The next review of the fix's diff
   checks the new wording. Waiting for the author left a false claim in the
   files: one subtopic held two after its first stage.
-- **A session asks the author first, and goes on without the change:** a
+- **A session leaves a question, and goes on without the change:** a
   claim reworded for any reason other than being false, a scope the
   reviewer and the writer dispute, a claim fix a diff review still
   disputes, and a change to `rules.md`, this file, a skill or the engine.
+- **A decide session answers the questions once the three stages end.** It
+  is a fresh session that wrote none of the subtopic's files. For each
+  question it applies the change, keeps the files as they are, or defers
+  the case to a later level. It reads the recommendation beside a question
+  as advice. A recommendation from the session that raised it once named
+  one construct outside the baseline, in an example that held four.
+- **A diff review checks the decide session's edits**, under the stopping
+  rule of every stage. A decision changes a claim or a question as a fix
+  does, and rule 23 holds for a fix.
+- **Two kinds of question still go to the author.** The first is a change
+  outside the subtopic's own files: `rules.md`, this file, a skill, the
+  engine, or the module's `CLAUDE.md` and its baseline. Such a change
+  reaches every later subtopic. The second is a change retiring a question
+  that is already on the content repository's `main`, since the answers
+  users gave to it stop counting.
 - **The digest** is `review/<topic>-<sub>-L<level>.md` in the module's
-  directory. It opens with `## For you`: at most three questions, ranked
-  as the list above gives them, a disputed scope first. The rest of the
-  digest is a log the author need not read: what was written, each
-  decision taken alone, and each scope deferred to a later level. The
-  author reads the `## For you` sections a topic at a time, and the
-  concept file's header records the topic's approval.
+  directory. It opens with `## For you`: the questions left for the author,
+  at most three, or `Nothing.`. `## Decided` follows, with one line per
+  question the decide session answered: the decision and its reason. The
+  rest of the digest is a log the author need not read: what was written,
+  each decision taken alone, and each scope deferred to a later level.
 - **A question about the rules, a skill or the engine** goes to one list
   for the whole run, beside its report, since one such question recurs
   across subtopics. The list holds each question once.
