@@ -225,9 +225,9 @@ seven new defects, which only a review of its diff found.
   further review. The module check still runs over that last fix pass. In
   the first subtopic written in the background, the diff reviews after the
   last wrong claim found one or two small defects each, at the cost of a
-  full round of review and fix every time. A fresh full review after each fix pass found
-  one wrong claim each time in prose the fix pass had just written, and a
-  review of the diff finds that prose too.
+  full round of review and fix every time. A fresh full review after each
+  fix pass found one wrong claim each time in prose the fix pass had just
+  written, and a review of the diff finds that prose too.
 - **A finding about an approved layer does not pause the stage.** The stage
   goes on without the change, and the author decides the finding at its
   end.
