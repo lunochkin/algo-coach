@@ -1,7 +1,7 @@
 import pytest
 from pydantic import ValidationError
 
-from algo_coach.schema import Card, ProblemDifficulty, Selector, Template, TemplateKind
+from climb.schema import Card, ProblemDifficulty, Selector, Template, TemplateKind
 
 
 def template(slug: str = "sliding-window", **kwargs) -> Template:

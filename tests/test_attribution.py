@@ -2,9 +2,9 @@ from datetime import UTC, datetime, timedelta
 
 from helpers import GENERATED, logged, stored_attempt
 
-from algo_coach.attempt_claims import resolve_techniques, standing_attempt_claims
-from algo_coach.log import AttemptLog
-from algo_coach.schema import (
+from climb.attempt_claims import resolve_techniques, standing_attempt_claims
+from climb.log import AttemptLog
+from climb.schema import (
     Attempt,
     AttemptClaim,
     ClaimSource,

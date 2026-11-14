@@ -6,7 +6,7 @@ import {
   QUESTIONS_PASSED,
   type ModuleRow as Row,
   moduleRowNote,
-} from '@algo-coach/core'
+} from '@climb/core'
 
 import { PickRow } from '@/components/PickRow'
 import { Tag } from '@/components/Tag'

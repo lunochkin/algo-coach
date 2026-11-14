@@ -15,7 +15,7 @@ import {
   revokeLabel,
   deviceTitle,
   revokeDevice,
-} from '@algo-coach/core';
+} from '@climb/core';
 import { described, engine } from '@/lib/engine';
 import { getToken } from '@/lib/settings';
 import { useStore } from '@/lib/store';

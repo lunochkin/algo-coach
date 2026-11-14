@@ -4,8 +4,8 @@ import pytest
 from helpers import PROVENANCE_FIELDS
 from pydantic import ValidationError
 
-from algo_coach.mint import generator_match
-from algo_coach.schema import MatchSource, TemplateMatch
+from climb.mint import generator_match
+from climb.schema import MatchSource, TemplateMatch
 
 
 def make_match(source: MatchSource, **overrides) -> TemplateMatch:

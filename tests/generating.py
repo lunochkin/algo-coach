@@ -4,8 +4,8 @@ and a reference call apart, and the reply each of them expects."""
 import json
 from dataclasses import dataclass, field
 
-from algo_coach.calls import Reply
-from algo_coach.generation import blind, discrimination, inputs, naive, screen
+from climb.calls import Reply
+from climb.generation import blind, discrimination, inputs, naive, screen
 
 CANONICAL = "def solve(xs):\n    return len(xs)\n"
 BLIND = "def solve(xs):\n    return sum(1 for _ in xs)\n"

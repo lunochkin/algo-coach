@@ -1,0 +1,63 @@
+"""A reply that names a subset of the candidates it was offered, which is how
+the classifier and the matcher both read. The candidates appear twice: the
+schema enforces them, and the prompt informs them, reasoning being
+unconstrained."""
+
+import json
+from collections.abc import Sequence
+from typing import Any
+
+from climb.calls.ask import ask
+from climb.calls.store import CallLog
+from climb.calls.transport import Transport
+from climb.schema import Call, Configuration
+
+# about twice the longest choice reply measured, 4,172 tokens: a reply stuck
+# emitting whitespace then stops at a quarter of the transport's own cap
+MAX_TOKENS = 8000
+
+
+def choice_schema(key: str, options: Sequence[str]) -> dict[str, Any]:
+    return {
+        "type": "object",
+        "properties": {
+            key: {"type": "array", "items": {"type": "string", "enum": list(options)}},
+        },
+        "required": [key],
+        "additionalProperties": False,
+    }
+
+
+def offer(
+    transport: Transport,
+    log: CallLog,
+    *,
+    system: str,
+    content: str,
+    key: str,
+    options: Sequence[str],
+    configuration: Configuration,
+) -> tuple[Call, str | None]:
+    """One request at the configuration, constrained to the options. What the
+    text means is the caller's: a cut-short reply is a verdict to one reader
+    and a failure to another."""
+    return ask(
+        transport,
+        log,
+        system=system,
+        content=content,
+        configuration=configuration,
+        schema=choice_schema(key, options),
+        max_tokens=MAX_TOKENS,
+    )
+
+
+def chosen(text: str, key: str, options: Sequence[str]) -> list[str]:
+    """The options the reply named, in the order offered. Checked against them
+    again: the schema's guarantee ends with the request, and an append-only log
+    has no later pass that fixes a bad name."""
+    named = set(json.loads(text)[key])
+    return [one for one in options if one in named]
+
+
+__all__ = ["choice_schema", "chosen", "offer"]

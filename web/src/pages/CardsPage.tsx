@@ -1,4 +1,4 @@
-import { cardEdges, depthSections, CARDS_TITLE, OF, CARDS_NONE, CARDS_NOTE } from '@algo-coach/core'
+import { cardEdges, depthSections, CARDS_TITLE, OF, CARDS_NONE, CARDS_NOTE } from '@climb/core'
 import { useState } from 'react'
 
 import { api } from '@/api/client'

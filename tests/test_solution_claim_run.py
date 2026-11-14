@@ -10,15 +10,15 @@ from helpers import (
     stored_problem,
 )
 
-from algo_coach.attempt_claims import ask as claim_one
-from algo_coach.calls import CallLog
-from algo_coach.classifier import request_hash
-from algo_coach.log import AttemptLog
-from algo_coach.mint import solution as mint_solution
-from algo_coach.schema import ClaimSource, SolutionRole
-from algo_coach.solution_claims import SolutionClaimLog, candidates, read, read_one
-from algo_coach.solutions import SolutionLog
-from algo_coach.techniques import codes
+from climb.attempt_claims import ask as claim_one
+from climb.calls import CallLog
+from climb.classifier import request_hash
+from climb.log import AttemptLog
+from climb.mint import solution as mint_solution
+from climb.schema import ClaimSource, SolutionRole
+from climb.solution_claims import SolutionClaimLog, candidates, read, read_one
+from climb.solutions import SolutionLog
+from climb.techniques import codes
 
 answering = FakeTransport.answering
 

@@ -6,7 +6,7 @@ import time
 from pathlib import Path
 from typing import Any
 
-from algo_coach.runner import child
+from climb.runner import child
 
 DOUBLE = "def solve(n):\n    return n * 2\n"
 # the script as the broker sends it: its source, run as `python -c`

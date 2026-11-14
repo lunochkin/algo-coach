@@ -3,7 +3,7 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { Pressable, type StyleProp, StyleSheet, View, type ViewStyle } from 'react-native';
 import { Divider, ProgressBar, Text, TouchableRipple, useTheme } from 'react-native-paper';
 
-import type { Stat } from '@algo-coach/core';
+import type { Stat } from '@climb/core';
 import { styles } from '@/ui/common';
 import { font, radius, space } from '@/ui/tokens';
 

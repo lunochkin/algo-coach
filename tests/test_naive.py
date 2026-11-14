@@ -6,11 +6,11 @@ from helpers import own
 from matching import card, seeded, template
 from pydantic import ValidationError
 
-from algo_coach.calls import CallLog, Reply
-from algo_coach.generation import GenerationError, Target, write_naive
-from algo_coach.generation.blind import SYSTEM as BLIND
-from algo_coach.generation.blind import prompt as blindly
-from algo_coach.generation.naive import (
+from climb.calls import CallLog, Reply
+from climb.generation import GenerationError, Target, write_naive
+from climb.generation.blind import SYSTEM as BLIND
+from climb.generation.blind import prompt as blindly
+from climb.generation.naive import (
     NAIVE_DEFAULT,
     SYSTEM,
     prompt,
@@ -18,7 +18,7 @@ from algo_coach.generation.naive import (
     request_hash,
     schema,
 )
-from algo_coach.schema import Configuration
+from climb.schema import Configuration
 
 STATEMENT = "Given a list of readings, return the widest stretch that stays fair."
 AVOIDING = "two indices walking one way over a window that never shrinks"

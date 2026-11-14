@@ -3,11 +3,11 @@ from datetime import UTC, datetime
 import pytest
 from helpers import PROVENANCE, logged, stored_problem
 
-from algo_coach.attempt_claims import standing_attempt_claims
-from algo_coach.log import AttemptLog, SittingStore
-from algo_coach.mint import classifier_claim
-from algo_coach.schema import Attempt, ClaimSource, Confidence, Sitting
-from algo_coach.sitting import Missing, Refused, claim, unclaimed
+from climb.attempt_claims import standing_attempt_claims
+from climb.log import AttemptLog, SittingStore
+from climb.mint import classifier_claim
+from climb.schema import Attempt, ClaimSource, Confidence, Sitting
+from climb.sitting import Missing, Refused, claim, unclaimed
 
 
 @pytest.fixture(autouse=True)

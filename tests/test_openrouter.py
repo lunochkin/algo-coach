@@ -2,7 +2,7 @@ from dataclasses import dataclass, field
 
 import pytest
 
-from algo_coach.calls import ROUTING, UNSENT, OpenRouter, ProviderError, Retry, openrouter, traced
+from climb.calls import ROUTING, UNSENT, OpenRouter, ProviderError, Retry, openrouter, traced
 
 
 @dataclass
@@ -212,7 +212,7 @@ def test_a_gateway_failure_is_waited_out_like_a_cap(monkeypatch):
     Reported upward, three of them in a row abort a backlog run over something
     that fixes itself."""
     slept: list[float] = []
-    monkeypatch.setattr("algo_coach.calls.openrouter.time.sleep", slept.append)
+    monkeypatch.setattr("climb.calls.openrouter.time.sleep", slept.append)
     api = client()
     broken = Completion([], provider=None)
     broken.error = {"message": "ext_proc failed", "code": 502}
@@ -232,7 +232,7 @@ def test_a_gateway_failure_is_waited_out_like_a_cap(monkeypatch):
 def test_a_choice_that_stopped_on_an_error_is_not_an_empty_verdict(monkeypatch):
     """Read as one it would be recorded as the model declining — a claim about
     the model rather than about the gateway between us and it."""
-    monkeypatch.setattr("algo_coach.calls.openrouter.time.sleep", lambda _: None)
+    monkeypatch.setattr("climb.calls.openrouter.time.sleep", lambda _: None)
     api = client(Message(content=None))
     api.chat.completions.reply.choices[0].finish_reason = "error"
     api.chat.completions.reply.error = {"message": "upstream died", "code": 503}
@@ -245,7 +245,7 @@ def test_a_rejected_schema_is_not_waited_out(monkeypatch):
     """Asking again answers the same way: the configuration is wrong, and the
     abort count is what should notice."""
     slept: list[float] = []
-    monkeypatch.setattr("algo_coach.calls.openrouter.time.sleep", slept.append)
+    monkeypatch.setattr("climb.calls.openrouter.time.sleep", slept.append)
     api = client()
     broken = Completion([], provider=None)
     broken.error = {"message": "json_schema not supported", "code": 405}
@@ -263,7 +263,7 @@ def test_a_rate_limit_is_waited_out_rather_than_reported(monkeypatch):
     """A per-minute cap is a fact about the endpoint. Reported upward it would
     spend a run's abort count on something that fixes itself."""
     slept: list[float] = []
-    monkeypatch.setattr("algo_coach.calls.openrouter.time.sleep", slept.append)
+    monkeypatch.setattr("climb.calls.openrouter.time.sleep", slept.append)
     api = client(raises=[Rejected(429), Rejected(429)])
 
     reply = OpenRouter(api)(
@@ -281,7 +281,7 @@ def test_a_rate_limit_is_waited_out_rather_than_reported(monkeypatch):
 def test_every_other_failure_is_raised_on_the_first_try(monkeypatch):
     """A bad key and a rejected schema do not improve by being asked again."""
     slept: list[float] = []
-    monkeypatch.setattr("algo_coach.calls.openrouter.time.sleep", slept.append)
+    monkeypatch.setattr("climb.calls.openrouter.time.sleep", slept.append)
     api = client(raises=[Rejected(401)])
 
     with pytest.raises(Rejected):
@@ -298,7 +298,7 @@ def test_a_404_naming_no_endpoints_is_asked_once_more(monkeypatch):
     """The router's list of endpoints moves under a pinned request, so this is
     state rather than a rejected request."""
     slept: list[float] = []
-    monkeypatch.setattr("algo_coach.calls.openrouter.time.sleep", slept.append)
+    monkeypatch.setattr("climb.calls.openrouter.time.sleep", slept.append)
     api = client(raises=[NotFound(NO_ENDPOINTS)])
 
     reply = OpenRouter(api)(
@@ -315,7 +315,7 @@ def test_a_model_that_does_not_exist_pays_one_extra_request(monkeypatch):
     """Nothing in the message separates a wrong id from a list that moved, so
     the one retry is what it costs before it fails."""
     slept: list[float] = []
-    monkeypatch.setattr("algo_coach.calls.openrouter.time.sleep", slept.append)
+    monkeypatch.setattr("climb.calls.openrouter.time.sleep", slept.append)
     api = client(raises=[NotFound(NO_ENDPOINTS)] * 4)
 
     with pytest.raises(NotFound):
@@ -329,7 +329,7 @@ def test_a_404_naming_something_else_is_raised_on_the_first_try(monkeypatch):
     """A path the router does not serve is a bad request, and asking again
     answers it the same way."""
     slept: list[float] = []
-    monkeypatch.setattr("algo_coach.calls.openrouter.time.sleep", slept.append)
+    monkeypatch.setattr("climb.calls.openrouter.time.sleep", slept.append)
     api = client(raises=[NotFound("Not found")])
 
     with pytest.raises(NotFound):
@@ -342,7 +342,7 @@ def test_a_404_naming_something_else_is_raised_on_the_first_try(monkeypatch):
 def test_an_unrouted_wait_reports_the_one_retry_it_will_make(monkeypatch):
     """A line saying 1 of 5 would promise four more waits the loop never
     makes."""
-    monkeypatch.setattr("algo_coach.calls.openrouter.time.sleep", lambda _: None)
+    monkeypatch.setattr("climb.calls.openrouter.time.sleep", lambda _: None)
     reported: list[Retry] = []
     api = client(raises=[NotFound(NO_ENDPOINTS)])
 
@@ -356,7 +356,7 @@ def test_an_unrouted_wait_reports_the_one_retry_it_will_make(monkeypatch):
 def test_a_cap_that_never_lifts_is_reported_in_the_end(monkeypatch):
     """The waits cover a minute between them; past that the endpoint is not
     rate limiting, it is refusing."""
-    monkeypatch.setattr("algo_coach.calls.openrouter.time.sleep", lambda _: None)
+    monkeypatch.setattr("climb.calls.openrouter.time.sleep", lambda _: None)
     api = client(raises=[Rejected(429)] * 5)
 
     with pytest.raises(Rejected):
@@ -432,7 +432,7 @@ def test_the_request_times_itself(monkeypatch):
 def test_a_failure_carries_what_the_loop_knows(monkeypatch):
     """The failure keeps its own type — every caller that catches one still
     catches the same thing — and the count rides on it."""
-    monkeypatch.setattr("algo_coach.calls.openrouter.time.sleep", lambda _: None)
+    monkeypatch.setattr("climb.calls.openrouter.time.sleep", lambda _: None)
     api = client(raises=[Rejected(429)] * 5)
 
     with pytest.raises(Rejected) as failure:
@@ -447,7 +447,7 @@ def test_a_wait_is_reported_while_it_is_being_waited_out(monkeypatch):
     """The call record says how many requests an answer took, and says it
     afterwards. A run held behind a cap is silent until then, and silence is
     what a slow model looks like."""
-    monkeypatch.setattr("algo_coach.calls.openrouter.time.sleep", lambda _: None)
+    monkeypatch.setattr("climb.calls.openrouter.time.sleep", lambda _: None)
     held: list[Retry] = []
     api = client(raises=[Rejected(429), Rejected(429)])
 
@@ -462,7 +462,7 @@ def test_a_wait_is_reported_while_it_is_being_waited_out(monkeypatch):
 def test_a_failure_nobody_waits_out_is_reported_by_nobody(monkeypatch):
     """The report is about the wait. A rejected key raises on the first try,
     and the run's own failure path is what says so."""
-    monkeypatch.setattr("algo_coach.calls.openrouter.time.sleep", lambda _: None)
+    monkeypatch.setattr("climb.calls.openrouter.time.sleep", lambda _: None)
     held: list[Retry] = []
     api = client(raises=[Rejected(401)])
 
@@ -475,7 +475,7 @@ def test_a_failure_nobody_waits_out_is_reported_by_nobody(monkeypatch):
 
 
 def test_an_answer_on_the_first_try_reports_nothing(monkeypatch):
-    monkeypatch.setattr("algo_coach.calls.openrouter.time.sleep", lambda _: None)
+    monkeypatch.setattr("climb.calls.openrouter.time.sleep", lambda _: None)
     held: list[Retry] = []
 
     OpenRouter(client(), on_retry=held.append)(
@@ -488,7 +488,7 @@ def test_an_answer_on_the_first_try_reports_nothing(monkeypatch):
 def test_a_gateway_failure_inside_a_200_is_reported_by_its_code(monkeypatch):
     """The same wait, reached by the other path: the router carrying the
     provider's failure in a body rather than a status."""
-    monkeypatch.setattr("algo_coach.calls.openrouter.time.sleep", lambda _: None)
+    monkeypatch.setattr("climb.calls.openrouter.time.sleep", lambda _: None)
     held: list[Retry] = []
     api = client()
     broken = Completion([], provider=None)
@@ -509,7 +509,7 @@ def test_a_gateway_failure_inside_a_200_is_reported_by_its_code(monkeypatch):
 def test_a_cap_that_never_lifts_is_reported_at_every_wait(monkeypatch):
     """One line per wait, so the last four minutes of a run read as four
     holds rather than as nothing happening."""
-    monkeypatch.setattr("algo_coach.calls.openrouter.time.sleep", lambda _: None)
+    monkeypatch.setattr("climb.calls.openrouter.time.sleep", lambda _: None)
     held: list[Retry] = []
     api = client(raises=[Rejected(429)] * 5)
 
@@ -526,7 +526,7 @@ def test_a_cap_that_never_lifts_is_reported_at_every_wait(monkeypatch):
 def test_a_transport_nobody_asked_to_report_still_waits(monkeypatch):
     """The callback is a report, never what makes the retry happen."""
     slept: list[float] = []
-    monkeypatch.setattr("algo_coach.calls.openrouter.time.sleep", slept.append)
+    monkeypatch.setattr("climb.calls.openrouter.time.sleep", slept.append)
     api = client(raises=[Rejected(429)])
 
     reply = OpenRouter(api)(

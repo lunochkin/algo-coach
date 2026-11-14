@@ -33,7 +33,7 @@ import {
   OF,
   SUBTOPIC_COLUMN,
   BACK_BOARD,
-} from '@algo-coach/core'
+} from '@climb/core'
 
 import { Loaded } from '@/components/Loaded'
 import { PageHeader } from '@/components/PageHeader'

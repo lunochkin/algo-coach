@@ -4,17 +4,17 @@ const POLICY = `# Privacy policy
 
 Last updated: 11 November 2026
 
-algo-coach is an app for practising algorithmic problem solving, used in a
+Climbance is an app for practising algorithmic problem solving, used in a
 browser and as an app on your phone, and access is by invitation. This page
-says what algo-coach stores about you, why it stores it, and who can read it.
+says what Climbance stores about you, why it stores it, and who can read it.
 
-algo-coach is run by Maksim Lunochkin. Write to
+Climbance is run by Maksim Lunochkin. Write to
 [maksim@lunochkin.com](mailto:maksim@lunochkin.com) with any request about this
 policy.
 
 ## Signing in
 
-You sign in through Google or GitHub, and algo-coach never sees a password.
+You sign in through Google or GitHub, and Climbance never sees a password.
 
 - The app asks the provider for your account's id and your verified email
   address, and nothing else.

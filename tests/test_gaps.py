@@ -1,9 +1,9 @@
 import pytest
 from matching import PROCEDURE, canonical, card, problem, seeded, template
 
-from algo_coach.matches import core, coverage, uncovered
-from algo_coach.mint import generator_match, user_match
-from algo_coach.schema import ProblemStatus, RetirementReason, SolutionRole
+from climb.matches import core, coverage, uncovered
+from climb.mint import generator_match, user_match
+from climb.schema import ProblemStatus, RetirementReason, SolutionRole
 
 
 @pytest.fixture

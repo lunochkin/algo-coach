@@ -5,15 +5,15 @@ import pytest
 from commands import connected
 from helpers import T0, FakeTransport, Verdict, attempt, logged, machine_claim, own, seed_problem
 
-from algo_coach.attempt_claims import classify_backlog, standing_attempt_claims
-from algo_coach.attempt_claims.run import Progress
-from algo_coach.calls import CallLog
-from algo_coach.classifier import DEFAULT, EFFORT, MODEL, ClassifierError, request_hash
-from algo_coach.log import AttemptLog
-from algo_coach.mint import user_claim
-from algo_coach.runs import ABORT_AFTER
-from algo_coach.schema import AttemptClaim, ClaimSource
-from algo_coach.solution_claims import load_problems
+from climb.attempt_claims import classify_backlog, standing_attempt_claims
+from climb.attempt_claims.run import Progress
+from climb.calls import CallLog
+from climb.classifier import DEFAULT, EFFORT, MODEL, ClassifierError, request_hash
+from climb.log import AttemptLog
+from climb.mint import user_claim
+from climb.runs import ABORT_AFTER
+from climb.schema import AttemptClaim, ClaimSource
+from climb.solution_claims import load_problems
 
 answering = FakeTransport.answering
 

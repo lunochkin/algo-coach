@@ -3,13 +3,13 @@ from datetime import UTC, datetime
 import pytest
 from helpers import PROVENANCE, stored_problem
 
-from algo_coach.cases import CaseLog
-from algo_coach.log import AttemptLog, SittingStore
-from algo_coach.mint import case
-from algo_coach.runner import runner
-from algo_coach.schema import CaseOutcome, Sitting
-from algo_coach.sitting import DRILL_CAP_MS, Missing, Refused, Submitted, submit
-from algo_coach.verifications import VerificationLog
+from climb.cases import CaseLog
+from climb.log import AttemptLog, SittingStore
+from climb.mint import case
+from climb.runner import runner
+from climb.schema import CaseOutcome, Sitting
+from climb.sitting import DRILL_CAP_MS, Missing, Refused, Submitted, submit
+from climb.verifications import VerificationLog
 
 STARTED = datetime(2026, 9, 10, 8, tzinfo=UTC)
 NINE = datetime(2026, 9, 10, 9, tzinfo=UTC)
@@ -151,7 +151,7 @@ def test_only_the_sitting_s_problem_decides(database):
 def test_the_run_is_capped_at_the_sitting_s_cap(database, monkeypatch):
     """Generation's cap sits well above the sitting's, and a submission is
     judged under the one the separating case was chosen against."""
-    monkeypatch.setattr("algo_coach.sitting.DRILL_CAP_MS", 50)
+    monkeypatch.setattr("climb.sitting.DRILL_CAP_MS", 50)
     slow = "import time\n\n\ndef solve(n):\n    time.sleep(0.5)\n    return n * 2\n"
 
     assert not Stores(database).submit(slow).solved

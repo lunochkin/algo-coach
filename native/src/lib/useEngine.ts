@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 
-import type { GetData, GetParams, GetPath } from '@algo-coach/core';
+import type { GetData, GetParams, GetPath } from '@climb/core';
 import { engine } from '@/lib/engine';
 import { getToken } from '@/lib/settings';
 import { useStore } from '@/lib/store';

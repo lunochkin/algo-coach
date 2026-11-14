@@ -13,7 +13,7 @@ import {
   showAllKb,
   caseLabel,
   cutValue,
-} from '@algo-coach/core'
+} from '@climb/core'
 
 import type { CaseResult, Submitted } from '@/api/client'
 import { PlainCode } from '@/components/PythonCode'

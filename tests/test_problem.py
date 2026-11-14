@@ -2,7 +2,7 @@ import pytest
 from helpers import GENERATED, PROVENANCE_FIELDS
 from pydantic import ValidationError
 
-from algo_coach.schema import Problem, ProblemStatus, RetirementReason
+from climb.schema import Problem, ProblemStatus, RetirementReason
 
 CONTENT = {
     "id": "p1",

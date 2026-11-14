@@ -5,7 +5,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 ARCHITECTURE = sorted((ROOT / "docs" / "architecture").glob("*.md"))
-SRC = ROOT / "src" / "algo_coach"
+SRC = ROOT / "src" / "climb"
 DOCS = [*sorted((ROOT / "docs").rglob("*.md")), ROOT / "README.md", ROOT / "CLAUDE.md"]
 PROSE_WIDTH = tomllib.loads((ROOT / "pyproject.toml").read_text())["tool"]["ruff"]["lint"][
     "pycodestyle"

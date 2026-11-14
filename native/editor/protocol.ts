@@ -1,4 +1,4 @@
-import type { EditorKey } from '@algo-coach/editor';
+import type { EditorKey } from '@climb/editor';
 
 // what the app and the editor page say to each other, one JSON message each
 

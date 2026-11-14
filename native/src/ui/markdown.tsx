@@ -3,7 +3,7 @@ import { Linking, View, type TextStyle, type ViewStyle } from 'react-native';
 import { Renderer, useMarkdown, type MarkedStyles } from 'react-native-marked';
 import { Text, useTheme, type MD3Theme } from 'react-native-paper';
 
-import { codeWraps, EXTERNAL_HINT, EXTERNAL_MARK, isExternal, spans } from '@algo-coach/core';
+import { codeWraps, EXTERNAL_HINT, EXTERNAL_MARK, isExternal, spans } from '@climb/core';
 
 import { withMath } from '@/lib/math';
 import { CodeBlock } from '@/ui/common';

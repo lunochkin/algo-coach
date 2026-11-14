@@ -25,7 +25,7 @@ import {
   submitToSitting,
   TOUCH_MS,
   touchSitting,
-} from '@algo-coach/core'
+} from '@climb/core'
 import { ChevronLeft } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
 import { Link, useSearchParams } from 'react-router'

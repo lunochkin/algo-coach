@@ -5,7 +5,7 @@ import {
   FORECAST_NOTE,
   forecastBarLabel,
   type ForecastView,
-} from '@algo-coach/core'
+} from '@climb/core'
 
 import { Panel } from '@/components/Panel'
 import { SectionHeading } from '@/components/SectionHeading'

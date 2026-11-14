@@ -1,4 +1,4 @@
-import { pythonEditing } from '@algo-coach/editor'
+import { pythonEditing } from '@climb/editor'
 import { defaultKeymap, historyKeymap, indentWithTab } from '@codemirror/commands'
 import { Compartment, EditorState } from '@codemirror/state'
 import { EditorView, keymap } from '@codemirror/view'

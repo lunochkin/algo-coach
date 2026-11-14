@@ -1,8 +1,8 @@
 from helpers import PROVENANCE_FIELDS, a_call
 
-from algo_coach.calls import CallLog
-from algo_coach.drafts import DraftStore
-from algo_coach.schema import Draft, ExpectedSource, Gate, WritingState
+from climb.calls import CallLog
+from climb.drafts import DraftStore
+from climb.schema import Draft, ExpectedSource, Gate, WritingState
 
 CONTENT = {
     "title": "Two Sum",

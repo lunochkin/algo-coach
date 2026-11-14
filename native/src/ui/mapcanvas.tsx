@@ -30,7 +30,7 @@ import {
   type ClusterBox,
   type Course,
   type EdgePath,
-} from '@algo-coach/core';
+} from '@climb/core';
 
 import { tones } from './common';
 

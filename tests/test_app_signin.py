@@ -7,9 +7,9 @@ import pytest
 from sqlalchemy import select, update
 from test_api_signin import browser, google_returns
 
-from algo_coach.api.apps import APP_REDIRECTS
-from algo_coach.log import Provider, hashed, invite
-from algo_coach.log.table import app_codes, app_tokens
+from climb.api.apps import APP_REDIRECTS
+from climb.log import Provider, hashed, invite
+from climb.log.table import app_codes, app_tokens
 
 VERIFIER = "v" * 43 + "-the-app-s-own-secret"
 CHALLENGE = (

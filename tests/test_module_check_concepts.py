@@ -3,7 +3,7 @@ from pathlib import Path
 
 from authoring import found, written
 
-from algo_coach.knowledge.authoring import check
+from climb.knowledge.authoring import check
 
 LESSON = "## While\n\n`while` tests its condition first.\n"
 

@@ -178,7 +178,7 @@ class Job:
 
     def check(self) -> list[str]:
         done = subprocess.run(
-            ["uv", "run", "algo-coach", "module", "check"]
+            ["uv", "run", "climb", "module", "check"]
             + ["--content", str(self.wt / "modules"), self.module],
             cwd=self.engine,
             capture_output=True,

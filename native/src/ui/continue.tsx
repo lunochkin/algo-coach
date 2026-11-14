@@ -15,7 +15,7 @@ import {
   queueStart,
   waitingOutside,
   continueAct,
-} from '@algo-coach/core';
+} from '@climb/core';
 import { useStore } from '@/lib/store';
 import { BottomBar, startQueue, styles, Press } from '@/ui/common';
 import { radius, space } from '@/ui/tokens';

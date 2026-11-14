@@ -23,7 +23,7 @@ from pathlib import Path
 import inputs
 import stages
 
-from algo_coach.knowledge.authoring.status import LEVELS, Topic, markdown, topics
+from climb.knowledge.authoring.status import LEVELS, Topic, markdown, topics
 
 ENGINE = Path(__file__).resolve().parents[3]
 CONTENT = ENGINE / "content"

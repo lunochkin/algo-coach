@@ -3,11 +3,11 @@ from generating import SLOW, FakeWriter
 from matching import card, seeded, template
 from pydantic import ValidationError
 
-from algo_coach.calls import CallLog
-from algo_coach.generation import BENCH, Bench, Corpus, write_problems
-from algo_coach.outcomes import OutcomeLog
-from algo_coach.problems import ProblemStore
-from algo_coach.schema import CallSite, Configuration, Gate, ProblemDifficulty, SiteOutcome
+from climb.calls import CallLog
+from climb.generation import BENCH, Bench, Corpus, write_problems
+from climb.outcomes import OutcomeLog
+from climb.problems import ProblemStore
+from climb.schema import CallSite, Configuration, Gate, ProblemDifficulty, SiteOutcome
 
 BUILDS = "def solve(size, seed):\n    return [list(range(size))]\n"
 # four mutation sites, where `len(xs)` has none: what makes the loop ask
@@ -288,7 +288,7 @@ def test_a_form_that_is_its_own_optimum_leaves_no_naive_solution_record(database
 def test_the_inputs_record_carries_the_size_the_search_found(database, monkeypatch):
     """What the site is scored on: the code it wrote is what the search ran to
     reach a size."""
-    monkeypatch.setattr("algo_coach.generation.timing.DRILL_CAP_MS", 60)
+    monkeypatch.setattr("climb.generation.timing.DRILL_CAP_MS", 60)
     model = FakeWriter(slow=SLOW, generator=BUILDS)
 
     _, _, outcomes = run(database, model, templates=[CLAIMS])
@@ -302,7 +302,7 @@ def test_the_inputs_record_carries_the_bound_the_search_ran_under(database, monk
     """A landed problem clears its draft, so the size the input generator
     reported is readable nowhere else and a separating size has nothing to be
     read against."""
-    monkeypatch.setattr("algo_coach.generation.timing.DRILL_CAP_MS", 60)
+    monkeypatch.setattr("climb.generation.timing.DRILL_CAP_MS", 60)
     model = FakeWriter(slow=SLOW, generator=BUILDS)
 
     _, _, outcomes = run(database, model, templates=[CLAIMS])
@@ -329,7 +329,7 @@ def test_a_bound_is_recorded_where_no_search_ran(database):
 def test_the_naive_solution_record_carries_the_search_it_was_judged_by(database, monkeypatch):
     """The search timed this answer against the canonical, so what it found is
     a verdict about the naive solution as much as about the input generator."""
-    monkeypatch.setattr("algo_coach.generation.timing.DRILL_CAP_MS", 60)
+    monkeypatch.setattr("climb.generation.timing.DRILL_CAP_MS", 60)
     model = FakeWriter(slow=SLOW, generator=BUILDS)
 
     _, _, outcomes = run(database, model, templates=[CLAIMS])

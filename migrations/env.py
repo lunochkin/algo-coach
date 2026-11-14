@@ -9,15 +9,15 @@ from alembic import context
 from dotenv import find_dotenv, load_dotenv
 from sqlalchemy import create_engine
 
-import algo_coach
-from algo_coach.storage import metadata
+import climb
+from climb.storage import metadata
 
 # every `table.py` under the package, so a store's new table reaches the
 # migration without a list here to update
-source = Path(algo_coach.__file__).parent
+source = Path(climb.__file__).parent
 for path in sorted(source.rglob("table.py")):
     parts = path.relative_to(source).with_suffix("").parts
-    importlib.import_module(".".join(("algo_coach", *parts)))
+    importlib.import_module(".".join(("climb", *parts)))
 
 
 def url() -> str:

@@ -4,7 +4,7 @@ import time
 
 import pytest
 
-from algo_coach.runner import STARTUP_MS, CaseRun, RunOutcome, as_json, defines_solve, run
+from climb.runner import STARTUP_MS, CaseRun, RunOutcome, as_json, defines_solve, run
 
 DOUBLE = "def solve(n):\n    return n * 2\n"
 

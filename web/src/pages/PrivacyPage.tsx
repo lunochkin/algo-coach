@@ -1,4 +1,4 @@
-import { privacyPolicy, privacyUpdated, BACK_SIGN_IN } from '@algo-coach/core'
+import { privacyPolicy, privacyUpdated, BACK_SIGN_IN } from '@climb/core'
 
 import { LOGIN } from '@/api/client'
 import { Markdown } from '@/components/Markdown'

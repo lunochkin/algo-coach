@@ -15,7 +15,7 @@ import {
   CANCEL,
   START_NOTE,
   type StartScope,
-} from '@algo-coach/core';
+} from '@climb/core';
 import { useStore } from '@/lib/store';
 import { startQueue, styles } from '@/ui/common';
 import { Sheet } from '@/ui/sheet';

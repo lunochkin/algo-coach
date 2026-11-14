@@ -8,12 +8,12 @@ from joserfc import jwt
 from joserfc.jwk import RSAKey
 from sqlalchemy import select
 
-from algo_coach.api import create_app
-from algo_coach.api.context import SESSION_COOKIE
-from algo_coach.api.signin import Client, SignIn
-from algo_coach.log import LIFETIME, Provider, hashed, invite
-from algo_coach.log.table import identities, sessions
-from algo_coach.storage import Database
+from climb.api import create_app
+from climb.api.context import SESSION_COOKIE
+from climb.api.signin import Client, SignIn
+from climb.log import LIFETIME, Provider, hashed, invite
+from climb.log.table import identities, sessions
+from climb.storage import Database
 
 ORIGIN = "http://localhost:5173"
 CLIENTS = {
@@ -311,8 +311,8 @@ def test_sign_in_is_configured_from_the_environment():
     environ = {
         "GITHUB_CLIENT_ID": "github-id",
         "GITHUB_CLIENT_SECRET": "github-secret",
-        "ALGO_COACH_ORIGIN": ORIGIN,
-        "ALGO_COACH_SECRET": "a-test-key",
+        "CLIMB_ORIGIN": ORIGIN,
+        "CLIMB_SECRET": "a-test-key",
     }
 
     configured = SignIn.from_environ(environ)
@@ -323,5 +323,5 @@ def test_sign_in_is_configured_from_the_environment():
 
 def test_a_provider_configured_without_the_origin_is_refused_at_start():
     """Found when the app is built, not at the first sign-in."""
-    with pytest.raises(ValueError, match="ALGO_COACH_ORIGIN"):
+    with pytest.raises(ValueError, match="CLIMB_ORIGIN"):
         SignIn.from_environ({"GOOGLE_CLIENT_ID": "google-id", "GOOGLE_CLIENT_SECRET": "s"})

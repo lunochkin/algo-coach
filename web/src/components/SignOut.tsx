@@ -1,7 +1,7 @@
 import { LogOut } from 'lucide-react'
 import { useState, type ReactNode } from 'react'
 
-import { SIGN_OUT, SIGN_OUT_TITLE, signOutWarning, STAY_SIGNED_IN } from '@algo-coach/core'
+import { SIGN_OUT, SIGN_OUT_TITLE, signOutWarning, STAY_SIGNED_IN } from '@climb/core'
 
 import {
   AlertDialog,

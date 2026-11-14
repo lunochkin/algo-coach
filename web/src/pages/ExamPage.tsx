@@ -43,7 +43,7 @@ import {
   BACK_CERTIFICATIONS,
   BACK_KNOWLEDGE,
   OF,
-} from '@algo-coach/core'
+} from '@climb/core'
 
 import { optionTile } from '@/components/optionTile'
 import { Choice } from '@/components/Choice'

@@ -2,7 +2,7 @@ import pytest
 from helpers import PROVENANCE_FIELDS, a_call
 from pydantic import ValidationError
 
-from algo_coach.schema import (
+from climb.schema import (
     Draft,
     ExpectedSource,
     Gate,

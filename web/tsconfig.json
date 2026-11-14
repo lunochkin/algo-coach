@@ -13,7 +13,7 @@
       "@/*": [
         "./src/*"
       ],
-      "@algo-coach/core/*": ["../packages/core/src/*"]
+      "@climb/core/*": ["../packages/core/src/*"]
     }
   }
 }

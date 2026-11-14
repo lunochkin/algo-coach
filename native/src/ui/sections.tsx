@@ -10,7 +10,7 @@ import {
 import { useTheme } from 'react-native-paper';
 import Svg, { Defs, LinearGradient, Rect, Stop } from 'react-native-svg';
 
-import { sectionOpened, sectionToggled } from '@algo-coach/core';
+import { sectionOpened, sectionToggled } from '@climb/core';
 import { Heading } from '@/ui/rows';
 import { Toggle } from '@/ui/toggle';
 import { space } from '@/ui/tokens';

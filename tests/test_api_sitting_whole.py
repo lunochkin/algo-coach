@@ -1,8 +1,8 @@
 import pytest
 from helpers import PROVENANCE, browsing, seed_problem
 
-from algo_coach.cases import CaseLog
-from algo_coach.mint import case
+from climb.cases import CaseLog
+from climb.mint import case
 
 USER = "u-4f9c2a"
 STATEMENT = "Double `n`.\n\n```python\ndef solve(n: int) -> int:\n```"

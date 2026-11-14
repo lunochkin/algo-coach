@@ -4,8 +4,8 @@ from datetime import UTC, datetime, timedelta
 from hypothesis import given
 from hypothesis import strategies as st
 
-from algo_coach.runner import agrees, as_json
-from algo_coach.standing import latest_by, standing
+from climb.runner import agrees, as_json
+from climb.standing import latest_by, standing
 
 json_values = st.recursive(
     st.none() | st.booleans() | st.integers() | st.floats(allow_nan=False) | st.text(),

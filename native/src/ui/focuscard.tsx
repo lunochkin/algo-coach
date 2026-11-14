@@ -26,7 +26,7 @@ import {
   focusTitle,
   STRICT,
   strictLabel,
-} from '@algo-coach/core';
+} from '@climb/core';
 
 import { styles, tones } from './common';
 import { Panel } from './rows';

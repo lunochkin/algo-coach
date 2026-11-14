@@ -1,4 +1,4 @@
-import type { EditorKey } from '@algo-coach/editor';
+import type { EditorKey } from '@climb/editor';
 
 // the app's own keyboard: what a key press does to the text and the caret.
 // The system keyboard hides the symbols code and a `short` reply are made of,

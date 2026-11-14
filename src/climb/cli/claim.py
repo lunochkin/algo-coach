@@ -1,0 +1,198 @@
+import argparse
+from collections.abc import Mapping, Sequence
+from textwrap import fill
+
+from climb.attempt_claims import (
+    against,
+    claim_by_hand,
+    claimable,
+    contested,
+    machine_claims_at,
+    revisable,
+    standing_attempt_claims,
+)
+from climb.classifier import request_hash
+from climb.cli.display import verdict
+from climb.cli.prompts import NONE, ask_choice, numbered
+from climb.cli.score import configurations
+from climb.cli.scoring import labels
+from climb.log import AttemptLog
+from climb.schema import Attempt, AttemptClaim, Confidence, Problem
+from climb.solution_claims import load_problems
+from climb.storage import Database
+from climb.techniques import criterion
+
+WIDTH = 100
+LEVELS = list(Confidence)
+
+
+def claim(args: argparse.Namespace, parser: argparse.ArgumentParser, root: Database) -> None:
+    """The drill loop's technique question, over attempts already in the log.
+
+    With `--revise`, the same question over what the hand pass already
+    answered.
+    """
+    log = AttemptLog(root)
+    problems = {problem.id: problem for problem in load_problems(root)}
+    claims = log.claims(args.user)
+    standing = standing_attempt_claims(claims)
+
+    if args.revise:
+        pool, machine_claims, names = disputed(args, parser, claims, log, problems, standing)
+    else:
+        if args.named or args.disputed is not None:
+            parser.exit(2, "claim: --model, --effort and --disputed need --revise\n")
+        pool, machine_claims, names = (
+            claimable(
+                log.attempts(args.user),
+                problems,
+                standing,
+                user_id=args.user,
+                technique=args.technique,
+                seed=args.seed,
+            ),
+            [],
+            [],
+        )
+    if not pool:
+        # "disputed" only where that is what emptied it: the revision pool is
+        # every claim by default.
+        left = "left to claim"
+        if args.revise:
+            left = "disputed" if args.disputed else "to revise"
+        # Zero: an empty pool is a completed query, and nothing disputed is
+        # what adjudication stops on. Misuse still exits 2.
+        parser.exit(0, f"claim: nothing {left} for {args.user}\n")
+
+    # Once, unlike the candidates: the levels are the same at every attempt.
+    print(f"\nconfidence: {numbered(LEVELS)}")
+    # `0` and `s` are the pair worth spelling out: one is a verdict about the
+    # code, the other leaves the attempt unanswered.
+    kept = "keeps the claim" if args.revise else "skips"
+    print(f"keys: numbers to name, 0 for {NONE}, s skips, enter {kept}, a stops.")
+
+    written = 0
+    for index, attempt in enumerate(pool[: args.count], start=1):
+        problem = problems[attempt.problem_id]
+        print(f"\n{index}/{min(args.count, len(pool))}  {problem.title}")
+        print(f"{verdict(attempt)}, {attempt.finished_at:%Y-%m-%d}")
+        print(code_excerpt(attempt.code or "", args.lines))
+        if args.revise:
+            print(read_as(attempt, standing[attempt.id], machine_claims, names))
+        # Printed per attempt: the candidates are this problem's techniques.
+        print(f"  {numbered(problem.techniques)}")
+
+        # In the candidates' order, since that is what the numbers select.
+        rules = [text for code in problem.techniques if (text := rule(code))]
+        print(f"\n{'\n\n'.join(rules)}\n")
+
+        answer = ask_choice(
+            "techniques",
+            problem.techniques,
+            [],
+            empty="keep" if args.revise else "skip",
+            # Without `0`, a user claim could only be overturned by deleting
+            # it, which drops the attempt out of the eval set.
+            none=NONE,
+        )
+        if answer is None or answer.rest:
+            break
+        if answer.picked is None:
+            continue
+        chosen = [problem.techniques[int(number) - 1] for number in answer.picked]
+
+        # Empty leaves it unsaid rather than defaulting to the middle.
+        level = ask_choice("confidence", LEVELS, [], empty="unsaid")
+        if level is None:
+            break
+        claim_by_hand(
+            log,
+            attempt.id,
+            chosen,
+            confidence=LEVELS[int(level.picked[0]) - 1] if level.picked else None,
+            informed_by=shown(attempt, machine_claims),
+        )
+        written += 1
+        # After the append, since the techniques answer already landed.
+        if level.rest:
+            break
+
+    print(f"\n{written} claim(s) written")
+
+
+def disputed(
+    args: argparse.Namespace,
+    parser: argparse.ArgumentParser,
+    claims: Sequence[AttemptClaim],
+    log: AttemptLog,
+    problems: Mapping[str, Problem],
+    standing: Mapping[str, AttemptClaim],
+) -> tuple[list[Attempt], list[Mapping[str, AttemptClaim]], list[str]]:
+    """The revision pool and what each named classifier read it as."""
+    named = configurations(args, parser)
+    pool = revisable(
+        log.attempts(args.user),
+        problems,
+        standing,
+        user_id=args.user,
+        technique=args.technique,
+    )
+    # What each attempt would be asked now: a claim made against older criteria
+    # answered a different question.
+    asked = {
+        attempt.id: request_hash(problems[attempt.problem_id].techniques, attempt.code or "")
+        for attempt in pool
+    }
+    machine_claims: list[Mapping[str, AttemptClaim]] = [
+        machine_claims_at(claims, configuration, asked) for configuration in named
+    ]
+    pool = contested(
+        pool,
+        standing,
+        machine_claims,
+        at_least=args.disputed if args.disputed is not None else 0,
+    )
+    return pool, machine_claims, labels(named)
+
+
+# The calls whose verdicts `read_as` showed. The pool only promises that one
+# configuration disagreed, not that all answered.
+def shown(attempt: Attempt, machine_claims: Sequence[Mapping[str, AttemptClaim]]) -> list[str]:
+    return [
+        one.call_id
+        for stored in machine_claims
+        if (one := stored.get(attempt.id)) is not None and one.call_id is not None
+    ]
+
+
+def read_as(
+    attempt: Attempt,
+    claim: AttemptClaim,
+    machine_claims: Sequence[Mapping[str, AttemptClaim]],
+    names: Sequence[str],
+) -> str:
+    """The standing claim and what each classifier read the same code as."""
+    width = max(len(name) for name in ("you", *names)) + 1
+    lines = [f"  {'you:'.ljust(width)} {' '.join(claim.techniques)}"]
+    for name, stored in zip(names, machine_claims, strict=True):
+        one = stored.get(attempt.id)
+        if one is not None:
+            lines.append(f"  {(name + ':').ljust(width)} {' '.join(one.techniques)}")
+    lines.append(f"  {against(claim, machine_claims)} of {len(names)} disagree")
+    return "\n".join(lines)
+
+
+def code_excerpt(code: str, limit: int) -> str:
+    lines = code.splitlines()
+    if len(lines) <= limit:
+        return code
+    return "\n".join([*lines[:limit], f"... {len(lines) - limit} more lines"])
+
+
+def rule(code: str) -> str:
+    """One candidate's criterion, verbatim from the vocabulary and wrapped for
+    a terminal. Only the wrapping is this reader's."""
+    return "\n".join(
+        fill(line, width=WIDTH, initial_indent="  ", subsequent_indent="      ")
+        for line in criterion(code)
+    )

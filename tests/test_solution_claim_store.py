@@ -1,8 +1,8 @@
 import pytest
 from helpers import PROVENANCE, stored_solution
 
-from algo_coach.mint import machine_solution_claim, user_solution_claim
-from algo_coach.solution_claims import SolutionClaimLog
+from climb.mint import machine_solution_claim, user_solution_claim
+from climb.solution_claims import SolutionClaimLog
 
 
 @pytest.fixture(autouse=True)

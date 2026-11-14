@@ -5,11 +5,11 @@ from commands import connected, run_cli
 from generating import SLOW, FakeWriter
 from matching import card, seeded, template
 
-from algo_coach.calls import CallLog
-from algo_coach.generation import Corpus, write_problems
-from algo_coach.outcomes import OutcomeLog
-from algo_coach.problems import ProblemStore
-from algo_coach.runner import runner
+from climb.calls import CallLog
+from climb.generation import Corpus, write_problems
+from climb.outcomes import OutcomeLog
+from climb.problems import ProblemStore
+from climb.runner import runner
 
 BUILDS = "def solve(size, seed):\n    return [list(range(size))]\n"
 
@@ -22,7 +22,7 @@ def root(database, monkeypatch):
 def landed(root, monkeypatch):
     """One stored problem, written through the whole pipeline, so its canonical
     and the cases that decide it are both there."""
-    monkeypatch.setattr("algo_coach.generation.timing.DRILL_CAP_MS", 60)
+    monkeypatch.setattr("climb.generation.timing.DRILL_CAP_MS", 60)
     (one,) = seeded(root, card(templates=[template("longest-valid-window", speedup=True)]))
     write_problems(
         FakeWriter(slow=SLOW, generator=BUILDS),
@@ -54,7 +54,7 @@ def test_a_case_past_the_bar_is_listed_by_problem_canonical_and_case(root, monke
     fail, so the listing names exactly where to look."""
     stored = landed(root, monkeypatch)
     # the module itself: the package's own `retime` names the command's function
-    monkeypatch.setattr(importlib.import_module("algo_coach.cli.retime"), "BAR_MS", -1)
+    monkeypatch.setattr(importlib.import_module("climb.cli.retime"), "BAR_MS", -1)
 
     run_cli(monkeypatch, "retime")
 

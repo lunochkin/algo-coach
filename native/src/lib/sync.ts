@@ -6,7 +6,7 @@ import {
   type Outgoing,
   type SyncStore,
   type SyncTransport,
-} from '@algo-coach/core';
+} from '@climb/core';
 
 import { writeCatalog } from './courses-cache';
 import * as DB from './db';

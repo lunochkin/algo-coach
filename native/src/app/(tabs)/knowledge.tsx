@@ -21,7 +21,7 @@ import {
   knowledgeHome,
   forecastView,
   reviewForecast,
-} from '@algo-coach/core';
+} from '@climb/core';
 import { useStore } from '@/lib/store';
 import { fromCopy, Loaded, styles, SyncBanner, SyncLine, ScreenHeader } from '@/ui/common';
 import { ContinueBar, ContinueNotice, useContinue } from '@/ui/continue';

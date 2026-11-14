@@ -2,7 +2,7 @@ import { router } from 'expo-router';
 import { useEffect } from 'react';
 
 /**
- * The engine's redirect after a sign-in, `algocoach://signed-in`. The browser
+ * The engine's redirect after a sign-in, `climbance://signed-in`. The browser
  * sheet takes the code from it, and Android also hands the link to the router,
  * which would otherwise show it as an unmatched route. Steps back at once.
  */

@@ -3,10 +3,10 @@ from dataclasses import dataclass, field
 import pytest
 from generating import proposed
 
-from algo_coach.calls import CallLog, Reply
-from algo_coach.generation import GenerationError, harden
-from algo_coach.mutation import ROUNDS
-from algo_coach.schema import ExpectedSource
+from climb.calls import CallLog, Reply
+from climb.generation import GenerationError, harden
+from climb.mutation import ROUNDS
+from climb.schema import ExpectedSource
 
 # four mutation sites rather than eight: the same kill structure, at half
 # the subprocesses a pass costs

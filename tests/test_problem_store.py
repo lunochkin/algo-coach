@@ -1,8 +1,8 @@
 import pytest
 from helpers import GENERATED
 
-from algo_coach.problems import ProblemStore
-from algo_coach.schema import Problem, ProblemStatus, RetirementReason
+from climb.problems import ProblemStore
+from climb.schema import Problem, ProblemStatus, RetirementReason
 
 
 def make_problem(id: str = "i1", **overrides) -> Problem:

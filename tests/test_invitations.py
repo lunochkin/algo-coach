@@ -1,7 +1,7 @@
 import pytest
 from commands import connected, run_cli
 
-from algo_coach.log import invitations_held, invite, invited, withdraw
+from climb.log import invitations_held, invite, invited, withdraw
 
 
 def test_an_invited_email_is_matched_whatever_its_case(database):

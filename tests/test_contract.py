@@ -1,5 +1,5 @@
-from algo_coach.generation import blind, generator, inputs, naive
-from algo_coach.generation.contract import ALONE, ENTRY, RUNTIME, SIGNATURE
+from climb.generation import blind, generator, inputs, naive
+from climb.generation.contract import ALONE, ENTRY, RUNTIME, SIGNATURE
 
 PROMPTS = (generator.SYSTEM, blind.SYSTEM, inputs.SYSTEM, naive.SYSTEM)
 

@@ -3,7 +3,7 @@ import {
   SECTION_PROBLEMS,
   SECTION_CARDS,
   SECTION_KNOWLEDGE,
-} from '@algo-coach/core'
+} from '@climb/core'
 import { useEffect, useRef } from 'react'
 import { Link, useLocation } from 'react-router'
 
@@ -65,7 +65,7 @@ export function NavMenu({ wide }: { wide: boolean }) {
           {/* the flame dot the site's wordmark carries, and alone at phone
               width, where the four sections need the room */}
           <span aria-hidden className="size-2.5 rounded-full bg-brand" />
-          <span className="sr-only sm:not-sr-only">algo-coach</span>
+          <span className="sr-only sm:not-sr-only">Climbance</span>
         </Link>
         <div ref={sections} className="flex min-w-0 items-center gap-1 overflow-x-auto">
           {SECTIONS.map(({ label, to, owns }) => {

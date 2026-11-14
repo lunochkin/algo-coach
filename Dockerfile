@@ -38,7 +38,7 @@ RUN useradd --create-home --uid 10001 engine
 # daemon runs in this image
 COPY --from=docker:29-cli /usr/local/bin/docker /usr/local/bin/docker
 WORKDIR /app
-ENV PATH=/app/.venv/bin:$PATH ALGO_COACH_PAGES=/app/web/dist
+ENV PATH=/app/.venv/bin:$PATH CLIMB_PAGES=/app/web/dist
 COPY --from=engine /app/.venv .venv
 COPY alembic.ini ./
 COPY migrations migrations
@@ -48,4 +48,4 @@ USER engine
 EXPOSE 8000
 # 0.0.0.0 inside the container, which `deploy/compose.yaml` publishes on the
 # server's loopback address alone
-CMD ["uvicorn", "--factory", "algo_coach.api.__main__:app", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["uvicorn", "--factory", "climb.api.__main__:app", "--host", "0.0.0.0", "--port", "8000"]

@@ -18,7 +18,7 @@ how an account signing in is linked to a user.
   account is.
 - **The records written before hosting stay in the local database**, under the
   ids the terminal and the local API wrote them under. The dev login signs in as
-  the user `ALGO_COACH_DEV_LOGIN` names, and the terminal reads that user's log
+  the user `CLIMB_DEV_LOGIN` names, and the terminal reads that user's log
   by default.
 - **No record is copied from the local log to the hosted one.** The local log
   held a handful of sittings and attempts when hosting was decided. Carrying
@@ -35,8 +35,8 @@ how an account signing in is linked to a user.
 - **A reader given a user reads that user's records in its query.** No command
   loads every user's log to filter it, so the author's log, which every eval
   reads, never mixes with another user's.
-- **`algo-coach log export` prints one user's whole log as JSON.**
-- **`algo-coach log erase` deletes one user's whole log in one transaction.**
+- **`climb log export` prints one user's whole log as JSON.**
+- **`climb log erase` deletes one user's whole log in one transaction.**
   The log belongs to its user, so a user leaving takes the log along. The
   user and its sign-in stay, and a new log starts at the next sitting.
 - **A call is erased with the log only where no other record names it.** A

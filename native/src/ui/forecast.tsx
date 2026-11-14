@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Pressable, View } from 'react-native';
 import { Text, useTheme } from 'react-native-paper';
 
-import { FORECAST_HEADING, FORECAST_NOTE, forecastBarLabel, type ForecastView } from '@algo-coach/core';
+import { FORECAST_HEADING, FORECAST_NOTE, forecastBarLabel, type ForecastView } from '@climb/core';
 
 import { Heading, Panel } from './rows';
 import { space, textSize } from './tokens';

@@ -7,8 +7,8 @@ import uuid
 import pytest
 from fastapi.testclient import TestClient
 
-from algo_coach.broker import create_app
-from algo_coach.broker.container import IMAGE, kill, remove_leftovers
+from climb.broker import create_app
+from climb.broker.container import IMAGE, kill, remove_leftovers
 
 DOUBLE = "def solve(n):\n    return n * 2\n"
 
@@ -156,8 +156,8 @@ def test_a_run_whose_entry_stops_answering_times_out_and_leaves_no_container(
 def test_leftover_containers_are_removed_running_or_not(sandbox: TestClient):
     """A label of this test's own, since the broker's label would reach the
     containers the other workers' runs are using."""
-    label = f"algo-coach.test-{uuid.uuid4().hex}"
-    running, exited = (f"algo-coach-leftover-{uuid.uuid4().hex}" for _ in range(2))
+    label = f"climb.test-{uuid.uuid4().hex}"
+    running, exited = (f"climb-leftover-{uuid.uuid4().hex}" for _ in range(2))
     _leftover(running, label, ["sleep", "60"], detach=True)
     _leftover(exited, label, ["true"])
 

@@ -12,7 +12,7 @@ import {
   type SettingRecord,
   type SessionRecord,
   type StatusRecord,
-} from '@algo-coach/core';
+} from '@climb/core';
 
 export type Table =
   'attempts' | 'sessions' | 'statuses' | 'focus' | 'lessons' | 'certs' | 'setting_changes' | 'raises' | 'orders';
@@ -33,7 +33,7 @@ let opened: Promise<SQLite.SQLiteDatabase> | null = null;
 export function db(): Promise<SQLite.SQLiteDatabase> {
   // a file of its own: learn's app kept GitHub's bookkeeping in learn.db
   opened ??= (async () => {
-    const d = await SQLite.openDatabaseAsync('algo-coach.db');
+    const d = await SQLite.openDatabaseAsync('climb.db');
     await d.execAsync('PRAGMA journal_mode = WAL;');
     for (const table of TABLES) {
       await d.execAsync(`

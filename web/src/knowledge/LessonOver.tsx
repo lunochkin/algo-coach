@@ -1,4 +1,4 @@
-import { lessonPage } from '@algo-coach/core'
+import { lessonPage } from '@climb/core'
 import { useEffect } from 'react'
 
 import {

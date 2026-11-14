@@ -11,7 +11,7 @@ import {
   RECALL_MARKS,
   RUNGS_SOLVED,
   recallMarkLabel,
-} from '@algo-coach/core';
+} from '@climb/core';
 import { tones } from '@/ui/common';
 import { Panel, PanelStrip, PickRow } from '@/ui/rows';
 import { font } from '@/ui/tokens';

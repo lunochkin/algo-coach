@@ -1,4 +1,4 @@
-import { BACK_BOARD, NOT_FOUND } from '@algo-coach/core'
+import { BACK_BOARD, NOT_FOUND } from '@climb/core'
 
 import { PageHeader } from '@/components/PageHeader'
 

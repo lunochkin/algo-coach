@@ -5,8 +5,8 @@ import pytest
 from commands import connected
 from helpers import own
 
-from algo_coach import cli
-from algo_coach.cards import CardStore, seed_cards
+from climb import cli
+from climb.cards import CardStore, seed_cards
 
 CONTENT = Path(__file__).parents[1] / "content" / "cards"
 
@@ -177,7 +177,7 @@ def test_seed_cards_command_over_a_directory(database, tmp_path, monkeypatch, ca
         json.dumps(record("union-find", technique="union-find"))
     )
     connected(database, monkeypatch)
-    monkeypatch.setattr("sys.argv", ["algo-coach", "seed", "cards", str(source)])
+    monkeypatch.setattr("sys.argv", ["climb", "seed", "cards", str(source)])
 
     cli.main()
 
@@ -189,7 +189,7 @@ def test_seed_cards_command_over_one_file(database, tmp_path, monkeypatch, capsy
     source = tmp_path / "binary-search.json"
     source.write_text(json.dumps(record()))
     connected(database, monkeypatch)
-    monkeypatch.setattr("sys.argv", ["algo-coach", "seed", "cards", str(source)])
+    monkeypatch.setattr("sys.argv", ["climb", "seed", "cards", str(source)])
 
     cli.main()
 
@@ -200,7 +200,7 @@ def test_a_rejected_card_exits_nonzero(database, tmp_path, monkeypatch, capsys):
     source = tmp_path / "broken.json"
     source.write_text(json.dumps({"slug": "half-written"}))
     connected(database, monkeypatch)
-    monkeypatch.setattr("sys.argv", ["algo-coach", "seed", "cards", str(source)])
+    monkeypatch.setattr("sys.argv", ["climb", "seed", "cards", str(source)])
 
     with pytest.raises(SystemExit) as exit:
         cli.main()
@@ -215,7 +215,7 @@ def test_a_file_that_is_not_json_never_reaches_the_engine(database, tmp_path, mo
     source = tmp_path / "broken.json"
     source.write_text("{")
     connected(database, monkeypatch)
-    monkeypatch.setattr("sys.argv", ["algo-coach", "seed", "cards", str(source)])
+    monkeypatch.setattr("sys.argv", ["climb", "seed", "cards", str(source)])
 
     with pytest.raises(SystemExit) as exit:
         cli.main()

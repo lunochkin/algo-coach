@@ -28,7 +28,7 @@ import {
   SETTINGS_NOTE,
   OF,
   SYNC_HEADING,
-} from '@algo-coach/core'
+} from '@climb/core'
 
 import { api } from '@/api/client'
 import { useLoaded } from '@/api/useLoaded'

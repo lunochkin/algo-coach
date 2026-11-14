@@ -3,8 +3,8 @@ import re
 import pytest
 from helpers import FakeTransport, Verdict
 
-from algo_coach.calls import UNSENT
-from algo_coach.classifier import (
+from climb.calls import UNSENT
+from climb.classifier import (
     DEFAULT,
     EFFORT,
     MODEL,
@@ -13,9 +13,9 @@ from algo_coach.classifier import (
     ClassifierError,
     request_hash,
 )
-from algo_coach.classifier import classify as _classify
-from algo_coach.schema import Kind
-from algo_coach.techniques import criteria
+from climb.classifier import classify as _classify
+from climb.schema import Kind
+from climb.techniques import criteria
 
 CODE = "def f(nums):\n    return sorted(nums)\n"
 

@@ -1,8 +1,8 @@
 import pytest
 from pydantic import ValidationError
 
-from algo_coach.mint import recall_attempt
-from algo_coach.schema import CaseOutcome, CaseResult, Execution, Hint, RecallAttempt
+from climb.mint import recall_attempt
+from climb.schema import CaseOutcome, CaseResult, Execution, Hint, RecallAttempt
 
 USER = "u-4f9c2a"
 FORM = "def solve(xs, target):\n    return 0\n"

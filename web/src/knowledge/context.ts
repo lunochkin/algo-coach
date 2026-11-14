@@ -1,6 +1,6 @@
 import { createContext, useContext } from 'react'
 
-import { copyReading } from '@algo-coach/core'
+import { copyReading } from '@climb/core'
 
 import type { Held } from '@/knowledge/copy'
 

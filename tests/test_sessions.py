@@ -2,8 +2,8 @@ from datetime import UTC, datetime
 
 from sqlalchemy import select
 
-from algo_coach.log import LIFETIME, Provider, hashed, opened, signed_in
-from algo_coach.log.table import sessions
+from climb.log import LIFETIME, Provider, hashed, opened, signed_in
+from climb.log.table import sessions
 
 
 def stored(database) -> list:

@@ -6,7 +6,7 @@ from typing import Any
 import pytest
 from pydantic import BaseModel
 
-from algo_coach.schema import (
+from climb.schema import (
     Answer,
     Attempt,
     AttemptClaim,

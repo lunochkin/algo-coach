@@ -1,8 +1,8 @@
 from matching import canonicals, card, problem, seeded, stored, template
 
-from algo_coach.matches import unsettled
-from algo_coach.mint import machine_match, user_match
-from algo_coach.schema import MachineProvenance
+from climb.matches import unsettled
+from climb.mint import machine_match, user_match
+from climb.schema import MachineProvenance
 
 
 def corpus(root, *, backtracking: int = 3, union: int = 3):

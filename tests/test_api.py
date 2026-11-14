@@ -4,11 +4,11 @@ import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy import update
 
-from algo_coach.api import Root, UserId, create_app
-from algo_coach.api.context import SESSION_COOKIE
-from algo_coach.log import hashed, named, opened
-from algo_coach.log.table import sessions
-from algo_coach.sitting import Missing, Refused
+from climb.api import Root, UserId, create_app
+from climb.api.context import SESSION_COOKIE
+from climb.log import hashed, named, opened
+from climb.log.table import sessions
+from climb.sitting import Missing, Refused
 
 USER = "u-4f9c2a"
 

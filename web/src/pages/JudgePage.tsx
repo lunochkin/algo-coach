@@ -15,12 +15,12 @@ import {
   nextJudged,
   separatingLines,
   verdictPassed,
-} from '@algo-coach/core'
+} from '@climb/core'
 import { useEffect, useState } from 'react'
 import { useSearchParams } from 'react-router'
 
 import { api } from '@/api/client'
-import type { components } from '@algo-coach/core'
+import type { components } from '@climb/core'
 import { ErrorLine } from '@/components/ErrorLine'
 import { PageHeader } from '@/components/PageHeader'
 import { Panel } from '@/components/Panel'

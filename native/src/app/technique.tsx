@@ -12,7 +12,7 @@ import {
   TECHNIQUE_CARDS,
   TECHNIQUE_PROBLEMS,
   TECHNIQUE_NONE,
-} from '@algo-coach/core';
+} from '@climb/core';
 import { useEngine } from '@/lib/useEngine';
 import { CardPanel } from '@/ui/cards';
 import { Blank, Loaded, styles, ScreenHeader } from '@/ui/common';

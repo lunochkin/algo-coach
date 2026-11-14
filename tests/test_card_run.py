@@ -3,8 +3,8 @@ from datetime import UTC, datetime, timedelta
 import pytest
 from pydantic import ValidationError
 
-from algo_coach.mint import card_run
-from algo_coach.schema import CardRun, Probe
+from climb.mint import card_run
+from climb.schema import CardRun, Probe
 
 USER = "u-4f9c2a"
 BEGAN = datetime(2026, 6, 1, tzinfo=UTC)

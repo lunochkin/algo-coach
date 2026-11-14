@@ -4,10 +4,10 @@ from matching import card as card_record
 from matching import seeded
 from matching import template as template_record
 
-from algo_coach.judgements import ItemStore
-from algo_coach.judging import build, digest, items, shown
-from algo_coach.judging.build import WIDTH
-from algo_coach.schema import Card, CaseOutcome, ItemStatus, Selector, Template, TemplateCase
+from climb.judgements import ItemStore
+from climb.judging import build, digest, items, shown
+from climb.judging.build import WIDTH
+from climb.schema import Card, CaseOutcome, ItemStatus, Selector, Template, TemplateCase
 
 NOW = datetime(2026, 11, 14, tzinfo=UTC)
 

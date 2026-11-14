@@ -1,7 +1,7 @@
 from helpers import a_call
 
-from algo_coach.generation import Gate, agree, check, checks, stopped
-from algo_coach.schema import CaseOutcome, DraftCase, ExpectedSource, MachineProvenance
+from climb.generation import Gate, agree, check, checks, stopped
+from climb.schema import CaseOutcome, DraftCase, ExpectedSource, MachineProvenance
 
 DOUBLE = "def solve(x):\n    return x * 2\n"
 # the same function reached another way, which is what a blind reference is

@@ -11,7 +11,7 @@ import sys
 import tomllib
 from pathlib import Path
 
-from algo_coach.knowledge.authoring.course import norm
+from climb.knowledge.authoring.course import norm
 
 LETTERS = "ABCDEFGH"
 # the module check proves these keys by running the code, rule 1

@@ -1,7 +1,7 @@
 import pytest
 from helpers import PROVENANCE, machine_claim
 
-from algo_coach.mint import (
+from climb.mint import (
     draft,
     generated_problem,
     machine_match,
@@ -10,7 +10,7 @@ from algo_coach.mint import (
     user_claim,
     user_match,
 )
-from algo_coach.schema import (
+from climb.schema import (
     ClaimSource,
     Confidence,
     FailureMode,

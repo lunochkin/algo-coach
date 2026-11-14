@@ -2,12 +2,12 @@ from generating import SLOW, FakeWriter
 from matching import card, seeded, template
 from sqlalchemy import delete, text
 
-from algo_coach.calls import CallLog
-from algo_coach.cases import CaseLog
-from algo_coach.generation import REPLAYED, Bench, Corpus, naive, replay, screen, write_problems
-from algo_coach.outcomes import OutcomeLog
-from algo_coach.problems import ProblemStore
-from algo_coach.schema import (
+from climb.calls import CallLog
+from climb.cases import CaseLog
+from climb.generation import REPLAYED, Bench, Corpus, naive, replay, screen, write_problems
+from climb.outcomes import OutcomeLog
+from climb.problems import ProblemStore
+from climb.schema import (
     CallSite,
     Configuration,
     Gate,
@@ -15,8 +15,8 @@ from algo_coach.schema import (
     RetirementReason,
     SolutionRole,
 )
-from algo_coach.solutions import SolutionLog
-from algo_coach.solutions.table import solutions
+from climb.solutions import SolutionLog
+from climb.solutions.table import solutions
 
 BUILDS = "def solve(size, seed):\n    return [list(range(size))]\n"
 BRANCHING = "def solve(n):\n    return n > 3\n"
@@ -32,7 +32,7 @@ def landed(database, monkeypatch, model: FakeWriter | None = None, **overrides):
     asked about. A run under the real sitting cap holds the draft instead: the
     reference finishes at every size the input generator writes.
     """
-    monkeypatch.setattr("algo_coach.generation.timing.DRILL_CAP_MS", 60)
+    monkeypatch.setattr("climb.generation.timing.DRILL_CAP_MS", 60)
     overrides.setdefault(
         "templates", [template("longest-valid-window", speedup=True), template("fixed-window")]
     )

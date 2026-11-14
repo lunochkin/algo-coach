@@ -50,7 +50,7 @@ this repo holds. The content repository holds the modules alone.
   snippets import from, and the skip list `check.toml`. A skip names a
   question or a lesson, so the skip list is content.
 - **Two checks read a module, and they stay apart.** The seed refuses a module
-  whose files break the format, and executes nothing. `algo-coach module
+  whose files break the format, and executes nothing. `climb module
   check <slug>` runs every snippet and every lesson block, and judges each
   rule a program can judge. The seed then runs without the module's libraries
   installed.

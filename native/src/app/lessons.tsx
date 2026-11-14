@@ -17,7 +17,7 @@ import {
   OF,
   sectionOpened,
   sectionToggled,
-} from '@algo-coach/core';
+} from '@climb/core';
 import { useStore } from '@/lib/store';
 import { fromCopy, Loaded, styles, ScreenHeader } from '@/ui/common';
 import { Heading, PanelItem, PickRow } from '@/ui/rows';

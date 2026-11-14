@@ -3,8 +3,8 @@ from datetime import UTC, datetime
 from helpers import FakeTransport, Verdict, own
 from matching import PROCEDURE, canonical, canonicals, card, problem, seeded, stored, template
 
-from algo_coach.calls import CallLog
-from algo_coach.matches import (
+from climb.calls import CallLog
+from climb.matches import (
     DEFAULT,
     MatchLog,
     Progress,
@@ -13,8 +13,8 @@ from algo_coach.matches import (
     questions,
     request_hash,
 )
-from algo_coach.runs import ABORT_AFTER
-from algo_coach.schema import MatchSource, SolutionRole, TemplateMatch
+from climb.runs import ABORT_AFTER
+from climb.schema import MatchSource, SolutionRole, TemplateMatch
 
 
 def run(root, client: FakeTransport, cards=None, problems=None, **kwargs):

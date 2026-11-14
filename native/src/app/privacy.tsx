@@ -2,7 +2,7 @@ import { ScrollView, View } from 'react-native';
 import { Text, useTheme } from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { privacyPolicy, privacyUpdated } from '@algo-coach/core';
+import { privacyPolicy, privacyUpdated } from '@climb/core';
 import { styles, ScreenHeader } from '@/ui/common';
 import { Markdown } from '@/ui/markdown';
 

@@ -5,7 +5,7 @@ import {
   draftKey,
   isDraft,
   preferenceAfter,
-} from '@algo-coach/core';
+} from '@climb/core';
 
 import { getMeta, setMeta } from './db';
 

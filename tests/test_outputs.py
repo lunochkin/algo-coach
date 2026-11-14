@@ -1,4 +1,4 @@
-from algo_coach.runner import NoValue, RunOutcome, outputs
+from climb.runner import NoValue, RunOutcome, outputs
 
 DOUBLE = "def solve(n):\n    return n * 2\n"
 

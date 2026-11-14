@@ -1,7 +1,7 @@
 import { router } from 'expo-router';
 import type { ReactNode } from 'react';
 
-import { type ModuleRow as Row, moduleStats, PAUSED, QUESTIONS_PASSED, moduleRowNote } from '@algo-coach/core';
+import { type ModuleRow as Row, moduleStats, PAUSED, QUESTIONS_PASSED, moduleRowNote } from '@climb/core';
 import { PickRow } from '@/ui/rows';
 
 /**

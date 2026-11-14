@@ -6,11 +6,11 @@ from helpers import own
 from matching import card, seeded, template
 from pydantic import ValidationError
 
-from algo_coach.calls import CallLog, Reply
-from algo_coach.generation import GenerationError, write_reference
-from algo_coach.generation.blind import BLIND_DEFAULT, SYSTEM, prompt, read, schema
-from algo_coach.generation.generator import prompt as generator_prompt
-from algo_coach.schema import Configuration
+from climb.calls import CallLog, Reply
+from climb.generation import GenerationError, write_reference
+from climb.generation.blind import BLIND_DEFAULT, SYSTEM, prompt, read, schema
+from climb.generation.generator import prompt as generator_prompt
+from climb.schema import Configuration
 
 STATEMENT = "Given a list of readings, return the widest stretch that stays fair."
 

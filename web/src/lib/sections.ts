@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 
-import { sectionOpened, sectionToggled } from '@algo-coach/core'
+import { sectionOpened, sectionToggled } from '@climb/core'
 
 export type Item = { id: string; label: string }
 

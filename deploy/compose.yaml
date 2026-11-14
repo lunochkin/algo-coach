@@ -7,10 +7,10 @@
 # the image to run, ALGO_COACH_IMAGE, by digest rather than by tag, so a
 # restart runs what the deploy pulled. It also names POSTGRES_USER,
 # POSTGRES_PASSWORD and POSTGRES_DB, the DATABASE_URL the engine reaches the
-# `db` service by, ALGO_COACH_ORIGIN and ALGO_COACH_SECRET, and each provider's
-# client id and secret. ALGO_COACH_DOMAIN is the host ALGO_COACH_ORIGIN names,
+# `db` service by, CLIMB_ORIGIN and CLIMB_SECRET, and each provider's
+# client id and secret. CLIMB_DOMAIN is the host CLIMB_ORIGIN names,
 # since Caddy issues the certificate for it and the sign-in callback returns
-# there. ALGO_COACH_REDIRECT_FROM lists the hosts Caddy redirects to it, and
+# there. CLIMB_REDIRECT_FROM lists the hosts Caddy redirects to it, and
 # Caddy refuses to start without it. DOCKER_GID is the id of the host's docker
 # group, which the deployment repo writes per server.
 
@@ -56,7 +56,7 @@ services:
       - "127.0.0.1:8000:8000"
     # a submission runs in the broker's container rather than in this one
     environment:
-      ALGO_COACH_BROKER: http://broker:8001
+      CLIMB_BROKER: http://broker:8001
     # default for Postgres, Caddy and the sign-in providers, and api-broker for
     # the one service nothing else reaches
     networks: [default, api-broker]
@@ -69,7 +69,7 @@ services:
   broker:
     image: ${ALGO_COACH_IMAGE}
     restart: unless-stopped
-    command: ["python", "-m", "algo_coach.broker"]
+    command: ["python", "-m", "climb.broker"]
     # the image's non-root user, in the host's docker group. The id differs
     # between servers, and a missing one stops the deploy rather than starting
     # a broker the socket refuses

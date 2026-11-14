@@ -3,10 +3,10 @@ from datetime import UTC, datetime, timedelta
 import pytest
 from helpers import make_problem
 
-from algo_coach.log import SittingStore
-from algo_coach.problems import ProblemStore
-from algo_coach.schema import RetirementReason, Sitting
-from algo_coach.sitting import Missing, Refused, Served, begin, get, serve
+from climb.log import SittingStore
+from climb.problems import ProblemStore
+from climb.schema import RetirementReason, Sitting
+from climb.sitting import Missing, Refused, Served, begin, get, serve
 
 BEGAN = datetime.now(UTC) - timedelta(hours=1)
 

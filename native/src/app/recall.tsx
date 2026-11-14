@@ -31,7 +31,7 @@ import {
   requestHint,
   revealForm,
   runRecall,
-} from '@algo-coach/core';
+} from '@climb/core';
 import { engine } from '@/lib/engine';
 import { getToken } from '@/lib/settings';
 import { useStore } from '@/lib/store';

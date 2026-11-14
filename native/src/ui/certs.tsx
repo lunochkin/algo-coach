@@ -16,7 +16,7 @@ import {
   type CertStatus,
   type Course,
   CLOSE,
-} from '@algo-coach/core';
+} from '@climb/core';
 import { useStore } from '@/lib/store';
 import { Sheet } from '@/ui/sheet';
 import type { Scope } from '@/ui/start';

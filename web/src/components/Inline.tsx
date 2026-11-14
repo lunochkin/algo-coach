@@ -1,4 +1,4 @@
-import { spans } from '@algo-coach/core'
+import { spans } from '@climb/core'
 
 // authored prose inside a paragraph, its backtick pairs drawn as a lesson draws inline code
 export function Inline({ text }: { text: string }) {

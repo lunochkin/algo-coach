@@ -1,7 +1,7 @@
 /** The engine's HTTP API, as the app calls it. */
-import { engineClient, type EngineClient, NO_ENGINE_ERROR, SIGNED_OUT_ERROR } from '@algo-coach/core';
+import { engineClient, type EngineClient, NO_ENGINE_ERROR, SIGNED_OUT_ERROR } from '@climb/core';
 
-export { described } from '@algo-coach/core';
+export { described } from '@climb/core';
 
 export class SignedOut extends Error {}
 

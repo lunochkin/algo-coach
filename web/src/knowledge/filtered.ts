@@ -1,4 +1,4 @@
-import { levels, type Catalog, type DrillScope } from '@algo-coach/core'
+import { levels, type Catalog, type DrillScope } from '@climb/core'
 
 // a filtered queue's choices, carried in its URL: `pages.md`, The knowledge pages
 

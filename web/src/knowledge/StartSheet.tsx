@@ -14,7 +14,7 @@ import {
   type DrillScope,
   START_NOTE,
   type StartScope,
-} from '@algo-coach/core'
+} from '@climb/core'
 
 import { Choice } from '@/components/Choice'
 import { Button } from '@/components/ui/button'

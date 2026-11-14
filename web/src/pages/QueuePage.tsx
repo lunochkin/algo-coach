@@ -28,7 +28,7 @@ import {
   OF,
   lessonStopKicker,
   lessonRead,
-} from '@algo-coach/core'
+} from '@climb/core'
 
 import { Loaded } from '@/components/Loaded'
 import { PageHeader } from '@/components/PageHeader'

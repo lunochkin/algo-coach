@@ -2,9 +2,9 @@ import pytest
 from helpers import PROVENANCE, stored_problem, stored_template
 from pydantic import ValidationError
 
-from algo_coach.mint import site_outcome
-from algo_coach.outcomes import OutcomeLog, answered
-from algo_coach.schema import CallSite, Configuration, Gate, SiteOutcome
+from climb.mint import site_outcome
+from climb.outcomes import OutcomeLog, answered
+from climb.schema import CallSite, Configuration, Gate, SiteOutcome
 
 
 @pytest.fixture(autouse=True)

@@ -125,7 +125,7 @@ The order matters because each step can reject what came before.
   and the solution a mutant has to beat is the canonical it is a copy of.
 - **An operator changes one decision the code makes**, and each operator is a
   mistake a solver makes. A mutant nobody would write asks for a case that
-  catches nothing. The set of operators is in `algo_coach.mutation`.
+  catches nothing. The set of operators is in `climb.mutation`.
 - **The call that answers a survivor proposes arguments, never returns.** The
   reference computes what the arguments return, so no model writes an
   expected output that could agree with the mistake the case was asked for.
@@ -247,7 +247,7 @@ The order matters because each step can reject what came before.
   stage and the process then ends, so a rejected draft would leave only the
   calls it paid for. `machine.md` gives what a site's record carries.
 - **A run ends on what it reached, and prints no statement.** Each problem
-  the run stored is a line naming the id, and `algo-coach problem <id>` reads
+  the run stored is a line naming the id, and `climb problem <id>` reads
   one problem whole. Ten statements scroll the result out of the terminal.
 - **The first problem written for a template is the standard problem its
   form is known by.** A learner meets the form first on the question it is

@@ -4,9 +4,9 @@ import pytest
 from helpers import browsing
 from matching import card, seeded, template
 
-from algo_coach.judgements import ItemStore
-from algo_coach.judging import build
-from algo_coach.log import JudgementLog
+from climb.judgements import ItemStore
+from climb.judging import build
+from climb.log import JudgementLog
 
 USER = "u-4f9c2a"
 FORM = (

@@ -4,7 +4,7 @@ from typing import Any
 
 import pytest
 
-from algo_coach.runner import child
+from climb.runner import child
 
 DOUBLE = "def solve(n):\n    return n * 2\n"
 

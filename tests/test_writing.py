@@ -1,9 +1,9 @@
 from generating import CANONICAL, draft
 from helpers import a_call
 
-from algo_coach.generation import Writing
-from algo_coach.generation.generator import SYSTEM, read
-from algo_coach.schema import ProblemDifficulty, WritingState
+from climb.generation import Writing
+from climb.generation.generator import SYSTEM, read
+from climb.schema import ProblemDifficulty, WritingState
 
 GENERATED = read(draft())
 

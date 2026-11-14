@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 
-import { learnerLog, learnerView, loadSnapshot, type Snapshot } from '@algo-coach/core'
+import { learnerLog, learnerView, loadSnapshot, type Snapshot } from '@climb/core'
 
 import { useKnowledge } from '@/knowledge/context'
 

@@ -2,8 +2,8 @@ from datetime import UTC, datetime, timedelta
 
 import pytest
 
-from algo_coach.matches import standing_matches
-from algo_coach.schema import MatchSource, TemplateMatch
+from climb.matches import standing_matches
+from climb.schema import MatchSource, TemplateMatch
 
 T0 = datetime(2026, 1, 1, tzinfo=UTC)
 

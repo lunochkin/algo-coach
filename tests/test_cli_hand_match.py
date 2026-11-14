@@ -7,12 +7,12 @@ from matching import PROCEDURE, card, problem, seeded, stored, template
 from textual.containers import VerticalScroll
 from textual.widgets import Markdown, Static
 
-from algo_coach.calls import CallLog
-from algo_coach.cards import CardStore
-from algo_coach.cli.hand_match import hand_matching
-from algo_coach.matches import MatchLog
-from algo_coach.mint import machine_match
-from algo_coach.schema import MachineProvenance, MatchSource
+from climb.calls import CallLog
+from climb.cards import CardStore
+from climb.cli.hand_match import hand_matching
+from climb.matches import MatchLog
+from climb.mint import machine_match
+from climb.schema import MachineProvenance, MatchSource
 
 # Wide and tall: the layout is two panes, and the pilot's default is one
 # eighty-column screen. Nothing here asserts on wrapping.

@@ -25,7 +25,7 @@ import {
   OF,
   SCOPE_COLUMN,
   CERT_LEGEND,
-} from '@algo-coach/core'
+} from '@climb/core'
 
 import { Loaded } from '@/components/Loaded'
 import { PageHeader } from '@/components/PageHeader'

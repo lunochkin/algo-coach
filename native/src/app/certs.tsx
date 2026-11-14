@@ -26,7 +26,7 @@ import {
   OF,
   CERT_LEGEND,
   type CertState,
-} from '@algo-coach/core';
+} from '@climb/core';
 import { useStore } from '@/lib/store';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 

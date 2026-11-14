@@ -23,7 +23,7 @@ from the second block on.
 it. `docs/authoring/concepts.md` gives the order and the stages.
 A subtopic counts once it is released at the level, on the content
 repository's `main`. `run.py --release` in the `concept-author` skill rewrites
-the counts from `algo-coach module status py`, and ticks a topic once it is
+the counts from `climb module status py`, and ticks a topic once it is
 complete. `modules/py/STATUS.md` gives each subtopic.
 
 - [x] Close the open findings of the content repository's review of the Python
@@ -166,12 +166,12 @@ Judging a solution is built from a template's mutants that fail a case, so a
 template's cases must catch its mutants first. Taken from the content
 pipeline, Phase 17, which keeps the rest for the next module.
 
-- [x] Port the skill's `validate.py` to `algo-coach card check <slug>`, with a
+- [x] Port the skill's `validate.py` to `climb card check <slug>`, with a
       test per check, and have the content repository's pre-commit hook run
       it on a staged card
 - [x] Run the mutants of each template's form against its cases in `card
       check`, and report each survivor as a case the template lacks.
-      `algo_coach.mutation` enumerates them already, and the pass costs no
+      `climb.mutation` enumerates them already, and the pass costs no
       call
 - [x] Seed cards in a few round trips: batch the template and case inserts,
       and skip a card the store already holds unchanged. A seed through the
@@ -271,7 +271,7 @@ module. The rest waits for the next module.
 - [x] Move `RULES.md` and the authoring half of `content/modules/CLAUDE.md`
       into this repo's docs, with learn's names replaced: `courses/`,
       `just learn check`, `spec/learn.md`. A writer session follows them
-- [x] Port `content/modules/check.py` to `algo-coach module check <slug>`,
+- [x] Port `content/modules/check.py` to `climb module check <slug>`,
       with a test per rule it checks. Its 1126 lines carry no test today, and
       every later step trusts its verdict
 - [ ] Add the `Finding` record and its schema snapshot: the rule, the question
@@ -338,7 +338,7 @@ module. The rest waits for the next module.
 ## Phase 18 — scheduling and mastery
 
 - [ ] Port learn's FSRS replay, question states and gating into
-      `algo_coach.knowledge`, with the shared fixtures passing against it. The
+      `climb.knowledge`, with the shared fixtures passing against it. The
       mastery formula and the scheduler read them on the server, and the
       queues stay in TypeScript
 - [ ] Generate `tests/fixtures/knowledge/scheduling.json` from this repo, by
@@ -462,7 +462,7 @@ The hand pass does two jobs at once. It writes the matcher's reference, and it
 is the only reading of a generated problem that no model produced. A generator
 that drifted from its target shows in the hand pass whatever the matcher says.
 
-- [ ] Match by hand a sample of pairs through `algo-coach match --by-hand`,
+- [ ] Match by hand a sample of pairs through `climb match --by-hand`,
       across the core templates the sweep reached. The command samples and
       writes a record per candidate already
 - [ ] Match the eval set by hand with no matcher reading in view, which is
@@ -491,8 +491,8 @@ the audit. Generation goes on without the score.
       named and the matcher missed, and the templates the matcher named and the
       user did not. Most pairs are negative, so accuracy would score a matcher
       naming nothing in the nineties
-- [ ] Serve the score from a command, `algo-coach match --score`, beside the
-      run and the hand pass. `algo-coach score` reads attempts, and a second
+- [ ] Serve the score from a command, `climb match --score`, beside the
+      run and the hand pass. `climb score` reads attempts, and a second
       subject on it would make every flag mean two things
 - [ ] Skip a question the hand pass settled whole, and read those pairs in the
       eval alone. A user match carries no configuration, so the run path counts
@@ -652,7 +652,7 @@ one form its target named.
 - [ ] Generate a canonical per approach, one call each, and store the canonicals
       the problem's cases pass. A failure rejects nothing. The cases judge the
       solution, and an enumerated canonical is no reading of the statement
-- [ ] Add `algo-coach enumerate`, a problem in and canonicals out, through the
+- [ ] Add `climb enumerate`, a problem in and canonicals out, through the
       transport the other commands share
 - [ ] Decide what two canonicals of one form cost, once a corpus shows how
       often enumeration proposes two of one form. Execution cannot separate

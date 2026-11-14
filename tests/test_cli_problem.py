@@ -3,11 +3,11 @@ from commands import connected, run_cli
 from generating import SLOW, FakeWriter
 from matching import card, seeded, template
 
-from algo_coach.calls import CallLog
-from algo_coach.generation import Corpus, write_problems
-from algo_coach.outcomes import OutcomeLog
-from algo_coach.problems import ProblemStore
-from algo_coach.schema import ProblemDifficulty, ProblemStatus, RetirementReason
+from climb.calls import CallLog
+from climb.generation import Corpus, write_problems
+from climb.outcomes import OutcomeLog
+from climb.problems import ProblemStore
+from climb.schema import ProblemDifficulty, ProblemStatus, RetirementReason
 
 BUILDS = "def solve(size, seed):\n    return [list(range(size))]\n"
 
@@ -21,7 +21,7 @@ def root(database, monkeypatch):
 def landed(root, monkeypatch, **overrides):
     """One stored problem, written through the whole pipeline so every record a
     reader joins is there."""
-    monkeypatch.setattr("algo_coach.generation.timing.DRILL_CAP_MS", 60)
+    monkeypatch.setattr("climb.generation.timing.DRILL_CAP_MS", 60)
     (one,) = seeded(root, card(templates=[template("longest-valid-window", speedup=True)]))
     write_problems(
         FakeWriter(slow=SLOW, generator=BUILDS, **overrides),

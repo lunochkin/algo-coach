@@ -16,7 +16,7 @@ import {
   syncErrorLabel,
   pageReading,
   copyReading,
-} from '@algo-coach/core';
+} from '@climb/core';
 import type { QueueSession, Session, SyncState } from '@/lib/store';
 import { font, palette, radius, space, textSize } from '@/ui/tokens';
 

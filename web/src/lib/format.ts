@@ -4,9 +4,9 @@ import {
   problemFacts as problemFactsAt,
   techniqueStats,
   templateView as templateViewAt,
-} from '@algo-coach/core'
+} from '@climb/core'
 
-export { duration, share } from '@algo-coach/core'
+export { duration, share } from '@climb/core'
 
 // the core's wording, read at the moment the page renders
 export function lastAt(at: string | null | undefined): string {

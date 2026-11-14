@@ -1,11 +1,11 @@
 import pytest
 from helpers import a_call
 
-from algo_coach.generation import Disagreement, Misdeclaration, misdeclared
-from algo_coach.generation import settle as settle_by
-from algo_coach.generation.agreement import agrees
-from algo_coach.runner import NoValue, RunOutcome
-from algo_coach.schema import DraftCase, ExpectedSource, MachineProvenance
+from climb.generation import Disagreement, Misdeclaration, misdeclared
+from climb.generation import settle as settle_by
+from climb.generation.agreement import agrees
+from climb.runner import NoValue, RunOutcome
+from climb.schema import DraftCase, ExpectedSource, MachineProvenance
 
 
 def settle(args, **kwargs):

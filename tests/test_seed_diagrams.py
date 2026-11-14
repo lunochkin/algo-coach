@@ -3,11 +3,11 @@ from pathlib import Path
 import pytest
 from test_seed_knowledge import CHOICE, OPEN, authored, rows
 
-from algo_coach.knowledge import diagrams as drawing
-from algo_coach.knowledge import read_module, seed_module
-from algo_coach.knowledge.diagrams import DrawError, MermaidCli, mermaid_sources, source_hash
-from algo_coach.knowledge.snapshot import snapshot
-from algo_coach.knowledge.table import diagrams, modules
+from climb.knowledge import diagrams as drawing
+from climb.knowledge import read_module, seed_module
+from climb.knowledge.diagrams import DrawError, MermaidCli, mermaid_sources, source_hash
+from climb.knowledge.snapshot import snapshot
+from climb.knowledge.table import diagrams, modules
 
 FLOW = "flowchart TB\n  a --> b"
 TREE = "flowchart TB\n  root --> leaf"

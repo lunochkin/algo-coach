@@ -1,9 +1,9 @@
 ---
 paths:
-  - "src/algo_coach/cards/**"
-  - "src/algo_coach/techniques/**"
-  - "src/algo_coach/matches/**"
-  - "src/algo_coach/ladder.py"
+  - "src/climb/cards/**"
+  - "src/climb/techniques/**"
+  - "src/climb/matches/**"
+  - "src/climb/ladder.py"
   - "content/cards/**"
 ---
 

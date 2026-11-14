@@ -224,7 +224,7 @@ each person signs in to a log of their own, and their code runs in a sandbox.
   refuses a wait past a bound, kills a run past its deadline by name, and
   removes what a dead broker left. The API holds no socket and reaches the
   broker on a network only the two join.
-- `runner.run` calls the broker where `ALGO_COACH_BROKER` names one, and the
+- `runner.run` calls the broker where `CLIMB_BROKER` names one, and the
   local subprocess everywhere else. The comparison against `expected` stays
   above that boundary.
 - A user's submissions are capped at ten a minute. A sitting nothing has
@@ -400,7 +400,7 @@ one app with one log.
 - The account menu listing and revoking signed-in apps, and `log export` and
   `log erase` covering the knowledge log.
 - learn's history imported for the author, and learn frozen.
-- From the first days of use: a login screen, the app named Algo Coach, a
+- From the first days of use: a login screen, the app named Climbance, a
   raise of today's new-question limit, learning steps counted apart from the
   due reviews, and next up named by Continue's own rule.
 - Exit met in part at close: practice moved to the app on 2026-11-09, and the
@@ -492,7 +492,7 @@ than the author.
 - The technique field on a subtopic, carried by the seed and the snapshot, and
   the algorithms module authored to it in the content repository, checked by
   the solver and the lesson reviewer before it is seeded.
-- The card rules numbered in `cards.md`, and `algo-coach card check` with a
+- The card rules numbered in `cards.md`, and `climb card check` with a
   pass running each template's mutants against its cases, so the mutants a
   solution is judged on are ones the cases catch.
 - Judging a solution: a template's solution, clean or carrying one mutant that
@@ -522,7 +522,7 @@ module left 23 numbered rules. Cards joined on 2026-11-12.
   command. The seed's own gate stays apart from it, since the gate executes
   no snippet.
 - The card rules numbered in a `cards.md` beside `docs/authoring/rules.md`,
-  and the card validator ported to `algo-coach card check`, which also runs
+  and the card validator ported to `climb card check`, which also runs
   each template's mutants against its cases.
 - A writer session per subtopic level, working through the module's coverage
   map, and per card.

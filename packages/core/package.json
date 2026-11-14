@@ -1,5 +1,5 @@
 {
-  "name": "@algo-coach/core",
+  "name": "@climb/core",
   "version": "0.0.0",
   "private": true,
   "description": "The knowledge rules and what a screen shows, shared by the web and the native app",

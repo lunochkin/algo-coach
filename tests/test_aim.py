@@ -1,8 +1,8 @@
 import pytest
 from matching import PROCEDURE, canonical, card, problem, seeded, template
 
-from algo_coach.generation import targets
-from algo_coach.mint import generator_match
+from climb.generation import targets
+from climb.mint import generator_match
 
 
 @pytest.fixture

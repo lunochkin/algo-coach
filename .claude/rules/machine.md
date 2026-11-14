@@ -1,10 +1,10 @@
 ---
 paths:
-  - "src/algo_coach/calls/**"
-  - "src/algo_coach/outcomes/**"
-  - "src/algo_coach/classifier.py"
-  - "src/algo_coach/eval/**"
-  - "src/algo_coach/generation/**"
+  - "src/climb/calls/**"
+  - "src/climb/outcomes/**"
+  - "src/climb/classifier.py"
+  - "src/climb/eval/**"
+  - "src/climb/generation/**"
 ---
 
 Read `docs/architecture/machine.md` before changing this code. It gives

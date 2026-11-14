@@ -1,5 +1,5 @@
-from algo_coach.cards import CardStore
-from algo_coach.schema import Card, Selector, Template, TemplateCase
+from climb.cards import CardStore
+from climb.schema import Card, Selector, Template, TemplateCase
 
 
 def template(slug: str, *, card: str) -> Template:

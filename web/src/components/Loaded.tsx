@@ -1,4 +1,4 @@
-import { RETRY, pageReading } from '@algo-coach/core'
+import { RETRY, pageReading } from '@climb/core'
 import type { ReactNode } from 'react'
 
 import { Button } from '@/components/ui/button'

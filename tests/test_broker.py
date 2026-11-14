@@ -8,8 +8,8 @@ from typing import Literal, NamedTuple
 import pytest
 from fastapi.testclient import TestClient
 
-from algo_coach.broker import create_app
-from algo_coach.broker.container import (
+from climb.broker import create_app
+from climb.broker.container import (
     CASE_SLACK_MS,
     IMAGE,
     OUTPUT_PER_CASE,
@@ -19,7 +19,7 @@ from algo_coach.broker.container import (
     Stop,
     docker,
 )
-from algo_coach.runner import child
+from climb.runner import child
 
 DOUBLE = "def solve(n):\n    return n * 2\n"
 RUN = {"code": DOUBLE, "args": [[1], [2]], "cap_ms": 3000}
@@ -105,7 +105,7 @@ def test_the_submission_s_image_is_pinned_by_digest():
 
 
 def test_each_run_s_container_carries_the_label_leftovers_are_found_by():
-    assert _holds(_options(one_run().argv), ["--label", "algo-coach.run"])
+    assert _holds(_options(one_run().argv), ["--label", "climb.run"])
 
 
 def test_a_run_answers_a_result_per_case():
@@ -152,7 +152,7 @@ def test_the_container_runs_the_entry_process_s_script_whole():
         ["--memory-swap", "512m"],
         ["--pids-limit", "256"],
         ["--init"],
-        ["--env", "ALGO_COACH_SANDBOX=1"],
+        ["--env", "CLIMB_SANDBOX=1"],
     ],
 )
 def test_the_container_starts_confined(flag):

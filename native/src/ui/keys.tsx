@@ -3,7 +3,7 @@ import { memo, type ReactNode, useEffect, useRef, useState } from 'react';
 import { Pressable, ScrollView, View } from 'react-native';
 import { Text, useTheme } from 'react-native-paper';
 
-import { KEY_NAMES, KEY_SPACE, nameKey } from '@algo-coach/core';
+import { KEY_NAMES, KEY_SPACE, nameKey } from '@climb/core';
 import {
   afterLetter,
   cased,

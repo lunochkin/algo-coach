@@ -1,0 +1,69 @@
+import json
+from collections.abc import Iterable, Mapping
+from functools import cache
+from importlib import resources
+from types import MappingProxyType
+
+from climb.schema import Technique
+
+
+@cache
+def criteria() -> Mapping[str, Technique]:
+    """Each code with what earns it, read through `importlib.resources` rather
+    than a path relative to the working directory: it ships inside the
+    wheel."""
+    raw = json.loads(resources.files("climb.techniques").joinpath("vocabulary.json").read_text())
+    entries = [Technique.model_validate(entry) for entry in raw["techniques"]]
+    return MappingProxyType({entry.code: entry for entry in entries})
+
+
+def criterion(code: str) -> list[str]:
+    """One code's rule in the words both readers meet, and nothing for a
+    code the vocabulary no longer carries: records outlive it, so a retired
+    code can still be a candidate and then reaches its reader as a bare
+    name."""
+    entry = criteria().get(code)
+    if entry is None:
+        return []
+    return [
+        f"{entry.code} — {entry.kind}: {entry.kind.test}.",
+        f"  Earns it: {entry.earns}",
+        f"  Near miss: {entry.near_miss}",
+    ]
+
+
+@cache
+def codes() -> frozenset[str]:
+    return frozenset(criteria())
+
+
+# The write path only: records already in the log may carry codes this rejects,
+# and must still load.
+def is_known(code: str) -> bool:
+    return code in codes()
+
+
+def with_ancestors(codes: Iterable[str]) -> set[str]:
+    """The codes and every code each is a kind of. A retired code has no entry,
+    so it reaches no parent."""
+    found: set[str] = set()
+    pending = list(codes)
+    while pending:
+        code = pending.pop()
+        if code in found:
+            continue
+        found.add(code)
+        entry = criteria().get(code)
+        if entry is not None:
+            pending.extend(entry.parents)
+    return found
+
+
+def family(code: str) -> str:
+    """The ancestor a listing groups a code under: one with no parent, the
+    first by name where there are several."""
+    return min(
+        ancestor
+        for ancestor in with_ancestors([code])
+        if not (entry := criteria().get(ancestor)) or not entry.parents
+    )

@@ -1,6 +1,6 @@
 from authoring import LESSON, _bank, found, git, question, rebanked, written
 
-from algo_coach.knowledge.authoring import check, in_sub, load, near
+from climb.knowledge.authoring import check, in_sub, load, near
 
 
 def checked(root, **flags):

@@ -1,9 +1,9 @@
 import pytest
 from helpers import PROVENANCE, browsing, seed_problem
 
-from algo_coach.cases import CaseLog
-from algo_coach.log import AttemptLog, SittingStore
-from algo_coach.mint import case
+from climb.cases import CaseLog
+from climb.log import AttemptLog, SittingStore
+from climb.mint import case
 
 USER = "u-4f9c2a"
 DOUBLE = "def solve(n):\n    return n * 2\n"

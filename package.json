@@ -1,5 +1,5 @@
 {
-  "name": "algo-coach-workspace",
+  "name": "climb-workspace",
   "private": true,
   "workspaces": [
     "packages/*",

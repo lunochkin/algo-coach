@@ -54,7 +54,7 @@ import {
   OF,
   mapLessonsToggle,
   MAP_FIT_PRESS,
-} from '@algo-coach/core';
+} from '@climb/core';
 import { useStore } from '@/lib/store';
 import { CertSheet, stateColor } from '@/ui/certs';
 import { Blank, BottomBar, fromCopy, HeaderNote, Loaded, styles, tones, Press, ScreenHeader } from '@/ui/common';

@@ -1,5 +1,5 @@
 {
-  "name": "algo-coach-diagrams",
+  "name": "climb-diagrams",
   "private": true,
   "type": "module",
   "description": "Draws Mermaid sources to SVG for the seed: docs/architecture/knowledge.md, Diagrams",

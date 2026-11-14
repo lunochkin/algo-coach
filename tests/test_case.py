@@ -2,8 +2,8 @@ import pytest
 from helpers import PROVENANCE, PROVENANCE_FIELDS
 from pydantic import ValidationError
 
-from algo_coach import mint
-from algo_coach.schema import ExpectedSource, MachineProvenance, TestCase
+from climb import mint
+from climb.schema import ExpectedSource, MachineProvenance, TestCase
 
 
 def case(*args, provenance: MachineProvenance = PROVENANCE, **overrides) -> TestCase:

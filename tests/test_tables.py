@@ -22,18 +22,18 @@ from sqlalchemy.exc import ProgrammingError
 from tables import Stored, mismatches
 from test_schema_additive import RECORDS
 
-import algo_coach
-from algo_coach.calls.table import calls
-from algo_coach.cards.table import card_requirements, card_templates, cards, template_cases
-from algo_coach.cases.table import test_cases
-from algo_coach.drafts.table import (
+import climb
+from climb.calls.table import calls
+from climb.cards.table import card_requirements, card_templates, cards, template_cases
+from climb.cases.table import test_cases
+from climb.drafts.table import (
     SettledField,
     draft_declared_cases,
     draft_settled_cases,
     drafts,
 )
-from algo_coach.judgements.table import judgement_items
-from algo_coach.knowledge.table import (
+from climb.judgements.table import judgement_items
+from climb.knowledge.table import (
     answers,
     certification_exams,
     diagrams,
@@ -50,7 +50,7 @@ from algo_coach.knowledge.table import (
     subtopics,
     topics,
 )
-from algo_coach.log.table import (
+from climb.log.table import (
     attempt_claims,
     attempt_verification_case_results,
     attempt_verifications,
@@ -69,11 +69,11 @@ from algo_coach.log.table import (
     sittings,
     users,
 )
-from algo_coach.matches.table import template_matches
-from algo_coach.outcomes.table import site_outcomes
-from algo_coach.problems.table import problems
-from algo_coach.ratings.table import difficulty_ratings
-from algo_coach.schema import (
+from climb.matches.table import template_matches
+from climb.outcomes.table import site_outcomes
+from climb.problems.table import problems
+from climb.ratings.table import difficulty_ratings
+from climb.schema import (
     Answer,
     Attempt,
     AttemptClaim,
@@ -122,10 +122,10 @@ from algo_coach.schema import (
     Topic,
     Verification,
 )
-from algo_coach.solution_claims.table import solution_claims
-from algo_coach.solutions.table import solutions
-from algo_coach.storage import appended_column, call_column, enumerated, metadata, timestamp
-from algo_coach.verifications.table import verification_case_results, verifications
+from climb.solution_claims.table import solution_claims
+from climb.solutions.table import solutions
+from climb.storage import appended_column, call_column, enumerated, metadata, timestamp
+from climb.verifications.table import verification_case_results, verifications
 
 # every stored record and its table. Each store adds its own as its tables land
 STORED: list[Stored] = [
@@ -243,9 +243,9 @@ def test_every_stored_record_has_a_table():
 def test_every_table_module_is_imported_here():
     """A table module this file never imports puts no table on the metadata
     the checks below read."""
-    source = Path(algo_coach.__file__).parent
+    source = Path(climb.__file__).parent
     declared = {
-        ".".join(("algo_coach", *path.relative_to(source).with_suffix("").parts))
+        ".".join(("climb", *path.relative_to(source).with_suffix("").parts))
         for path in source.rglob("table.py")
     }
 

@@ -6,10 +6,10 @@ from helpers import T0
 from sqlalchemy import insert, select
 from test_seed_knowledge import authored
 
-from algo_coach.knowledge import read_module, seed_module
-from algo_coach.knowledge.learn import imported, learn_lines
-from algo_coach.knowledge.table import answers, stints
-from algo_coach.log.table import users
+from climb.knowledge import read_module, seed_module
+from climb.knowledge.learn import imported, learn_lines
+from climb.knowledge.table import answers, stints
+from climb.log.table import users
 
 USER = "u-4f9c2a"
 T = "2026-11-07T10:00:00+00:00"

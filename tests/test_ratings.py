@@ -4,11 +4,11 @@ import pytest
 from helpers import PROVENANCE_FIELDS, T0, make_problem
 from pydantic import ValidationError
 
-from algo_coach.mint import user_rating
-from algo_coach.problems import ProblemStore
-from algo_coach.ratings import RatingLog, with_standing_difficulty
-from algo_coach.schema import DifficultyRating, ProblemDifficulty
-from algo_coach.solution_claims import load_problem, load_problems
+from climb.mint import user_rating
+from climb.problems import ProblemStore
+from climb.ratings import RatingLog, with_standing_difficulty
+from climb.schema import DifficultyRating, ProblemDifficulty
+from climb.solution_claims import load_problem, load_problems
 
 EASY, MEDIUM, HARD = ProblemDifficulty.EASY, ProblemDifficulty.MEDIUM, ProblemDifficulty.HARD
 

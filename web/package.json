@@ -1,5 +1,5 @@
 {
-  "name": "algo-coach-web",
+  "name": "climb-web",
   "private": true,
   "version": "0.0.0",
   "type": "module",
@@ -12,8 +12,8 @@
     "test": "vitest run"
   },
   "dependencies": {
-    "@algo-coach/core": "*",
-    "@algo-coach/editor": "*",
+    "@climb/core": "*",
+    "@climb/editor": "*",
     "@codemirror/commands": "^6.11.1",
     "@codemirror/lang-python": "^6.2.1",
     "@codemirror/language": "^6.13.1",

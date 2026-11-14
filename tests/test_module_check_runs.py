@@ -4,7 +4,7 @@ import pytest
 from authoring import LESSON, found, question, written
 from commands import run_cli
 
-from algo_coach.knowledge.authoring import check, snippets
+from climb.knowledge.authoring import check, snippets
 
 
 def output(qid: str, code: str, **fields) -> dict:
@@ -194,7 +194,7 @@ def test_a_kept_result_is_not_run_again(tmp_path):
 
 
 def test_the_command_prints_the_findings_and_fails_on_an_error(tmp_path, monkeypatch, capsys):
-    """`algo-coach module check` exits 1 where a rule refused something."""
+    """`climb module check` exits 1 where a rule refused something."""
     written(tmp_path, [question("a", answer=["A", "B"])])
 
     with pytest.raises(SystemExit) as exit:

@@ -3,9 +3,9 @@ from datetime import timedelta
 from helpers import T0
 from matching import problem
 
-from algo_coach.cards.graph import depths
-from algo_coach.ladder import Rung, met, unmet
-from algo_coach.schema import (
+from climb.cards.graph import depths
+from climb.ladder import Rung, met, unmet
+from climb.schema import (
     Attempt,
     Card,
     CardRun,

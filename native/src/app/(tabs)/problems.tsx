@@ -20,7 +20,7 @@ import {
   type ListingFilter,
   OF,
   techniquesLine,
-} from '@algo-coach/core';
+} from '@climb/core';
 import { useEngine } from '@/lib/useEngine';
 import { AccountMenu } from '@/ui/account';
 import { Loaded, styles, ScreenHeader } from '@/ui/common';

@@ -4,9 +4,9 @@ import pytest
 from helpers import a_call, stored_attempt, stored_problem
 from pydantic import ValidationError
 
-from algo_coach.calls import CallLog
-from algo_coach.log import AttemptLog
-from algo_coach.schema import (
+from climb.calls import CallLog
+from climb.log import AttemptLog
+from climb.schema import (
     Attempt,
     AttemptClaim,
     AttemptRecord,

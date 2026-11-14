@@ -21,7 +21,7 @@ default. Language: Python 3.
 ## Output
 
 One file, `content/cards/<slug>.json`, matching `CardSeed`
-(`src/algo_coach/schema/seed.py`). Gitignored — cards are product content and
+(`src/climb/schema/seed.py`). Gitignored — cards are product content and
 move behind a private repo later.
 
 No id, on the card or on any template: the engine mints identity at import.
@@ -38,8 +38,8 @@ file in place.
    *as the technique* must sit inside them.
 
    ```bash
-   uv run python -c "from algo_coach.techniques import codes; print(sorted(codes()))"
-   uv run python -c "from algo_coach.techniques import criterion; print('\n'.join(criterion('two-pointers')))"
+   uv run python -c "from climb.techniques import codes; print(sorted(codes()))"
+   uv run python -c "from climb.techniques import criterion; print('\n'.join(criterion('two-pointers')))"
    ```
 
 2. **Scope the card by the machinery, not by the vocabulary.** Several cards per
@@ -291,7 +291,7 @@ file in place.
    against them:
 
    ```bash
-   uv run algo-coach card check content/cards/<slug>.json
+   uv run climb card check content/cards/<slug>.json
    ```
 
    A surviving mutant is a case the template may lack: add a case it fails,

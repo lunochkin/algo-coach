@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 
-import { SyncLoop, syncDelay } from '@algo-coach/core'
+import { SyncLoop, syncDelay } from '@climb/core'
 
 import { api, LOGIN } from '@/api/client'
 import { Copy, eraseCopy, type Held } from '@/knowledge/copy'

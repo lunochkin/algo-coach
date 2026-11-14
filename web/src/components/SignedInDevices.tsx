@@ -10,7 +10,7 @@ import {
   OF,
   deviceTitle,
   revokeDevice,
-} from '@algo-coach/core'
+} from '@climb/core'
 
 import { api, type SignedInDevice } from '@/api/client'
 import { useLoaded } from '@/api/useLoaded'

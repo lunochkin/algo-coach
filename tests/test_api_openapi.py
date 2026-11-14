@@ -1,7 +1,7 @@
 import json
 from pathlib import Path
 
-from algo_coach.api.__main__ import app
+from climb.api.__main__ import app
 
 COMMITTED = Path(__file__).resolve().parents[1] / "packages/core/src/api/openapi.json"
 

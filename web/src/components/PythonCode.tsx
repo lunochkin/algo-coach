@@ -1,5 +1,5 @@
-import { codeRows, WRAP_MARK, type CodeRow } from '@algo-coach/core'
-import { pieces } from '@algo-coach/editor'
+import { codeRows, WRAP_MARK, type CodeRow } from '@climb/core'
+import { pieces } from '@climb/editor'
 import { type ReactNode } from 'react'
 
 import { useColumns } from '@/lib/columns'

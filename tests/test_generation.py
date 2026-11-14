@@ -6,8 +6,8 @@ from helpers import PROVENANCE_FIELDS, own
 from matching import card, seeded, template
 from pydantic import ValidationError
 
-from algo_coach.calls import CallLog, Reply, prompt_hash
-from algo_coach.generation import (
+from climb.calls import CallLog, Reply, prompt_hash
+from climb.generation import (
     SYSTEM,
     GenerationError,
     generate,
@@ -17,7 +17,7 @@ from algo_coach.generation import (
     schema,
     written_for,
 )
-from algo_coach.schema import (
+from climb.schema import (
     Configuration,
     Problem,
     ProblemDifficulty,

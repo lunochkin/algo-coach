@@ -23,9 +23,9 @@ See `README.md` for what this is; `docs/ROADMAP.md` for the phase plan.
 - Postgres is named by `DATABASE_URL` in `.env`. `just migrate` applies the
   migrations, and `just migration <name>` generates the next one.
 - Signing in reads `GOOGLE_CLIENT_ID`, `GITHUB_CLIENT_ID`, their `_SECRET`
-  pairs, `ALGO_COACH_ORIGIN` and `ALGO_COACH_SECRET` from `.env`. A provider
+  pairs, `CLIMB_ORIGIN` and `CLIMB_SECRET` from `.env`. A provider
   with no client offers no route, and with none the sign-in routes are absent.
-- Locally, `ALGO_COACH_DEV_LOGIN=local` in `.env` and no provider client: the
+- Locally, `CLIMB_DEV_LOGIN=local` in `.env` and no provider client: the
   login page `just app` serves offers a dev login as `local`.
 - The integration tests need a Postgres server named by `TEST_DATABASE_URL`.
   Its user needs the right to create databases and to set

@@ -7,7 +7,7 @@ import {
   OF,
   TECHNIQUE_NONE,
   TECHNIQUE_PROBLEMS,
-} from '@algo-coach/core'
+} from '@climb/core'
 
 import { api, candidates } from '@/api/client'
 import { useLoaded } from '@/api/useLoaded'

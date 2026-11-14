@@ -9,15 +9,15 @@ from datetime import UTC, datetime
 
 from fastapi.testclient import TestClient
 
-from algo_coach.api import create_app
-from algo_coach.api.context import SESSION_COOKIE
-from algo_coach.calls import CallLog, Reply
-from algo_coach.cards import CardStore
-from algo_coach.classifier import PIN, TEMPERATURE
-from algo_coach.log import AttemptLog, named, opened
-from algo_coach.mint import classifier_claim, user_solution_claim
-from algo_coach.problems import ProblemStore
-from algo_coach.schema import (
+from climb.api import create_app
+from climb.api.context import SESSION_COOKIE
+from climb.calls import CallLog, Reply
+from climb.cards import CardStore
+from climb.classifier import PIN, TEMPERATURE
+from climb.log import AttemptLog, named, opened
+from climb.mint import classifier_claim, user_solution_claim
+from climb.problems import ProblemStore
+from climb.schema import (
     Attempt,
     AttemptClaim,
     Call,
@@ -30,8 +30,8 @@ from algo_coach.schema import (
     SolutionRole,
     Template,
 )
-from algo_coach.solution_claims import SolutionClaimLog
-from algo_coach.solutions import SolutionLog
+from climb.solution_claims import SolutionClaimLog
+from climb.solutions import SolutionLog
 
 T0 = datetime(2026, 1, 1, tzinfo=UTC)
 

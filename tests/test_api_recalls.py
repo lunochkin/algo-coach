@@ -2,8 +2,8 @@ import pytest
 from helpers import browsing
 from matching import card, seeded, template
 
-from algo_coach.log import RecallLog
-from algo_coach.sitting import RUNS_PER_MINUTE
+from climb.log import RecallLog
+from climb.sitting import RUNS_PER_MINUTE
 
 USER = "u-4f9c2a"
 TECHNIQUE = "sliding-window"

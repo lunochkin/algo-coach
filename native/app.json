@@ -1,14 +1,14 @@
 {
   "expo": {
-    "name": "Algo Coach",
-    "slug": "algo-coach",
+    "name": "Climbance",
+    "slug": "climbance",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "algocoach",
+    "scheme": "climbance",
     "userInterfaceStyle": "automatic",
     "android": {
-      "package": "dev.lunochkin.algocoach",
+      "package": "com.climbance.app",
       "adaptiveIcon": {
         "backgroundColor": "#E6F4FE",
         "foregroundImage": "./assets/images/android-icon-foreground.png",

@@ -5,12 +5,12 @@ from importlib import import_module
 import pytest
 from helpers import own
 
-from algo_coach.calls import CallLog, Reply, Trace, ask, payload, prompt_hash, recorded, stamp
-from algo_coach.schema import Call, Configuration
+from climb.calls import CallLog, Reply, Trace, ask, payload, prompt_hash, recorded, stamp
+from climb.schema import Call, Configuration
 
 CONFIGURATION = Configuration(model="m", effort="low", pin="a-host")
 
-ASK = import_module("algo_coach.calls.ask")
+ASK = import_module("climb.calls.ask")
 
 
 @dataclass

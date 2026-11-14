@@ -1,0 +1,70 @@
+"""What solving a problem can take. A view, never stored truth."""
+
+from collections.abc import Iterable
+
+from climb.problems.store import ProblemStore
+from climb.ratings import RatingLog, with_standing_difficulty
+from climb.schema import Problem, Solution, SolutionClaim, SolutionRole
+from climb.solution_claims.standing import standing_solution_claims
+from climb.solution_claims.store import SolutionClaimLog
+from climb.solutions.store import SolutionLog
+from climb.storage import Database
+from climb.techniques import with_ancestors
+
+
+def derive(
+    problems: Iterable[Problem],
+    solutions: Iterable[Solution],
+    claims: Iterable[SolutionClaim],
+) -> dict[str, list[str]]:
+    """The techniques each problem's canonicals were read as, keyed by problem.
+
+    The reference is excluded, for the reason `corpus.md` gives. A canonical
+    nothing has read contributes nothing, which is not a verdict that it used
+    no technique. A claimed code brings every code it is a kind of.
+    """
+    standing = standing_solution_claims(claims)
+    derived: dict[str, set[str]] = {problem.id: set() for problem in problems}
+    for solution in solutions:
+        if solution.role is not SolutionRole.CANONICAL or solution.problem_id not in derived:
+            continue
+        claim = standing.get(solution.id)
+        if claim is not None:
+            derived[solution.problem_id] |= with_ancestors(claim.techniques)
+    # sorted: a claim's prompt is rendered from these, and the prompt hash is
+    # taken over that text.
+    return {problem_id: sorted(codes) for problem_id, codes in derived.items()}
+
+
+def with_techniques(
+    problems: Iterable[Problem],
+    solutions: Iterable[Solution],
+    claims: Iterable[SolutionClaim],
+) -> list[Problem]:
+    """Each problem carrying the view rather than what its record stores."""
+    problems = list(problems)
+    derived = derive(problems, solutions, claims)
+    return [problem.model_copy(update={"techniques": derived[problem.id]}) for problem in problems]
+
+
+def load_problem(root: Database, problem_id: str) -> Problem | None:
+    """One stored problem carrying the view, read without the rest of the
+    corpus. `None` where the store holds no such problem."""
+    problem = ProblemStore(root).get(problem_id)
+    if problem is None:
+        return None
+    solutions = SolutionLog(root).for_problem(problem_id)
+    claims = [
+        claim
+        for solution in solutions
+        for claim in SolutionClaimLog(root).for_solution(solution.id)
+    ]
+    rated = with_standing_difficulty([problem], RatingLog(root).for_problem(problem_id))
+    return with_techniques(rated, solutions, claims)[0]
+
+
+def load_problems(root: Database) -> list[Problem]:
+    """Every stored problem carrying the view. The store alone returns the
+    record: no techniques, and the generator's label."""
+    rated = with_standing_difficulty(ProblemStore(root).all(), RatingLog(root).ratings())
+    return with_techniques(rated, SolutionLog(root).solutions(), SolutionClaimLog(root).claims())

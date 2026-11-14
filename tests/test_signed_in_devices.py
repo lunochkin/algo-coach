@@ -4,9 +4,9 @@ from helpers import browsing
 from sqlalchemy import update
 from test_app_signin import CHALLENGE, VERIFIER
 
-from algo_coach.api.context import SESSION_COOKIE
-from algo_coach.log import exchanged, issued, named, opened
-from algo_coach.log.table import app_tokens, sessions
+from climb.api.context import SESSION_COOKIE
+from climb.log import exchanged, issued, named, opened
+from climb.log.table import app_tokens, sessions
 
 USER = "u-4f9c2a"
 OTHER = "u-b71e03"

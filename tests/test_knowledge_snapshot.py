@@ -2,8 +2,8 @@ from fastapi.testclient import TestClient
 from helpers import browsing
 from test_seed_knowledge import CHOICE, authored, titled
 
-from algo_coach.api.app import create_app
-from algo_coach.knowledge import read_module, seed_module
+from climb.api.app import create_app
+from climb.knowledge import read_module, seed_module
 
 USER = "u-4f9c2a"
 

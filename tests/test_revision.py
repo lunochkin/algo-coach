@@ -2,10 +2,10 @@ from datetime import timedelta
 
 from helpers import T0, attempt, logged, machine_claim, seed_problem
 
-from algo_coach.attempt_claims import against, contested, revisable, standing_attempt_claims
-from algo_coach.log import AttemptLog
-from algo_coach.mint import user_claim
-from algo_coach.solution_claims import load_problems
+from climb.attempt_claims import against, contested, revisable, standing_attempt_claims
+from climb.log import AttemptLog
+from climb.mint import user_claim
+from climb.solution_claims import load_problems
 
 
 def pool(log):

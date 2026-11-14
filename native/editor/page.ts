@@ -9,7 +9,7 @@ import {
   offered,
   pythonEditing,
   wordBefore,
-} from '@algo-coach/editor';
+} from '@climb/editor';
 import { syntaxTree } from '@codemirror/language';
 import { EditorState } from '@codemirror/state';
 import { drawSelection, EditorView } from '@codemirror/view';

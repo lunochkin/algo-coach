@@ -5,7 +5,7 @@ import remarkGfm from 'remark-gfm'
 import remarkMath from 'remark-math'
 import type { Components } from 'react-markdown'
 import { Children, isValidElement, type ReactNode } from 'react'
-import { codeWraps, EXTERNAL_HINT, EXTERNAL_MARK, isExternal, tableShape } from '@algo-coach/core'
+import { codeWraps, EXTERNAL_HINT, EXTERNAL_MARK, isExternal, tableShape } from '@climb/core'
 
 import { Diagram } from '@/components/Diagram'
 import { WrappedText } from '@/components/PythonCode'

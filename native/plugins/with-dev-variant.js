@@ -1,4 +1,4 @@
-// Debug builds install as a separate app (dev.lunochkin.algocoach.dev, "Algo Dev") next to the
+// Debug builds install as a separate app (com.climbance.app.dev, "Climbance Dev") next to the
 // release one, so a Metro-connected dev build never replaces the daily app. The build type
 // decides every difference, so one prebuilt project serves both builds.
 const fs = require('fs');
@@ -42,7 +42,7 @@ module.exports = function withDevVariant(config) {
       fs.mkdirSync(dir, { recursive: true });
       fs.writeFileSync(
         path.join(dir, 'strings.xml'),
-        '<resources>\n  <string name="app_name">Algo Dev</string>\n</resources>\n',
+        '<resources>\n  <string name="app_name">Climbance Dev</string>\n</resources>\n',
       );
       return cfg;
     },

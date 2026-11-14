@@ -4,9 +4,9 @@ from pydantic import ValidationError
 from sqlalchemy import insert
 from sqlalchemy.exc import IntegrityError
 
-from algo_coach.knowledge.table import answers, modules, questions, stints, subtopics, topics
-from algo_coach.log.table import users
-from algo_coach.schema import Answer, Focus, OpenGrade, Stint, StintMode
+from climb.knowledge.table import answers, modules, questions, stints, subtopics, topics
+from climb.log.table import users
+from climb.schema import Answer, Focus, OpenGrade, Stint, StintMode
 
 USER = "u-4f9c2a"
 BASE = {

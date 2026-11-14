@@ -13,7 +13,7 @@ import {
   toggled,
   type ListingFilter,
   OF,
-} from '@algo-coach/core'
+} from '@climb/core'
 import { useSearchParams } from 'react-router'
 
 import { api } from '@/api/client'

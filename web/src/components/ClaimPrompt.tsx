@@ -16,7 +16,7 @@ import {
   OF,
   claimDeclined,
   sendClaim,
-} from '@algo-coach/core'
+} from '@climb/core'
 import { useEffect, useState } from 'react'
 
 import { api, type Attempt, type FailureMode } from '@/api/client'

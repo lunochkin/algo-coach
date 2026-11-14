@@ -2,11 +2,11 @@ import pytest
 from commands import TRANSPORT, connected, run_cli
 from helpers import FakeTransport, Verdict, attempt, logged, machine_claim, seed_problem
 
-from algo_coach import cli
-from algo_coach.attempt_claims import standing_attempt_claims
-from algo_coach.classifier import EFFORT, MODEL
-from algo_coach.log import AttemptLog
-from algo_coach.runs import ABORT_AFTER
+from climb import cli
+from climb.attempt_claims import standing_attempt_claims
+from climb.classifier import EFFORT, MODEL
+from climb.log import AttemptLog
+from climb.runs import ABORT_AFTER
 
 
 def run(monkeypatch, client: FakeTransport, *argv: str) -> None:
@@ -50,7 +50,7 @@ def test_a_missing_key_fails_before_the_run(root, monkeypatch, capsys):
     monkeypatch.delenv("OPENROUTER_API_KEY", raising=False)
     monkeypatch.delenv("ANTHROPIC_AUTH_TOKEN", raising=False)
     monkeypatch.setattr(TRANSPORT, "OpenRouter", lambda _api, **_: client)
-    monkeypatch.setattr("sys.argv", ["algo-coach", "claim", "attempts", "--user", "u1"])
+    monkeypatch.setattr("sys.argv", ["climb", "claim", "attempts", "--user", "u1"])
 
     with pytest.raises(SystemExit) as exit_info:
         cli.main()

@@ -1,8 +1,8 @@
 from database import emptied
 from sqlalchemy import func, insert, select, text
 
-from algo_coach.calls.table import calls
-from algo_coach.storage import metadata
+from climb.calls.table import calls
+from climb.storage import metadata
 
 
 def call_row(id: str) -> dict:

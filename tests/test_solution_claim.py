@@ -4,8 +4,8 @@ import pytest
 from helpers import PROVENANCE_FIELDS
 from pydantic import ValidationError
 
-from algo_coach.mint import machine_solution_claim, user_solution_claim
-from algo_coach.schema import AttemptClaim, ClaimSource, MachineProvenance, SolutionClaim
+from climb.mint import machine_solution_claim, user_solution_claim
+from climb.schema import AttemptClaim, ClaimSource, MachineProvenance, SolutionClaim
 
 
 def make_solution_claim(source: ClaimSource, **overrides) -> SolutionClaim:

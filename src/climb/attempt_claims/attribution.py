@@ -1,0 +1,26 @@
+from collections.abc import Iterable, Mapping
+from operator import attrgetter
+
+from climb.schema import Attempt, AttemptClaim, ClaimSource, Problem
+from climb.standing import standing
+from climb.techniques import with_ancestors
+
+# Weakest first: the user's claim stands over the machine's.
+BY_WHAT_EACH_KNEW = (ClaimSource.CLASSIFIER, ClaimSource.USER)
+
+
+def standing_attempt_claims(claims: Iterable[AttemptClaim]) -> dict[str, AttemptClaim]:
+    """The claim that stands: the user's own if any, however late the
+    machine's."""
+    return standing(claims, attrgetter("attempt_id"), by_what_each_knew=BY_WHAT_EACH_KNEW)
+
+
+def resolve_techniques(
+    attempt: Attempt, problem: Problem, claims: Mapping[str, AttemptClaim]
+) -> list[str]:
+    """The claim's techniques if it names any, otherwise the problem's, each
+    with every code it is a kind of."""
+    claim = claims.get(attempt.id)
+    return sorted(
+        with_ancestors(claim.techniques if claim and claim.techniques else problem.techniques)
+    )

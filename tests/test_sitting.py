@@ -3,9 +3,9 @@ from datetime import UTC, datetime
 import pytest
 from pydantic import ValidationError
 
-from algo_coach import mint
-from algo_coach.mint import sitting
-from algo_coach.schema import Sitting
+from climb import mint
+from climb.mint import sitting
+from climb.schema import Sitting
 
 CONTENT = {
     "id": "s1",

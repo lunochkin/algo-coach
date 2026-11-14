@@ -1,4 +1,4 @@
-# algo-coach
+# Climbance
 
 AI coaching layer for deliberate practice of algorithmic problem-solving:
 spaced repetition over a technique-mastery model, on a problem corpus the
@@ -12,7 +12,7 @@ submission against those cases. The engine fetches nothing from a platform, so
 every verdict is the engine's own rather than a status string copied from a
 platform.
 
-Most practice tools schedule *problems*. algo-coach models mastery of
+Most practice tools schedule *problems*. Climbance models mastery of
 *techniques*. A model reads the techniques a solution used from its code,
 rather than inferring them from a problem's tags. Scheduling will target the
 weakest technique rather than the oldest problem. The spaced repetition is over
@@ -76,7 +76,7 @@ Per-technique progress over the archived corpus of 1,785 attempts. The board
 stores nothing: every column is computed from the append-only log on read.
 
 ```
-$ algo-coach board
+$ climb board
 
 technique             attempts  solved   last               labels
 backtracking          144       110/144  2026-07-22 (28d)
@@ -96,7 +96,7 @@ attempts all of them read, with every divergence printed rather than averaged
 away.
 
 ```
-$ algo-coach score --stored --model openai/gpt-oss-120b ... --model moonshotai/kimi-k3 ...
+$ climb score --stored --model openai/gpt-oss-120b ... --model moonshotai/kimi-k3 ...
 
 61 of 62 hand-claimed attempts read by all
 
@@ -398,7 +398,7 @@ makes the same argument for a corpus that grows.
 ## Commands
 
 ```
-uv run algo-coach <command>
+uv run climb <command>
 ```
 
 | Command | What it does |
@@ -417,18 +417,18 @@ uv run algo-coach <command>
 ## Where things are
 
 ```
-src/algo_coach/schema/          the record contracts — the public part
-src/algo_coach/techniques/      the vocabulary: 27 codes, each with its criterion
-src/algo_coach/attempt_claims/  the attribution classifier and its scoring
-src/algo_coach/matches/         which solutions display which card template
-src/algo_coach/calls/           the model transport (OpenRouter) and the call log
-src/algo_coach/board/           the per-technique view, derived on read
-src/algo_coach/generation/      the four calls that write a problem, and its gates
-src/algo_coach/drafts/          one writing, held as it goes
-src/algo_coach/outcomes/        what each call site left on one such writing
-src/algo_coach/mutation/        the mutants a case set has to kill
-src/algo_coach/runner/          running a solution against a problem's cases
-src/algo_coach/{log,cards,problems,cases,solutions,solution_claims,verifications}/
+src/climb/schema/          the record contracts — the public part
+src/climb/techniques/      the vocabulary: 27 codes, each with its criterion
+src/climb/attempt_claims/  the attribution classifier and its scoring
+src/climb/matches/         which solutions display which card template
+src/climb/calls/           the model transport (OpenRouter) and the call log
+src/climb/board/           the per-technique view, derived on read
+src/climb/generation/      the four calls that write a problem, and its gates
+src/climb/drafts/          one writing, held as it goes
+src/climb/outcomes/        what each call site left on one such writing
+src/climb/mutation/        the mutants a case set has to kill
+src/climb/runner/          running a solution against a problem's cases
+src/climb/{log,cards,problems,cases,solutions,solution_claims,verifications}/
 native/                         the native app: the knowledge modules' queues on a phone
 packages/core/                  the knowledge rules and screen data, shared by the web and the app
 docs/architecture/              concepts, boundaries, invariants, flows

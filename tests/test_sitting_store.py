@@ -1,8 +1,8 @@
 import pytest
 from helpers import stored_problem
 
-from algo_coach.log import SittingStore
-from algo_coach.schema import Attempt, Sitting
+from climb.log import SittingStore
+from climb.schema import Attempt, Sitting
 
 
 @pytest.fixture(autouse=True)

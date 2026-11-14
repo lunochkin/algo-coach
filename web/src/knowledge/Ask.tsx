@@ -29,7 +29,7 @@ import {
   askResult,
   initialAsk,
   keyPointLabel,
-} from '@algo-coach/core'
+} from '@climb/core'
 
 import { Link } from 'react-router'
 

@@ -1,0 +1,326 @@
+from enum import StrEnum
+
+from sqlalchemy import (
+    Boolean,
+    CheckConstraint,
+    Column,
+    Double,
+    ForeignKey,
+    Index,
+    Integer,
+    Table,
+    Text,
+    UniqueConstraint,
+    text,
+)
+from sqlalchemy.dialects.postgresql import ARRAY
+
+from climb.schema import CaseOutcome, ClaimSource, Confidence, FailureMode, Hint
+from climb.storage import appended_column, call_column, enumerated, metadata, timestamp
+
+# the engine's own user, whose id a private record's `user_id` references. The
+# account a person signs in with is linked to it, and never stands in for it
+users = Table(
+    "users",
+    metadata,
+    Column("id", Text, primary_key=True),
+    Column("created_at", timestamp(), nullable=False),
+    CheckConstraint("id <> ''", name="id_minted"),
+)
+
+
+class Provider(StrEnum):
+    """Who holds an identity and its login: `README.md`."""
+
+    GOOGLE = "google"
+    GITHUB = "github"
+
+
+# an account a person signs in with, linked to one user: `README.md` gives when
+# two accounts share one. Keyed by the provider's own id, which the account
+# keeps where its email moves
+identities = Table(
+    "identities",
+    metadata,
+    Column("provider", enumerated(Provider), primary_key=True),
+    Column("provider_user_id", Text, primary_key=True),
+    Column("user_id", Text, ForeignKey("users.id"), nullable=False, index=True),
+    # verified by the provider, lowercased, and the one the latest sign-in gave
+    Column("email", Text, nullable=False, index=True),
+    Column("created_at", timestamp(), nullable=False),
+    CheckConstraint("provider_user_id <> ''", name="provider_user_id_named"),
+    CheckConstraint("email = lower(email) AND email <> ''", name="email_lowercased"),
+)
+
+# an email allowed to sign in, whichever provider verified it. Sign-in is by
+# invitation alone: `README.md`
+invitations = Table(
+    "invitations",
+    metadata,
+    Column("email", Text, primary_key=True),
+    Column("created_at", timestamp(), nullable=False),
+    CheckConstraint("email = lower(email) AND email <> ''", name="email_lowercased"),
+)
+
+# a signed-in browser. Keyed by the hash of the token its cookie carries, so a
+# copy of the table signs nobody in
+sessions = Table(
+    "sessions",
+    metadata,
+    Column("id", Text, primary_key=True),
+    Column("user_id", Text, ForeignKey("users.id"), nullable=False, index=True),
+    Column("created_at", timestamp(), nullable=False),
+    Column("expires_at", timestamp(), nullable=False),
+    # set at logout: a stored session ends when revoked, before it expires
+    Column("revoked_at", timestamp()),
+    # when the session last signed a request in, as the devices list shows it
+    Column("last_used_at", timestamp(), nullable=False),
+    # the browser's own name for itself, which a list of devices tells apart by
+    Column("user_agent", Text),
+    CheckConstraint("expires_at > created_at", name="expires_after_it_starts"),
+    CheckConstraint("revoked_at >= created_at", name="revoked_after_it_starts"),
+)
+
+# a one-time code the native app exchanges for its token, bound to the app's
+# PKCE challenge. Keyed by the code's hash, as a session is: `README.md`
+app_codes = Table(
+    "app_codes",
+    metadata,
+    Column("id", Text, primary_key=True),
+    Column("user_id", Text, ForeignKey("users.id"), nullable=False),
+    Column("challenge", Text, nullable=False),
+    Column("created_at", timestamp(), nullable=False),
+    Column("expires_at", timestamp(), nullable=False),
+    # set by the exchange: a code is exchanged once
+    Column("used_at", timestamp()),
+    CheckConstraint("expires_at > created_at", name="expires_after_it_starts"),
+)
+
+# a signed-in native app. Keyed by its token's hash, and alive while used: the
+# token expires once unused for the bound `README.md` gives
+app_tokens = Table(
+    "app_tokens",
+    metadata,
+    Column("id", Text, primary_key=True),
+    Column("user_id", Text, ForeignKey("users.id"), nullable=False, index=True),
+    Column("device", Text, nullable=False),
+    Column("created_at", timestamp(), nullable=False),
+    Column("last_used_at", timestamp(), nullable=False),
+    Column("revoked_at", timestamp()),
+    CheckConstraint("device <> ''", name="device_named"),
+    CheckConstraint("revoked_at >= created_at", name="revoked_after_it_starts"),
+)
+
+attempts = Table(
+    "attempts",
+    metadata,
+    Column("id", Text, primary_key=True),
+    appended_column(),
+    # the board and the candidates read one user's attempts
+    Column("user_id", Text, ForeignKey("users.id"), nullable=False, index=True),
+    Column("problem_id", Text, ForeignKey("problems.id"), nullable=False),
+    # the claim prompt reads one sitting's attempts
+    Column("sitting_id", Text, ForeignKey("sittings.id"), index=True),
+    Column("started_at", timestamp()),
+    Column("finished_at", timestamp(), nullable=False),
+    Column("language", Text),
+    Column("time_to_solve_sec", Double[float]()),
+    Column("solved", Boolean, nullable=False),
+    Column("code", Text),
+    Column("restored", Boolean),
+    CheckConstraint("time_to_solve_sec >= 0", name="time_counted"),
+)
+
+sittings = Table(
+    "sittings",
+    metadata,
+    Column("id", Text, primary_key=True),
+    Column("user_id", Text, ForeignKey("users.id"), nullable=False),
+    Column("problem_id", Text, ForeignKey("problems.id"), nullable=False),
+    Column("started_at", timestamp(), nullable=False),
+    Column("clock_started_at", timestamp()),
+    Column("ended_at", timestamp()),
+    # when the loop last acted on it: a sitting idle past the bound ends here
+    Column("last_active_at", timestamp()),
+    Column("device", Text),
+    CheckConstraint("ended_at >= started_at", name="ends_after_it_starts"),
+    CheckConstraint("device <> ''", name="device_named"),
+    CheckConstraint("clock_started_at >= started_at", name="clock_after_serving"),
+    # one clock running on a problem for a user: a second serve reaches it
+    # rather than starting another
+    Index(
+        "sittings_one_running_idx",
+        "user_id",
+        "problem_id",
+        unique=True,
+        postgresql_where=text("ended_at IS NULL"),
+    ),
+)
+
+# a sitting's pauses, in order. That they follow the start and each other, and
+# that only the last is open, spans rows, and stays the record's own check
+sitting_pauses = Table(
+    "sitting_pauses",
+    metadata,
+    Column("sitting_id", Text, ForeignKey("sittings.id"), primary_key=True),
+    Column("position", Integer, primary_key=True),
+    Column("at", timestamp(), nullable=False),
+    Column("until", timestamp()),
+    CheckConstraint("until >= at", name="ends_no_earlier_than_it_starts"),
+)
+
+attempt_verifications = Table(
+    "attempt_verifications",
+    metadata,
+    Column("id", Text, primary_key=True),
+    appended_column(),
+    Column("created_at", timestamp(), nullable=False),
+    Column("attempt_id", Text, ForeignKey("attempts.id"), nullable=False, index=True),
+    Column("cap_ms", Integer, nullable=False),
+    Column("runner", Text, nullable=False),
+    CheckConstraint("cap_ms > 0", name="capped"),
+    CheckConstraint("runner <> ''", name="runner_named"),
+)
+
+# the same shape as a solution run's results, declared here rather than
+# imported: the private log reads no product store's module
+attempt_verification_case_results = Table(
+    "attempt_verification_case_results",
+    metadata,
+    Column(
+        "attempt_verification_id", Text, ForeignKey("attempt_verifications.id"), primary_key=True
+    ),
+    Column("position", Integer, primary_key=True),
+    Column("case_id", Text, ForeignKey("test_cases.id"), nullable=False),
+    Column("outcome", enumerated(CaseOutcome), nullable=False),
+    Column("elapsed_ms", Integer),
+    Column("error", Text),
+    CheckConstraint(
+        "outcome NOT IN ('passed', 'wrong') OR elapsed_ms IS NOT NULL", name="returned_was_timed"
+    ),
+    CheckConstraint("error IS NULL OR outcome = 'crashed'", name="only_a_crash_names_an_error"),
+    CheckConstraint("elapsed_ms >= 0", name="elapsed_counted"),
+)
+
+attempt_claims = Table(
+    "attempt_claims",
+    metadata,
+    Column("id", Text, primary_key=True),
+    appended_column(),
+    Column("created_at", timestamp(), nullable=False),
+    Column("attempt_id", Text, ForeignKey("attempts.id"), nullable=False, index=True),
+    Column("techniques", ARRAY(Text), nullable=False),
+    Column("declined", Boolean, nullable=False),
+    Column("source", enumerated(ClaimSource), nullable=False),
+    Column("informed_by", ARRAY(Text), nullable=False),
+    Column("confidence", enumerated(Confidence)),
+    call_column(nullable=True),
+    # the claim's own rules: a user names a technique or declines, a decline
+    # names nothing, and only the classifier names a call
+    CheckConstraint(
+        "source <> 'user' OR cardinality(techniques) > 0 OR declined", name="user_claim_answers"
+    ),
+    CheckConstraint("NOT (cardinality(techniques) > 0 AND declined)", name="decline_names_nothing"),
+    CheckConstraint("(source = 'classifier') = (call_id IS NOT NULL)", name="call_matches_source"),
+)
+
+self_labels = Table(
+    "self_labels",
+    metadata,
+    Column("id", Text, primary_key=True),
+    appended_column(),
+    Column("created_at", timestamp(), nullable=False),
+    Column("attempt_id", Text, ForeignKey("attempts.id"), nullable=False, index=True),
+    Column("mode", enumerated(FailureMode), nullable=False),
+)
+
+diagnoses = Table(
+    "diagnoses",
+    metadata,
+    Column("id", Text, primary_key=True),
+    appended_column(),
+    Column("created_at", timestamp(), nullable=False),
+    Column("attempt_id", Text, ForeignKey("attempts.id"), nullable=False, index=True),
+    Column("mode", enumerated(FailureMode), nullable=False),
+    Column("evidence", Text, nullable=False),
+    # a model wrote every diagnosis
+    call_column(nullable=False),
+)
+
+
+# that a card was started, and what the ladder is measured from
+card_runs = Table(
+    "card_runs",
+    metadata,
+    Column("id", Text, primary_key=True),
+    appended_column(),
+    Column("user_id", Text, ForeignKey("users.id"), nullable=False, index=True),
+    Column("card_id", Text, ForeignKey("cards.id"), nullable=False),
+    Column("started_at", timestamp(), nullable=False),
+)
+
+# the probes a run was given, in the order they were offered. A later probe
+# appends a row, which is how the run stays append-only
+card_run_probes = Table(
+    "card_run_probes",
+    metadata,
+    Column("card_run_id", Text, ForeignKey("card_runs.id"), primary_key=True),
+    Column("position", Integer, primary_key=True),
+    Column("problem_id", Text, ForeignKey("problems.id"), nullable=False),
+    Column("assigned_at", timestamp(), nullable=False),
+    # one offer per problem, since a second tests no recognition the first did
+    # not
+    UniqueConstraint("card_run_id", "problem_id"),
+)
+
+recall_attempts = Table(
+    "recall_attempts",
+    metadata,
+    Column("id", Text, primary_key=True),
+    appended_column(),
+    Column("created_at", timestamp(), nullable=False),
+    Column("user_id", Text, ForeignKey("users.id"), nullable=False, index=True),
+    Column("card_id", Text, ForeignKey("cards.id"), nullable=False),
+    Column("template_id", Text, ForeignKey("card_templates.id"), nullable=False, index=True),
+    Column("code", Text, nullable=False),  # empty where the user ran a blank file
+    # taken in the order the trainer offers them, which the record checks
+    Column("hints", ARRAY(enumerated(Hint)), nullable=False),
+    Column("cap_ms", Integer, nullable=False),
+    Column("runner", Text, nullable=False),
+    CheckConstraint("cap_ms > 0", name="capped"),
+    CheckConstraint("runner <> ''", name="runner_named"),
+)
+
+# the shape a run's results always take. `case_id` names the template's case by
+# its position rather than by a key: a re-seed rewrites a template's cases
+# whole, and a foreign key would refuse the card its next seeding
+recall_attempt_case_results = Table(
+    "recall_attempt_case_results",
+    metadata,
+    Column("recall_attempt_id", Text, ForeignKey("recall_attempts.id"), primary_key=True),
+    Column("position", Integer, primary_key=True),
+    Column("case_id", Text, nullable=False),
+    Column("outcome", enumerated(CaseOutcome), nullable=False),
+    Column("elapsed_ms", Integer),
+    Column("error", Text),
+    CheckConstraint(
+        "outcome NOT IN ('passed', 'wrong') OR elapsed_ms IS NOT NULL", name="returned_was_timed"
+    ),
+    CheckConstraint("error IS NULL OR outcome = 'crashed'", name="only_a_crash_names_an_error"),
+    CheckConstraint("elapsed_ms >= 0", name="elapsed_counted"),
+)
+
+
+# one user's answers to the judging exercise: `log.md`, Judging a solution
+judgements = Table(
+    "judgements",
+    metadata,
+    Column("id", Text, primary_key=True),
+    appended_column(),
+    Column("created_at", timestamp(), nullable=False),
+    Column("user_id", Text, ForeignKey("users.id"), nullable=False, index=True),
+    Column("item_id", Text, ForeignKey("judgement_items.id"), nullable=False, index=True),
+    Column("called_clean", Boolean, nullable=False),
+    Column("line", Integer),
+    CheckConstraint("called_clean = (line IS NULL)", name="a_flaw_is_tapped"),
+)

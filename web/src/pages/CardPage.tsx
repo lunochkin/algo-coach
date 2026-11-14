@@ -24,7 +24,7 @@ import {
   cardSections,
   startCardRun,
   judgeFrom,
-} from '@algo-coach/core'
+} from '@climb/core'
 import { useState } from 'react'
 import { Link, useParams } from 'react-router'
 

@@ -1,7 +1,7 @@
 ---
 paths:
   - "packages/core/**"
-  - "src/algo_coach/knowledge/**"
+  - "src/climb/knowledge/**"
   - "content/modules/**"
 ---
 

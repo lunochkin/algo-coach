@@ -1,6 +1,6 @@
 import pytest
 
-from algo_coach.schema import Card, CardSeed, Template, TemplateSeed
+from climb.schema import Card, CardSeed, Template, TemplateSeed
 
 MINTED = frozenset({"id"})
 # read by `card check` alone, and dropped by the seed: `content.md`

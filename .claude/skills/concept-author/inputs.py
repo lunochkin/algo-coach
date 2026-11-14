@@ -110,7 +110,7 @@ def given(
             parts.append((str(path), path.read_text()))
     if role in ("review", "fix"):
         check = subprocess.run(
-            ["uv", "run", "algo-coach", "module", "check"]
+            ["uv", "run", "climb", "module", "check"]
             + ["--content", str(module.parent), module.name, "--sub", sub],
             cwd=engine,
             capture_output=True,

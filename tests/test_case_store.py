@@ -1,9 +1,9 @@
 import pytest
 from helpers import PROVENANCE, stored_problem
 
-from algo_coach import mint
-from algo_coach.cases import CaseLog
-from algo_coach.schema import TestCase
+from climb import mint
+from climb.cases import CaseLog
+from climb.schema import TestCase
 
 
 @pytest.fixture(autouse=True)

@@ -10,7 +10,7 @@ import {
   PRIVACY_NOTE,
   SIGN_IN_TITLE,
   OF,
-} from '@algo-coach/core'
+} from '@climb/core'
 
 import { api, PRIVACY } from '@/api/client'
 import { useLoaded } from '@/api/useLoaded'
@@ -26,7 +26,7 @@ export function LoginPage() {
   return (
     <section className="mx-auto max-w-form space-y-section py-16">
       <div className="space-y-1">
-        <p className="font-semibold">algo-coach</p>
+        <p className="font-semibold">Climbance</p>
         <h1 className="text-title font-semibold">{SIGN_IN_TITLE}</h1>
         <p className="text-meta text-muted-foreground">{LOGIN_INTRO}</p>
       </div>

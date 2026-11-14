@@ -3,12 +3,12 @@ from generating import FakeWriter
 from matching import card, seeded
 from pydantic import ValidationError
 
-from algo_coach.calls import CallLog
-from algo_coach.drafts import DraftStore
-from algo_coach.generation import Corpus, blind, write_problems
-from algo_coach.generation.screen import Verdict, prompt
-from algo_coach.outcomes import OutcomeLog
-from algo_coach.schema import CallSite, DraftCase, Gate, WritingState
+from climb.calls import CallLog
+from climb.drafts import DraftStore
+from climb.generation import Corpus, blind, write_problems
+from climb.generation.screen import Verdict, prompt
+from climb.outcomes import OutcomeLog
+from climb.schema import CallSite, DraftCase, Gate, WritingState
 
 BUILDS = "def solve(size, seed):\n    return [list(range(size))]\n"
 

@@ -3,11 +3,11 @@ from datetime import UTC, datetime, timedelta
 import pytest
 from helpers import PROVENANCE, stored_problem
 
-from algo_coach.cases import CaseLog
-from algo_coach.log import AttemptLog, SittingStore
-from algo_coach.mint import case
-from algo_coach.schema import Sitting
-from algo_coach.sitting import RUNS_PER_MINUTE, TooOften, submit
+from climb.cases import CaseLog
+from climb.log import AttemptLog, SittingStore
+from climb.mint import case
+from climb.schema import Sitting
+from climb.sitting import RUNS_PER_MINUTE, TooOften, submit
 
 STARTED = datetime(2026, 9, 10, 8, tzinfo=UTC)
 TEN = datetime(2026, 9, 10, 10, tzinfo=UTC)

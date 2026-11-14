@@ -1,10 +1,10 @@
 import pytest
 from helpers import PROVENANCE_FIELDS, stored_solution
 
-from algo_coach.cases import CaseLog
-from algo_coach.mint import verification
-from algo_coach.schema import CaseOutcome, CaseResult, TestCase
-from algo_coach.verifications import VerificationLog
+from climb.cases import CaseLog
+from climb.mint import verification
+from climb.schema import CaseOutcome, CaseResult, TestCase
+from climb.verifications import VerificationLog
 
 
 @pytest.fixture(autouse=True)

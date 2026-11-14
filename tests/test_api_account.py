@@ -2,12 +2,12 @@ from fastapi.testclient import TestClient
 from helpers import browsing
 from sqlalchemy import select
 
-from algo_coach.api import create_app
-from algo_coach.api.context import SESSION_COOKIE
-from algo_coach.api.signin import Client, SignIn
-from algo_coach.log import Provider, signed_in
-from algo_coach.log.table import sessions
-from algo_coach.storage import Database
+from climb.api import create_app
+from climb.api.context import SESSION_COOKIE
+from climb.api.signin import Client, SignIn
+from climb.log import Provider, signed_in
+from climb.log.table import sessions
+from climb.storage import Database
 
 USER = "u-4f9c2a"
 

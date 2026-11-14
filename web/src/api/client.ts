@@ -1,4 +1,4 @@
-import { engineClient, type components } from '@algo-coach/core'
+import { engineClient, type components } from '@climb/core'
 
 // the login page needs no session, so it is the one page a refusal leaves be
 export const LOGIN = '/login'

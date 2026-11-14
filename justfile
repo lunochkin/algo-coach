@@ -72,7 +72,7 @@ hooks:
 
 # Seed authored cards into the store.
 seed source="content/cards":
-    uv run algo-coach seed cards {{ source }}
+    uv run climb seed cards {{ source }}
 
 # Install the tool the seed draws Mermaid diagrams with: `knowledge.md`,
 # Diagrams. It sits outside the npm workspace, so the engine's own install
@@ -88,8 +88,8 @@ diagrams-test:
 # Seed one knowledge module from its authored directory, by slug. The
 # module's own checker runs first, and a module it refuses is not seeded.
 seed-module name="python":
-    uv run algo-coach module check {{ name }}
-    uv run algo-coach seed knowledge content/modules/{{ name }}
+    uv run climb module check {{ name }}
+    uv run climb seed knowledge content/modules/{{ name }}
 
 # --- practice ---
 
@@ -101,14 +101,14 @@ app:
     [ -d node_modules ] || npm install
     # the API on any exit, so none is left holding the port the proxy names
     trap 'kill $(jobs -p) 2>/dev/null; wait' EXIT
-    uv run python -m algo_coach.api --reload &
+    uv run python -m climb.api --reload &
     npm --prefix web run dev
 
 # Regenerate the API's types in packages/core, which the pages and the native
 # app read, from the app's OpenAPI schema, after a route or a response model
 # changes.
 types:
-    uv run python -m algo_coach.api --openapi > packages/core/src/api/openapi.json
+    uv run python -m climb.api --openapi > packages/core/src/api/openapi.json
     cd web && npx openapi-typescript ../packages/core/src/api/openapi.json -o ../packages/core/src/api/schema.d.ts
 
 # Apply every migration the database named by DATABASE_URL has not had.
@@ -122,37 +122,37 @@ migration name:
 
 # PROD_DATABASE_URL in `.env` names the local end of the tunnel the deployment
 # repo's `just tunnel` holds open.
-# Any algo-coach command against the deployed database.
+# Any climb command against the deployed database.
 prod *args:
-    DATABASE_URL="${PROD_DATABASE_URL:?PROD_DATABASE_URL is not set in .env}" uv run algo-coach {{ args }}
+    DATABASE_URL="${PROD_DATABASE_URL:?PROD_DATABASE_URL is not set in .env}" uv run climb {{ args }}
 
 # Per-technique progress.
 board *args:
-    uv run algo-coach board {{ args }}
+    uv run climb board {{ args }}
 
 # --- attribution ---
 
 # Claim stored attempts with the classifier.
 claim-attempts *args:
-    uv run algo-coach claim attempts {{ args }}
+    uv run climb claim attempts {{ args }}
 
 # Claim stored attempts by hand: the eval set.
 claim-attempts-by-hand *args:
-    uv run algo-coach claim attempts --by-hand {{ args }}
+    uv run climb claim attempts --by-hand {{ args }}
 
 # Claim the stored canonicals with the classifier.
 claim-solutions *args:
-    uv run algo-coach claim solutions {{ args }}
+    uv run climb claim solutions {{ args }}
 
 revise:
-    uv run algo-coach claim attempts --by-hand --revise --disputed 1 --model anthropic/claude-opus-5 --effort medium --provider anthropic --temperature default
+    uv run climb claim attempts --by-hand --revise --disputed 1 --model anthropic/claude-opus-5 --effort medium --provider anthropic --temperature default
 
 adjudicate:
-    uv run algo-coach score --concurrency 4 --model anthropic/claude-opus-5 --provider anthropic --temperature default
+    uv run climb score --concurrency 4 --model anthropic/claude-opus-5 --provider anthropic --temperature default
 
 # The classifier against the user's own claims.
 score *args:
-    uv run algo-coach score --concurrency 4 \
+    uv run climb score --concurrency 4 \
         --model anthropic/claude-opus-5 --provider anthropic --temperature default \
         --model google/gemini-3.7-flash --provider google-ai-studio \
         --model openai/gpt-oss-120b --provider coreweave/fp4 \
@@ -163,7 +163,7 @@ score *args:
 
 # The classifier against the user's own claims.
 score-stored *args:
-    uv run algo-coach score --stored \
+    uv run climb score --stored \
         --model anthropic/claude-fable-5             --provider anthropic --temperature default \
         --model anthropic/claude-opus-5              --provider anthropic --temperature default \
         --model anthropic/claude-sonnet-5            --provider anthropic --temperature default \
@@ -219,17 +219,17 @@ score-stored *args:
 
 # How far the classifier's claims move the board off the fallback.
 movement *args:
-    uv run algo-coach movement {{ args }}
+    uv run climb movement {{ args }}
 
 # --- matching ---
 
 # Which of a card's templates a problem exercises, by hand.
 match-by-hand *args:
-    uv run algo-coach match --by-hand {{ args }}
+    uv run climb match --by-hand {{ args }}
 
 # Match the corpus against a card's templates.
 match *args:
-    uv run algo-coach match {{ args }}
+    uv run climb match {{ args }}
 
 # --- the native app ---
 
@@ -271,7 +271,7 @@ native-apk: _prebuild
 native-install:
     {{ android_home }}/platform-tools/adb install -r {{ apk }}
 
-# The dev app ("algo-coach dev") beside the release one. Rebuild it only after native changes.
+# The dev app ("Climbance Dev") beside the release one. Rebuild it only after native changes.
 native-dev-apk: _prebuild
     cd native/android && ANDROID_HOME={{ android_home }} ./gradlew assembleDebug -PreactNativeArchitectures=arm64-v8a --console=plain -q
     {{ android_home }}/platform-tools/adb install -r native/android/app/build/outputs/apk/debug/app-debug.apk

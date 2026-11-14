@@ -17,7 +17,7 @@ import {
   BOARD_PRACTISED,
   MODULES_HEADING,
   orderedModuleRows,
-} from '@algo-coach/core'
+} from '@climb/core'
 import { Link } from 'react-router'
 
 import { api, type TechniqueRow } from '@/api/client'

@@ -3,9 +3,9 @@ from datetime import datetime
 from helpers import T0
 from matching import canonical, card, problem, seeded, template
 
-from algo_coach.ladder import CardState, Rung, card_state, ladder, probes
-from algo_coach.mint import generator_match, user_match
-from algo_coach.schema import Attempt, ProblemDifficulty, ProblemStatus, RetirementReason
+from climb.ladder import CardState, Rung, card_state, ladder, probes
+from climb.mint import generator_match, user_match
+from climb.schema import Attempt, ProblemDifficulty, ProblemStatus, RetirementReason
 
 TECHNIQUE = "sliding-window"
 

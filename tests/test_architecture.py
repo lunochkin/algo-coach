@@ -6,22 +6,22 @@ from pathlib import Path
 from importlinter.cli import lint_imports
 from pydantic import BaseModel
 
-import algo_coach.schema as schema
-from algo_coach.calls import CallLog
-from algo_coach.cards import CardStore
-from algo_coach.cases import CaseLog
-from algo_coach.drafts import DraftStore
-from algo_coach.log import AttemptLog, JudgementLog, SittingStore
-from algo_coach.matches import MatchLog
-from algo_coach.outcomes import OutcomeLog
-from algo_coach.problems import ProblemStore
-from algo_coach.ratings import RatingLog
-from algo_coach.solution_claims import SolutionClaimLog
-from algo_coach.solutions import SolutionLog
-from algo_coach.verifications import VerificationLog
+import climb.schema as schema
+from climb.calls import CallLog
+from climb.cards import CardStore
+from climb.cases import CaseLog
+from climb.drafts import DraftStore
+from climb.log import AttemptLog, JudgementLog, SittingStore
+from climb.matches import MatchLog
+from climb.outcomes import OutcomeLog
+from climb.problems import ProblemStore
+from climb.ratings import RatingLog
+from climb.solution_claims import SolutionClaimLog
+from climb.solutions import SolutionLog
+from climb.verifications import VerificationLog
 
 ROOT = Path(__file__).resolve().parent.parent
-SRC = ROOT / "src" / "algo_coach"
+SRC = ROOT / "src" / "climb"
 TESTS = ROOT / "tests"
 DOCS = [*(ROOT / "docs").rglob("*.md"), ROOT / "README.md", ROOT / "CLAUDE.md"]
 # `TODO.md` names the modules a phase is going to add, so its paths are checked
@@ -55,7 +55,7 @@ LINE_LIMIT = 550
 def modules() -> list[tuple[str, Path, ast.Module]]:
     found = []
     for path in sorted(SRC.rglob("*.py")):
-        name = ".".join(("algo_coach", *path.relative_to(SRC).with_suffix("").parts))
+        name = ".".join(("climb", *path.relative_to(SRC).with_suffix("").parts))
         if name.endswith(".__init__"):
             name = name.removesuffix(".__init__")
         found.append((name, path, ast.parse(path.read_text())))
@@ -170,7 +170,7 @@ def test_a_package_exports_only_what_something_imports():
     unpaid = [
         f"{name}: {export}"
         for name, path, tree in modules()
-        if path.name == "__init__.py" and name not in ("algo_coach", "algo_coach.cli")
+        if path.name == "__init__.py" and name not in ("climb", "climb.cli")
         for export in sorted(exported(tree))
         if export not in imported.get(name, set())
     ]
@@ -209,11 +209,11 @@ def test_the_docs_name_every_state_gate_and_source():
 def test_every_path_the_docs_name_exists():
     """A backticked path or module in the docs points at something in the
     tree, or the doc is describing a repo that moved under it."""
-    pattern = r"`((?:src/|docs/|tests/|scripts/)[\w./-]+|algo_coach(?:\.\w+)+)`"
+    pattern = r"`((?:src/|docs/|tests/|scripts/)[\w./-]+|climb(?:\.\w+)+)`"
     named = set(re.findall(pattern, prose(SPECS)))
     missing = []
     for ref in sorted(named):
-        if ref.startswith("algo_coach"):
+        if ref.startswith("climb"):
             path = ROOT / "src" / Path(*ref.split("."))
             found = path.with_suffix(".py").exists() or path.is_dir()
         else:

@@ -1,5 +1,5 @@
 [project]
-name = "algo-coach"
+name = "climb"
 version = "0.1.0"
 description = "AI coaching layer for deliberate practice of algorithmic problem-solving: SRS over a technique-mastery model, on a problem corpus the engine writes and owns"
 readme = "README.md"
@@ -25,7 +25,7 @@ dependencies = [
 ]
 
 [project.scripts]
-algo-coach = "algo_coach.cli:main"
+climb = "climb.cli:main"
 
 [dependency-groups]
 dev = [
@@ -64,89 +64,89 @@ pythonVersion = "3.15"
 typeCheckingMode = "strict"
 
 [tool.importlinter]
-root_package = "algo_coach"
+root_package = "climb"
 
 [[tool.importlinter.contracts]]
 name = "schema, ids, storage and standing import nothing of the domain"
 type = "forbidden"
-source_modules = ["algo_coach.schema", "algo_coach.ids", "algo_coach.storage", "algo_coach.standing"]
+source_modules = ["climb.schema", "climb.ids", "climb.storage", "climb.standing"]
 forbidden_modules = [
-    "algo_coach.calls",
-    "algo_coach.mint",
-    "algo_coach.techniques",
-    "algo_coach.log",
-    "algo_coach.attempt_claims",
-    "algo_coach.solution_claims",
-    "algo_coach.matches",
-    "algo_coach.generation",
-    "algo_coach.cli",
-    "algo_coach.api",
+    "climb.calls",
+    "climb.mint",
+    "climb.techniques",
+    "climb.log",
+    "climb.attempt_claims",
+    "climb.solution_claims",
+    "climb.matches",
+    "climb.generation",
+    "climb.cli",
+    "climb.api",
 ]
 
 [[tool.importlinter.contracts]]
 name = "the transport and the vocabulary sit under the domain"
 type = "forbidden"
-source_modules = ["algo_coach.calls", "algo_coach.techniques"]
+source_modules = ["climb.calls", "climb.techniques"]
 forbidden_modules = [
-    "algo_coach.mint",
-    "algo_coach.log",
-    "algo_coach.attempt_claims",
-    "algo_coach.solution_claims",
-    "algo_coach.matches",
-    "algo_coach.generation",
-    "algo_coach.cli",
-    "algo_coach.api",
+    "climb.mint",
+    "climb.log",
+    "climb.attempt_claims",
+    "climb.solution_claims",
+    "climb.matches",
+    "climb.generation",
+    "climb.cli",
+    "climb.api",
 ]
 
 [[tool.importlinter.contracts]]
 name = "no store reads another store"
 type = "independence"
 modules = [
-    "algo_coach.cases",
-    "algo_coach.solutions",
-    "algo_coach.outcomes",
-    "algo_coach.drafts",
-    "algo_coach.problems",
-    "algo_coach.verifications",
-    "algo_coach.cards",
-    "algo_coach.ratings",
-    "algo_coach.judgements",
+    "climb.cases",
+    "climb.solutions",
+    "climb.outcomes",
+    "climb.drafts",
+    "climb.problems",
+    "climb.verifications",
+    "climb.cards",
+    "climb.ratings",
+    "climb.judgements",
 ]
 
 [[tool.importlinter.contracts]]
 name = "the packages are layered, and nothing imports upward"
 type = "layers"
 layers = [
-    "algo_coach.cli | algo_coach.api",
-    "algo_coach.generation : algo_coach.ladder : algo_coach.recall : algo_coach.judging",
-    "algo_coach.attempt_claims : algo_coach.solution_claims : algo_coach.matches : algo_coach.board : algo_coach.cards : algo_coach.sitting",
-    "algo_coach.classifier : algo_coach.mint : algo_coach.log : algo_coach.knowledge : algo_coach.outcomes : algo_coach.problems : algo_coach.solutions : algo_coach.cases : algo_coach.drafts : algo_coach.ratings : algo_coach.judgements : algo_coach.verifications : algo_coach.techniques : algo_coach.mutation : algo_coach.calls : algo_coach.runs",
-    "algo_coach.runner",
-    "algo_coach.schema : algo_coach.ids : algo_coach.storage : algo_coach.standing",
+    "climb.cli | climb.api",
+    "climb.generation : climb.ladder : climb.recall : climb.judging",
+    "climb.attempt_claims : climb.solution_claims : climb.matches : climb.board : climb.cards : climb.sitting",
+    "climb.classifier : climb.mint : climb.log : climb.knowledge : climb.outcomes : climb.problems : climb.solutions : climb.cases : climb.drafts : climb.ratings : climb.judgements : climb.verifications : climb.techniques : climb.mutation : climb.calls : climb.runs",
+    "climb.runner",
+    "climb.schema : climb.ids : climb.storage : climb.standing",
 ]
 
 [[tool.importlinter.contracts]]
 name = "nothing imports an adapter"
 type = "forbidden"
 source_modules = [
-    "algo_coach.attempt_claims",
-    "algo_coach.solution_claims",
-    "algo_coach.matches",
-    "algo_coach.generation",
-    "algo_coach.board",
-    "algo_coach.sitting",
-    "algo_coach.runner",
-    "algo_coach.mutation",
+    "climb.attempt_claims",
+    "climb.solution_claims",
+    "climb.matches",
+    "climb.generation",
+    "climb.board",
+    "climb.sitting",
+    "climb.runner",
+    "climb.mutation",
 ]
-forbidden_modules = ["algo_coach.cli", "algo_coach.api"]
+forbidden_modules = ["climb.cli", "climb.api"]
 
 # the process holding the container runtime's socket loads no engine code. The
 # wildcard covers a package added later, and matches none of the broker's own
 [[tool.importlinter.contracts]]
 name = "the broker imports nothing of the engine"
 type = "forbidden"
-source_modules = ["algo_coach.broker"]
-forbidden_modules = ["algo_coach.*"]
+source_modules = ["climb.broker"]
+forbidden_modules = ["climb.*"]
 
 # used outside `src`, which is all deptry reads: Alembic runs `migrations/`, and
 # SQLAlchemy loads psycopg from the database URL's scheme. Starlette's session
@@ -155,7 +155,7 @@ forbidden_modules = ["algo_coach.*"]
 DEP002 = ["alembic", "itsdangerous", "psycopg"]
 
 [tool.coverage.run]
-source = ["algo_coach"]
+source = ["climb"]
 
 [tool.coverage.report]
 # what a module landing untested drops the total by. The uncovered lines are the
@@ -166,7 +166,7 @@ show_missing = true
 
 # ---- mutation testing of the suite itself: `just mutate`, never the hook
 [tool.mutmut]
-paths_to_mutate = ["src/algo_coach/"]
+paths_to_mutate = ["src/climb/"]
 tests_dir = ["tests/"]
 
 # ---- dead code: a name nothing in src or tests references
@@ -174,7 +174,7 @@ tests_dir = ["tests/"]
 paths = ["src", "tests"]
 # a schema field or an enum member no code reads is still one a stored record
 # carries, and a code is never deleted
-exclude = ["src/algo_coach/schema/"]
+exclude = ["src/climb/schema/"]
 # pydantic calls validators and FastAPI calls routes by registration, pytest
 # calls fixtures by name
 ignore_decorators = [
@@ -219,8 +219,8 @@ select = ["E", "W", "F", "I", "UP", "B", "SIM", "ANN401", "RUF100", "RUF022", "R
 
 # the adapters and the scripts print; the domain does not
 [tool.ruff.lint.per-file-ignores]
-"src/algo_coach/cli/**" = ["T20"]
-"src/algo_coach/api/__main__.py" = ["T20"]
+"src/climb/cli/**" = ["T20"]
+"src/climb/api/__main__.py" = ["T20"]
 ".claude/skills/**" = ["T20"]
 "tests/**" = ["T20"]
 
@@ -234,4 +234,4 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [tool.hatch.build.targets.wheel]
-packages = ["src/algo_coach"]
+packages = ["src/climb"]

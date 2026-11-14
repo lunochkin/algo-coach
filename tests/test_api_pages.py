@@ -1,10 +1,10 @@
 import pytest
 from fastapi.testclient import TestClient
 
-from algo_coach.api import create_app
-from algo_coach.storage import Database
+from climb.api import create_app
+from climb.storage import Database
 
-INDEX = "<!doctype html><title>algo-coach</title>"
+INDEX = "<!doctype html><title>Climbance</title>"
 
 
 @pytest.fixture

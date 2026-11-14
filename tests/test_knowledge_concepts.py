@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from algo_coach.knowledge import read_module
+from climb.knowledge import read_module
 
 COURSE = """title = "M"
 kinds = ["principle"]

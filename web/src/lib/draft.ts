@@ -1,4 +1,4 @@
-import { type Draft, isDraft, isDraftKey, userDraftKey } from '@algo-coach/core'
+import { type Draft, isDraft, isDraftKey, userDraftKey } from '@climb/core'
 
 // the draft in this browser's storage, keyed to its user: core decides what a
 // sitting opens on

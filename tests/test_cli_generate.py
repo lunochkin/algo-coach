@@ -7,13 +7,13 @@ from helpers import own
 from matching import card, seeded, template
 from sqlalchemy.exc import IntegrityError
 
-from algo_coach import cli
-from algo_coach.calls import CallLog
-from algo_coach.cards import CardStore
-from algo_coach.cases import CaseLog
-from algo_coach.cli.generating import staged, summary, verdict
-from algo_coach.drafts import DraftStore
-from algo_coach.generation import (
+from climb import cli
+from climb.calls import CallLog
+from climb.cards import CardStore
+from climb.cases import CaseLog
+from climb.cli.generating import staged, summary, verdict
+from climb.drafts import DraftStore
+from climb.generation import (
     BENCH,
     DISCRIMINATION_DEFAULT,
     GENERATOR_DEFAULT,
@@ -27,10 +27,10 @@ from algo_coach.generation import (
     reject,
     screen,
 )
-from algo_coach.matches import MatchLog
-from algo_coach.problems import ProblemStore
-from algo_coach.schema import Call, CaseOutcome, Configuration, MatchSource, SolutionRole
-from algo_coach.solutions import SolutionLog
+from climb.matches import MatchLog
+from climb.problems import ProblemStore
+from climb.schema import Call, CaseOutcome, Configuration, MatchSource, SolutionRole
+from climb.solutions import SolutionLog
 
 
 def run(monkeypatch, model: FakeWriter, *argv: str) -> None:
@@ -118,7 +118,7 @@ def test_an_unseeded_card_is_named_before_any_call(root, monkeypatch, capsys):
     monkeypatch.setattr(TRANSPORT, "OpenRouter", lambda _api, **_: FakeWriter())
     monkeypatch.setattr(
         "sys.argv",
-        ["algo-coach", "generate", "--card", "monotonic-stack", "--template", "next-greater"],
+        ["climb", "generate", "--card", "monotonic-stack", "--template", "next-greater"],
     )
 
     with pytest.raises(SystemExit) as exit_info:
@@ -241,7 +241,7 @@ def test_a_named_template_says_nothing_beside_gaps(root, monkeypatch, capsys):
 def test_a_run_names_a_template_or_aims_itself(root, monkeypatch, capsys):
     monkeypatch.setenv("OPENROUTER_API_KEY", "test")
     monkeypatch.setattr(TRANSPORT, "OpenRouter", lambda _api, **_: FakeWriter())
-    monkeypatch.setattr("sys.argv", ["algo-coach", "generate", "--card", "sliding-window"])
+    monkeypatch.setattr("sys.argv", ["climb", "generate", "--card", "sliding-window"])
 
     with pytest.raises(SystemExit) as exit_info:
         cli.main()
@@ -571,7 +571,7 @@ def test_replay_pays_for_a_second_configuration_once(root, monkeypatch, capsys):
     run that wrote it already answers for the bench it was written with."""
     # a template claiming a speedup, so the inputs site has a pair to answer.
     # The problem then lands only where the search separated the two solutions
-    monkeypatch.setattr("algo_coach.generation.timing.DRILL_CAP_MS", 60)
+    monkeypatch.setattr("climb.generation.timing.DRILL_CAP_MS", 60)
     seeded(root, card(templates=[template("longest-valid-window", speedup=True)]))
     run(monkeypatch, FakeWriter(slow=SLOW, generator=BUILDS), "longest-valid-window")
     capsys.readouterr()

@@ -4,8 +4,8 @@ import pytest
 from helpers import FakeTransport, Verdict, own
 from matching import PROCEDURE, canonical, card, problem, seeded, template
 
-from algo_coach.calls import CallLog
-from algo_coach.matches import DEFAULT, MatcherError, candidates, match, request_hash
+from climb.calls import CallLog
+from climb.matches import DEFAULT, MatcherError, candidates, match, request_hash
 
 
 def read(database, client: FakeTransport, cards=None, techniques=("sliding-window",)):

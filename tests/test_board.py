@@ -3,10 +3,10 @@ from datetime import UTC, datetime, timedelta
 import pytest
 from helpers import GENERATED
 
-from algo_coach.attempt_claims import standing_attempt_claims
-from algo_coach.board import TechniqueRow, excluded, per_technique, stalest_first, ungrouped
-from algo_coach.log import latest_by_attempt
-from algo_coach.schema import (
+from climb.attempt_claims import standing_attempt_claims
+from climb.board import TechniqueRow, excluded, per_technique, stalest_first, ungrouped
+from climb.log import latest_by_attempt
+from climb.schema import (
     Attempt,
     AttemptClaim,
     ClaimSource,

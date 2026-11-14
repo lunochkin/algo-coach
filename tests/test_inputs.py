@@ -5,9 +5,9 @@ import pytest
 from helpers import a_call, own
 from pydantic import ValidationError
 
-from algo_coach.calls import CallLog, Reply
-from algo_coach.generation import GenerationError
-from algo_coach.generation.inputs import (
+from climb.calls import CallLog, Reply
+from climb.generation import GenerationError
+from climb.generation.inputs import (
     INPUTS_DEFAULT,
     SYSTEM,
     prompt,
@@ -15,9 +15,9 @@ from algo_coach.generation.inputs import (
     schema,
     write_input_generator,
 )
-from algo_coach.generation.speedup import search
-from algo_coach.runner import defines_solve, outputs
-from algo_coach.schema import Configuration, MachineProvenance
+from climb.generation.speedup import search
+from climb.runner import defines_solve, outputs
+from climb.schema import Configuration, MachineProvenance
 
 STATEMENT = "Given a list of at most 1000 readings, return the widest fair stretch."
 BUILDS = "def solve(size, seed):\n    return [list(range(size))]\n"

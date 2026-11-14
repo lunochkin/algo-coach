@@ -1,6 +1,6 @@
 import ast
 
-from algo_coach.mutation import Operator, mutants
+from climb.mutation import Operator, mutants
 
 BINARY = """
 def solve(xs, target):

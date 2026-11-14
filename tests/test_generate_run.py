@@ -4,10 +4,10 @@ from generating import NAIVE, SLOW, FakeWriter
 from helpers import PROVENANCE_FIELDS, own
 from matching import card, seeded, template
 
-from algo_coach.calls import CallLog
-from algo_coach.cases import CaseLog
-from algo_coach.drafts import DraftStore
-from algo_coach.generation import (
+from climb.calls import CallLog
+from climb.cases import CaseLog
+from climb.drafts import DraftStore
+from climb.generation import (
     BENCH,
     GENERATOR_DEFAULT,
     Bench,
@@ -21,9 +21,9 @@ from algo_coach.generation import (
     screen,
     write_problems,
 )
-from algo_coach.generation import passage as passage_module
-from algo_coach.runs import ABORT_AFTER
-from algo_coach.schema import Configuration, ExpectedSource, Problem, WritingState
+from climb.generation import passage as passage_module
+from climb.runs import ABORT_AFTER
+from climb.schema import Configuration, ExpectedSource, Problem, WritingState
 
 
 def run(database, model: FakeWriter, *, count: int = 1):
@@ -223,7 +223,7 @@ def claiming(overrides: dict) -> dict:
 def timed(database, monkeypatch, model: FakeWriter, **overrides):
     """A run whose sitting cap is small enough to separate in a test, over a
     template claiming the speedup that makes the search run."""
-    monkeypatch.setattr("algo_coach.generation.timing.DRILL_CAP_MS", 60)
+    monkeypatch.setattr("climb.generation.timing.DRILL_CAP_MS", 60)
     (one,) = seeded(database, card(**claiming(overrides)))
     return one, write_problems(model, CallLog(database), one, one.templates[0], Corpus.at(database))
 
@@ -250,7 +250,7 @@ def test_the_mutation_loop_never_sees_the_separating_case(database, monkeypatch)
         seen.append([one.args for one in cases])
         return loop(*args, cases=cases, **kwargs)
 
-    monkeypatch.setattr("algo_coach.generation.passage.harden", capture)
+    monkeypatch.setattr("climb.generation.passage.harden", capture)
 
     timed(database, monkeypatch, FakeWriter(slow=SLOW, generator=BUILDS))
 
@@ -286,7 +286,7 @@ CRASHES = "def solve(size, seed):\n    raise ValueError\n"
 def reported(database, monkeypatch, model: FakeWriter, **overrides) -> Progress:
     """The line one problem left, which is where a site's failure is read."""
     seen: list[Progress] = []
-    monkeypatch.setattr("algo_coach.generation.timing.DRILL_CAP_MS", 60)
+    monkeypatch.setattr("climb.generation.timing.DRILL_CAP_MS", 60)
     (one,) = seeded(database, card(**claiming(overrides)))
     write_problems(
         model,
@@ -365,7 +365,7 @@ def test_the_naive_solution_is_written_between_the_input_generator_and_the_searc
     """The input generator is written for every problem, since the fuzz pass
     builds its inputs with it, and the search measures against what this step
     writes."""
-    monkeypatch.setattr("algo_coach.generation.timing.DRILL_CAP_MS", 60)
+    monkeypatch.setattr("climb.generation.timing.DRILL_CAP_MS", 60)
     (one,) = seeded(database, card(**claiming({})))
     stages: list[str] = []
 
@@ -486,7 +486,7 @@ def test_a_written_naive_solution_is_held_on_the_draft(database):
 def test_the_search_runs_before_the_mutation_loop(database, monkeypatch):
     """A canonical wrong at scale rejects the draft, and the loop is what
     that saves: a round is paid for after the search rather than before it."""
-    monkeypatch.setattr("algo_coach.generation.timing.DRILL_CAP_MS", 60)
+    monkeypatch.setattr("climb.generation.timing.DRILL_CAP_MS", 60)
     (one,) = seeded(database, card(**claiming({})))
     stages: list[str] = []
 

@@ -20,7 +20,7 @@ import {
   CUT_VALUE,
   showAllKb,
   COPY,
-} from '@algo-coach/core';
+} from '@climb/core';
 import { font, palette, radius, space, textSize } from '@/ui/tokens';
 
 type Submitted = components['schemas']['Submitted'];

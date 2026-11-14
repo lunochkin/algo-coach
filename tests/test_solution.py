@@ -2,8 +2,8 @@ import pytest
 from helpers import PROVENANCE, PROVENANCE_FIELDS, T0
 from pydantic import ValidationError
 
-from algo_coach.mint import solution
-from algo_coach.schema import Solution, SolutionRole
+from climb.mint import solution
+from climb.schema import Solution, SolutionRole
 
 CODE = "def solve(n):\n    return n\n"
 

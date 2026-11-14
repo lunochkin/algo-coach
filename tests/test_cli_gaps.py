@@ -2,8 +2,8 @@ import pytest
 from commands import connected, run_cli
 from matching import canonical, card, problem, seeded, stored, template
 
-from algo_coach.matches import MatchLog
-from algo_coach.mint import generator_match
+from climb.matches import MatchLog
+from climb.mint import generator_match
 
 
 def run(monkeypatch, *argv: str) -> None:

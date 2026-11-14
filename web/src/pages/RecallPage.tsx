@@ -24,7 +24,7 @@ import {
   requestHint,
   revealForm,
   runRecall,
-} from '@algo-coach/core'
+} from '@climb/core'
 import { Check, ChevronDown } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
 import { Link, useNavigate, useParams, useSearchParams } from 'react-router'

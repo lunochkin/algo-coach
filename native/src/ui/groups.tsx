@@ -12,7 +12,7 @@ import {
   MODULE_FOCUSED,
   moduleGrid,
   MODULE_START,
-} from '@algo-coach/core';
+} from '@climb/core';
 import { useStore } from '@/lib/store';
 import { styles, tones } from '@/ui/common';
 import { PageSection, type Sections } from '@/ui/sections';

@@ -5,18 +5,18 @@ from commands import connected, run_cli
 from database import emptied, shared
 from helpers import logged, seed_problem
 
-from algo_coach.attempt_claims import standing_attempt_claims
-from algo_coach.classifier import PIN, TEMPERATURE, request_hash
-from algo_coach.log import AttemptLog
-from algo_coach.mint import classifier_claim, user_claim
-from algo_coach.schema import (
+from climb.attempt_claims import standing_attempt_claims
+from climb.classifier import PIN, TEMPERATURE, request_hash
+from climb.log import AttemptLog
+from climb.mint import classifier_claim, user_claim
+from climb.schema import (
     Attempt,
     AttemptClaim,
     ClaimSource,
     Kind,
     MachineProvenance,
 )
-from algo_coach.techniques import criteria, criterion
+from climb.techniques import criteria, criterion
 
 T0 = datetime(2026, 1, 1, tzinfo=UTC)
 

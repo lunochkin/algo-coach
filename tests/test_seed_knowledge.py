@@ -5,8 +5,8 @@ import pytest
 from commands import connected, run_cli
 from sqlalchemy import event, select
 
-from algo_coach.knowledge import read_module, refusals, seed_module
-from algo_coach.knowledge.table import lessons, modules, questions, subtopics, topics
+from climb.knowledge import read_module, refusals, seed_module
+from climb.knowledge.table import lessons, modules, questions, subtopics, topics
 
 COURSE = """\
 title = "Python"

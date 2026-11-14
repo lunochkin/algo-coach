@@ -3,7 +3,7 @@ from urllib.parse import parse_qs, urlsplit
 from test_api_dev_login import browser
 from test_app_signin import CHALLENGE, JSON, VERIFIER
 
-from algo_coach.api.apps import APP_REDIRECTS
+from climb.api.apps import APP_REDIRECTS
 
 
 def dev_flow(client, challenge=CHALLENGE, kind="app-dev"):
@@ -17,7 +17,7 @@ def code_in(response) -> str:
 
 
 def test_the_dev_login_returns_the_dev_app_to_its_own_scheme(database):
-    """The dev app registers `algocoachdev://`, so the release app on the same
+    """The dev app registers `climbancedev://`, so the release app on the same
     phone never receives its code."""
     response = dev_flow(browser(database))
 

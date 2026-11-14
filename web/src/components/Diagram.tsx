@@ -1,4 +1,4 @@
-import { drawingSize, type Snapshot } from '@algo-coach/core'
+import { drawingSize, type Snapshot } from '@climb/core'
 import { useContext, useMemo } from 'react'
 
 import { PlainCode } from '@/components/PythonCode'

@@ -24,7 +24,7 @@ import {
   MODULES_HEADING,
   focusLabel,
   orderedModuleRows,
-} from '@algo-coach/core';
+} from '@climb/core';
 import { useStore } from '@/lib/store';
 import { useEngine } from '@/lib/useEngine';
 import { AccountMenu } from '@/ui/account';

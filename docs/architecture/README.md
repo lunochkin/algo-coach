@@ -656,7 +656,7 @@ times. Each record class is specified in one of the files beside it.
     `invitations` table does not hold, before any user, identity or session
     is stored. A signed-in user's code runs on the engine, so open
     registration is an abuse surface with no upside at this size.
-  - An invitation is added, withdrawn and listed by `algo-coach invite`. A
+  - An invitation is added, withdrawn and listed by `climb invite`. A
     withdrawn invitation stops the next sign-in. The dev login is never gated,
     since it answers on loopback alone.
   - A request naming a user without a live session answers 401, and the pages
@@ -710,7 +710,7 @@ times. Each record class is specified in one of the files beside it.
     Android and the Keychain on iOS.
   - The dev build of the app syncs with a local engine, never with a deployed
     one. Its test answers would otherwise land in the author's own log.
-  - The dev build has a URL scheme of its own, `algocoachdev://`. With one
+  - The dev build has a URL scheme of its own, `climbancedev://`. With one
     scheme for both builds, Android could hand the dev build's code to the
     release build on the same phone.
   - The dev build signs in through the dev login, which issues the same
@@ -727,7 +727,7 @@ times. Each record class is specified in one of the files beside it.
     managed provider or a company's own sign-in would each be one more provider
     an `identities` row names.
   - A dev login signs in with no provider, for local work, as the user
-    `ALGO_COACH_DEV_LOGIN` names. Setting the variable enables the dev login,
+    `CLIMB_DEV_LOGIN` names. Setting the variable enables the dev login,
     and two guards keep it off a deployed engine.
   - The app refuses to start with the flag beside a provider's client. A
     deployed engine signs its users in through a provider, so it carries one.
@@ -798,7 +798,7 @@ times. Each record class is specified in one of the files beside it.
   repository of its own. The technique vocabulary is the exception: it ships
   with the package, in git.
   - An authored card has its own shape. `CardSeed`
-    (`src/algo_coach/schema/seed.py`) is the payload the stored card is built
+    (`src/climb/schema/seed.py`) is the payload the stored card is built
     from, not the card, and it has no field for the identity the engine mints.
   - A card and each template are matched by their authored slug, which makes
     re-seeding refresh rather than duplicate. A new slug is a new card: the

@@ -9,7 +9,7 @@ import {
   SIGN_OUT,
   SIGNED_IN_DEVICES,
   YOUR_ACCOUNT,
-} from '@algo-coach/core'
+} from '@climb/core'
 
 import { api } from '@/api/client'
 import { useLoaded } from '@/api/useLoaded'

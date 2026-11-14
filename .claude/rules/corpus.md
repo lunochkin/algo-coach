@@ -1,14 +1,14 @@
 ---
 paths:
-  - "src/algo_coach/problems/**"
-  - "src/algo_coach/cases/**"
-  - "src/algo_coach/solutions/**"
-  - "src/algo_coach/solution_claims/**"
-  - "src/algo_coach/verifications/**"
-  - "src/algo_coach/runner/**"
-  - "src/algo_coach/generation/**"
-  - "src/algo_coach/mutation/**"
-  - "src/algo_coach/drafts/**"
+  - "src/climb/problems/**"
+  - "src/climb/cases/**"
+  - "src/climb/solutions/**"
+  - "src/climb/solution_claims/**"
+  - "src/climb/verifications/**"
+  - "src/climb/runner/**"
+  - "src/climb/generation/**"
+  - "src/climb/mutation/**"
+  - "src/climb/drafts/**"
 ---
 
 Read `docs/architecture/corpus.md` before changing this code. It gives

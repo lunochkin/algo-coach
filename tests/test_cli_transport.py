@@ -2,9 +2,9 @@ import argparse
 
 import pytest
 
-from algo_coach.calls import OpenRouter, Retry
-from algo_coach.cli import transport as module
-from algo_coach.cli.transport import transport, warn
+from climb.calls import OpenRouter, Retry
+from climb.cli import transport as module
+from climb.cli.transport import transport, warn
 
 
 def retry(**overrides) -> Retry:

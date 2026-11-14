@@ -1,7 +1,7 @@
 import { Fragment, lazy, Suspense } from 'react'
 import { Route, Routes, useMatch } from 'react-router'
 
-import { LOADING } from '@algo-coach/core'
+import { LOADING } from '@climb/core'
 import { LOGIN, PRIVACY } from '@/api/client'
 import { NavMenu } from '@/components/NavMenu'
 import { KnowledgeProvider } from '@/knowledge/KnowledgeProvider'

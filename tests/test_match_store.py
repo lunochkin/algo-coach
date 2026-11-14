@@ -3,8 +3,8 @@ from datetime import UTC, datetime, timedelta
 import pytest
 from helpers import stored_solution, stored_template
 
-from algo_coach.matches import MatchLog
-from algo_coach.schema import MatchSource, TemplateMatch
+from climb.matches import MatchLog
+from climb.schema import MatchSource, TemplateMatch
 
 
 @pytest.fixture(autouse=True)

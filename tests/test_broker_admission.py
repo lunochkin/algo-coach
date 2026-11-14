@@ -4,8 +4,8 @@ import time
 
 import httpx
 
-from algo_coach.broker import create_app
-from algo_coach.broker.container import Finished
+from climb.broker import create_app
+from climb.broker.container import Finished
 
 RUN = {"code": "def solve(n):\n    return n * 2\n", "args": [[1]], "cap_ms": 3000}
 RETURNED = b'{"outcome": "returned", "value": "2", "elapsed_ms": 0}\n'

@@ -9,7 +9,7 @@ import {
   modulesInOrder,
   BACK_KNOWLEDGE,
   OF,
-} from '@algo-coach/core'
+} from '@climb/core'
 
 import { Loaded } from '@/components/Loaded'
 import { PageHeader } from '@/components/PageHeader'

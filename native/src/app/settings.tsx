@@ -36,7 +36,7 @@ import {
   validDeviceName,
   COLOUR_SCHEME,
   SCHEME_CHOICES,
-} from '@algo-coach/core';
+} from '@climb/core';
 import * as DB from '@/lib/db';
 import { useScheme } from '@/lib/scheme';
 import { useStore } from '@/lib/store';

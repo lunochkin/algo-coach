@@ -3,11 +3,11 @@ from fastapi.testclient import TestClient
 from helpers import PROVENANCE, seed_problem
 from test_signed_in_devices import app_for
 
-from algo_coach.api.app import create_app
-from algo_coach.api.context import SESSION_COOKIE
-from algo_coach.cases import CaseLog
-from algo_coach.log import opened
-from algo_coach.mint import case
+from climb.api.app import create_app
+from climb.api.context import SESSION_COOKIE
+from climb.cases import CaseLog
+from climb.log import opened
+from climb.mint import case
 
 USER = "u-4f9c2a"
 DOUBLE = "def solve(n):\n    return n * 2\n"

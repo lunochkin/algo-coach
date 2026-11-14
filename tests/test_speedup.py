@@ -1,9 +1,9 @@
 import pytest
 from helpers import a_call
 
-from algo_coach.generation.speedup import CEILING, MARGIN, Missing, search
-from algo_coach.runner import weighs
-from algo_coach.schema import ExpectedSource, MachineProvenance
+from climb.generation.speedup import CEILING, MARGIN, Missing, search
+from climb.runner import weighs
+from climb.schema import ExpectedSource, MachineProvenance
 
 # a naive solution whose cost grows with the square of the size, as a naive
 # solution usually does. Two sleeps take 20ms and three take 45ms, and the cap

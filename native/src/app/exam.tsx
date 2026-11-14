@@ -25,7 +25,7 @@ import {
   EXAM_TITLE,
   examModuleChoice,
   OF,
-} from '@algo-coach/core';
+} from '@climb/core';
 import { useStore } from '@/lib/store';
 import { useSavedSize } from '@/lib/useSavedSize';
 import { BottomBar, fromCopy, Loaded, startExam, styles, Press, ScreenHeader } from '@/ui/common';

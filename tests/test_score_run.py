@@ -6,14 +6,14 @@ from datetime import timedelta
 import pytest
 from helpers import T0, FakeTransport, Verdict, attempt, logged, machine_claim, seed_problem
 
-from algo_coach.attempt_claims import score_backlog, standing_attempt_claims
-from algo_coach.calls import CallLog, Reply
-from algo_coach.classifier import DEFAULT, EFFORT, MODEL, PIN, request_hash
-from algo_coach.log import AttemptLog
-from algo_coach.mint import user_claim
-from algo_coach.runs import ABORT_AFTER
-from algo_coach.schema import ClaimSource
-from algo_coach.solution_claims import load_problems
+from climb.attempt_claims import score_backlog, standing_attempt_claims
+from climb.calls import CallLog, Reply
+from climb.classifier import DEFAULT, EFFORT, MODEL, PIN, request_hash
+from climb.log import AttemptLog
+from climb.mint import user_claim
+from climb.runs import ABORT_AFTER
+from climb.schema import ClaimSource
+from climb.solution_claims import load_problems
 
 # What the one-attempt fixture would be sent now.
 ASKED = request_hash(["greedy", "sorting"], "def f(): pass")

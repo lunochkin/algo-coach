@@ -3,12 +3,12 @@ records a verdict needs to exist."""
 
 from helpers import GENERATED, PROVENANCE_FIELDS, T0
 
-from algo_coach.cards import CardStore, seed_cards
-from algo_coach.mint import user_solution_claim
-from algo_coach.problems import ProblemStore
-from algo_coach.schema import Card, Problem, Solution, SolutionRole, TemplateKind
-from algo_coach.solution_claims import SolutionClaimLog
-from algo_coach.solutions import SolutionLog
+from climb.cards import CardStore, seed_cards
+from climb.mint import user_solution_claim
+from climb.problems import ProblemStore
+from climb.schema import Card, Problem, Solution, SolutionRole, TemplateKind
+from climb.solution_claims import SolutionClaimLog
+from climb.solutions import SolutionLog
 
 
 def template(slug: str, **overrides) -> dict:

@@ -7,9 +7,9 @@ adds the module's own rules, such as the supported versions.
 
 Each rule names how it is checked:
 
-- **seed**: `refusals()` in `src/algo_coach/knowledge/check.py` enforces it,
+- **seed**: `refusals()` in `src/climb/knowledge/check.py` enforces it,
   and the seed refuses a module that breaks it.
-- **check**: `algo-coach module check <slug>` checks it, from this repo, so
+- **check**: `climb module check <slug>` checks it, from this repo, so
   snippets run on the project's interpreter. The run restarts itself with
   the module's `requirements.txt` installed, so a snippet importing a
   library runs too. An error fails the run, and a

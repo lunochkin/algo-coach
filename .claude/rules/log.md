@@ -1,12 +1,12 @@
 ---
 paths:
-  - "src/algo_coach/log/**"
-  - "src/algo_coach/sitting.py"
-  - "src/algo_coach/attempt_claims/**"
-  - "src/algo_coach/board/**"
-  - "src/algo_coach/recall.py"
-  - "src/algo_coach/runs.py"
-  - "src/algo_coach/standing.py"
+  - "src/climb/log/**"
+  - "src/climb/sitting.py"
+  - "src/climb/attempt_claims/**"
+  - "src/climb/board/**"
+  - "src/climb/recall.py"
+  - "src/climb/runs.py"
+  - "src/climb/standing.py"
 ---
 
 Read `docs/architecture/log.md` before changing this code. It gives

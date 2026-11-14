@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 
-import { described } from '@algo-coach/core'
+import { described } from '@climb/core'
 
 export { described }
 

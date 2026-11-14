@@ -12,8 +12,8 @@ from pydantic import BaseModel
 from sqlalchemy import Boolean, Column, DateTime, Enum, Float, Integer, String, Table
 from sqlalchemy.dialects.postgresql import ARRAY, JSONB
 
-from algo_coach.schema import MachineProvenance
-from algo_coach.schema.authored import Authored
+from climb.schema import MachineProvenance
+from climb.schema.authored import Authored
 
 # columns a table carries by convention, which no record names: a log's order
 CONVENTIONS = frozenset({"appended"})

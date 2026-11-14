@@ -1,12 +1,12 @@
 ---
 paths:
-  - "src/algo_coach/generation/**"
-  - "src/algo_coach/mutation/**"
-  - "src/algo_coach/drafts/**"
-  - "src/algo_coach/eval/**"
-  - "src/algo_coach/sitting.py"
-  - "src/algo_coach/recall.py"
-  - "src/algo_coach/runs.py"
+  - "src/climb/generation/**"
+  - "src/climb/mutation/**"
+  - "src/climb/drafts/**"
+  - "src/climb/eval/**"
+  - "src/climb/sitting.py"
+  - "src/climb/recall.py"
+  - "src/climb/runs.py"
 ---
 
 Read `docs/architecture/flows.md` before changing this code. It gives

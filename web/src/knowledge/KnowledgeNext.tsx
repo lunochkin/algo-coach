@@ -36,7 +36,7 @@ import {
   waitingOutside,
   continueAct,
   type EmptyAction,
-} from '@algo-coach/core'
+} from '@climb/core'
 
 import { Panel } from '@/components/Panel'
 import {

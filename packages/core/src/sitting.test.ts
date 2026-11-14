@@ -83,7 +83,7 @@ describe("a draft's key", () => {
   it("finds every draft a browser holds, a user's or one written before the user was named", () => {
     expect(isDraftKey(userDraftKey('u-4f9c2a', 'p1'))).toBe(true);
     expect(isDraftKey(draftKey('p1'))).toBe(true);
-    expect(isDraftKey('algo-coach:clock')).toBe(false);
+    expect(isDraftKey('climb:clock')).toBe(false);
   });
 });
 

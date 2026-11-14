@@ -5,11 +5,11 @@ import pytest
 from commands import connected, run_cli
 from helpers import logged, seed_problem
 
-from algo_coach.board import TechniqueRow
-from algo_coach.cli.board import render
-from algo_coach.log import AttemptLog
-from algo_coach.problems import ProblemStore
-from algo_coach.schema import (
+from climb.board import TechniqueRow
+from climb.cli.board import render
+from climb.log import AttemptLog
+from climb.problems import ProblemStore
+from climb.schema import (
     Attempt,
     AttemptClaim,
     ClaimSource,
@@ -94,7 +94,7 @@ def test_board_json_carries_the_rows(board_root, monkeypatch, capsys):
 
 def test_the_user_defaults_to_the_one_the_dev_login_signs_in_as(board_root, monkeypatch, capsys):
     """The terminal and the local pages read one log."""
-    monkeypatch.setenv("ALGO_COACH_DEV_LOGIN", "u2")
+    monkeypatch.setenv("CLIMB_DEV_LOGIN", "u2")
     board_root.append_attempt(attempt("a1", user_id="u1"))
     board_root.append_attempt(attempt("a2", user_id="u2", solved=False))
 

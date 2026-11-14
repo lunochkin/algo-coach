@@ -1,5 +1,5 @@
-import { RUNGS_SOLVED, cardsCounted, RECALL_MARKS, recallMarkLabel } from '@algo-coach/core'
-import type { RecallMark } from '@algo-coach/core'
+import { RUNGS_SOLVED, cardsCounted, RECALL_MARKS, recallMarkLabel } from '@climb/core'
+import type { RecallMark } from '@climb/core'
 import { Link } from 'react-router'
 
 import type { ListedCard } from '@/api/client'

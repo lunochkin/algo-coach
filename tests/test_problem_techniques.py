@@ -3,17 +3,17 @@ from datetime import timedelta
 import pytest
 from helpers import PROVENANCE_FIELDS, T0, make_problem
 
-from algo_coach.mint import user_solution_claim
-from algo_coach.problems import ProblemStore
-from algo_coach.schema import Solution, SolutionClaim, SolutionRole
-from algo_coach.solution_claims import (
+from climb.mint import user_solution_claim
+from climb.problems import ProblemStore
+from climb.schema import Solution, SolutionClaim, SolutionRole
+from climb.solution_claims import (
     SolutionClaimLog,
     derive,
     load_problems,
     standing_solution_claims,
     with_techniques,
 )
-from algo_coach.solutions import SolutionLog
+from climb.solutions import SolutionLog
 
 
 def solution(id: str, problem_id: str = "p1", *, role: SolutionRole = SolutionRole.CANONICAL):

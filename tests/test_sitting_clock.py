@@ -3,12 +3,12 @@ from datetime import UTC, datetime, timedelta
 import pytest
 from helpers import PROVENANCE, stored_problem
 
-from algo_coach.cases import CaseLog
-from algo_coach.log import AttemptLog, SittingStore
-from algo_coach.mint import case
-from algo_coach.problems import ProblemStore
-from algo_coach.schema import Sitting
-from algo_coach.sitting import Missing, Refused, begin, end, pause, resume, start_clock, submit
+from climb.cases import CaseLog
+from climb.log import AttemptLog, SittingStore
+from climb.mint import case
+from climb.problems import ProblemStore
+from climb.schema import Sitting
+from climb.sitting import Missing, Refused, begin, end, pause, resume, start_clock, submit
 
 
 @pytest.fixture(autouse=True)

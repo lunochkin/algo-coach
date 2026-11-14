@@ -2,8 +2,8 @@ import pytest
 from sqlalchemy import func, insert, select
 from sqlalchemy.exc import IntegrityError
 
-from algo_coach.log import Provider, signed_in
-from algo_coach.log.table import identities, users
+from climb.log import Provider, signed_in
+from climb.log.table import identities, users
 
 EMAIL = "solver@example.com"
 

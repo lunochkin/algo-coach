@@ -8,14 +8,14 @@ from sqlalchemy import select, text
 from sqlalchemy.exc import ProgrammingError
 from test_seed_knowledge import authored
 
-from algo_coach import mint
-from algo_coach.calls.table import calls
-from algo_coach.cases import CaseLog
-from algo_coach.knowledge import read_module, seed_module, sync
-from algo_coach.log import AttemptLog, SittingStore, erased, whole_log
-from algo_coach.log.owned import KNOWLEDGE
-from algo_coach.log.table import attempts, sessions, users
-from algo_coach.schema import Diagnosis, FailureMode
+from climb import mint
+from climb.calls.table import calls
+from climb.cases import CaseLog
+from climb.knowledge import read_module, seed_module, sync
+from climb.log import AttemptLog, SittingStore, erased, whole_log
+from climb.log.owned import KNOWLEDGE
+from climb.log.table import attempts, sessions, users
+from climb.schema import Diagnosis, FailureMode
 
 AUTHOR = "u-4f9c2a"
 OTHER = "u-b71e03"
@@ -204,7 +204,7 @@ def test_a_delete_outside_an_erasure_is_still_refused(practised):
 def test_an_update_is_refused_even_while_erasing(practised):
     """Erasing deletes a whole log; no record is ever revised in place."""
     with pytest.raises(ProgrammingError, match="append-only"), practised.begin() as conn:
-        conn.execute(text("SET LOCAL algo_coach.erasing = 'on'"))
+        conn.execute(text("SET LOCAL climb.erasing = 'on'"))
         conn.execute(attempts.update().values(solved=False))
 
 
@@ -241,7 +241,7 @@ def test_a_mistyped_confirmation_erases_nothing(practised, monkeypatch):
 
 def test_erasing_names_its_user_every_time(monkeypatch):
     """A default would erase the author's own log."""
-    monkeypatch.setenv("ALGO_COACH_DEV_LOGIN", AUTHOR)
+    monkeypatch.setenv("CLIMB_DEV_LOGIN", AUTHOR)
 
     with pytest.raises(SystemExit) as exit_info:
         run_cli(monkeypatch, "log", "erase")

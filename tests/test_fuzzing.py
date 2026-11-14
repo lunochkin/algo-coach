@@ -1,10 +1,10 @@
 from helpers import a_call
 
-from algo_coach.generation.fuzzing import SEEDS, SIZES, build, fuzz, grid
-from algo_coach.generation.shrinking import Candidate, shrink
-from algo_coach.mutation import kill, mutants, survivors
-from algo_coach.runner import outputs
-from algo_coach.schema import ExpectedSource, MachineProvenance
+from climb.generation.fuzzing import SEEDS, SIZES, build, fuzz, grid
+from climb.generation.shrinking import Candidate, shrink
+from climb.mutation import kill, mutants, survivors
+from climb.runner import outputs
+from climb.schema import ExpectedSource, MachineProvenance
 
 # a boundary decision, and a reference that agrees with it by another route
 BOUNDED = "def solve(n):\n    return n > 3\n"

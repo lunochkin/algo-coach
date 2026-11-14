@@ -1,8 +1,8 @@
 import pytest
 from pydantic import ValidationError
 
-from algo_coach.mint import verification
-from algo_coach.schema import CaseOutcome, CaseResult, Verification
+from climb.mint import verification
+from climb.schema import CaseOutcome, CaseResult, Verification
 
 
 def result(case_id: str, outcome: str, **overrides) -> CaseResult:

@@ -4,9 +4,9 @@ import pytest
 from helpers import browsing, seed_problem
 from matching import card, seeded, template
 
-from algo_coach.log import AttemptLog, CardRunLog, RecallLog
-from algo_coach.mint import recall_attempt
-from algo_coach.schema import Attempt, CaseOutcome, CaseResult, Execution, Hint
+from climb.log import AttemptLog, CardRunLog, RecallLog
+from climb.mint import recall_attempt
+from climb.schema import Attempt, CaseOutcome, CaseResult, Execution, Hint
 
 
 def solved_attempt(problem_id: str, *, at: datetime, id: str) -> Attempt:

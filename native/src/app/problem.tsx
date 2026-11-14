@@ -36,7 +36,7 @@ import {
   TOUCH_MS,
   touchSitting,
   problemFacts,
-} from '@algo-coach/core';
+} from '@climb/core';
 import { engine } from '@/lib/engine';
 import { getToken } from '@/lib/settings';
 import { autoStarts, draftOf, keepDraft, pressed } from '@/lib/sitting';

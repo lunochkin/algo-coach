@@ -37,7 +37,7 @@ import {
   SyncLoop,
   syncDelay,
   NOT_SIGNED_IN,
-} from '@algo-coach/core';
+} from '@climb/core';
 
 import { readCatalog } from './courses-cache';
 import * as DB from './db';

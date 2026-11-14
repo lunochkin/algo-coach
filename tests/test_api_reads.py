@@ -1,10 +1,10 @@
 import pytest
 from helpers import browsing, seed_problem
 
-from algo_coach.cards import CardStore
-from algo_coach.log import AttemptLog
-from algo_coach.problems import ProblemStore
-from algo_coach.schema import Attempt, Card, Requirement, RetirementReason, Selector, Template
+from climb.cards import CardStore
+from climb.log import AttemptLog
+from climb.problems import ProblemStore
+from climb.schema import Attempt, Card, Requirement, RetirementReason, Selector, Template
 
 USER = "u-4f9c2a"
 

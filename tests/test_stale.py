@@ -1,7 +1,7 @@
 from helpers import CONFIGURATION, PROMPT_HASH, machine_claim
 
-from algo_coach.attempt_claims import at_configuration, is_stale, machine_claims_at
-from algo_coach.mint import user_claim
+from climb.attempt_claims import at_configuration, is_stale, machine_claims_at
+from climb.mint import user_claim
 
 
 def test_a_claim_at_this_configuration_is_read_as_current():

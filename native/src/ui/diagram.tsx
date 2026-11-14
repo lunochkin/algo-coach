@@ -3,7 +3,7 @@ import { View } from 'react-native';
 import { useTheme } from 'react-native-paper';
 import { SvgXml } from 'react-native-svg';
 
-import { drawingSize } from '@algo-coach/core';
+import { drawingSize } from '@climb/core';
 
 import { useStore } from '@/lib/store';
 import { CodeBlock } from '@/ui/common';

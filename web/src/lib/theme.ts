@@ -1,4 +1,4 @@
-const KEY = 'algo-coach:theme'
+const KEY = 'climb:theme'
 
 export type Scheme = 'light' | 'dark'
 

@@ -1,7 +1,7 @@
 from datetime import UTC, datetime, timedelta
 
-from algo_coach.schema import Attempt
-from algo_coach.sitting import carry
+from climb.schema import Attempt
+from climb.sitting import carry
 
 T0 = datetime(2026, 10, 1, 9, tzinfo=UTC)
 

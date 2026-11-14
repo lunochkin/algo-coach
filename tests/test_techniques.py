@@ -5,18 +5,18 @@ from importlib import resources
 import pytest
 from helpers import GENERATED
 
-from algo_coach.mint import user_claim
-from algo_coach.schema import (
+from climb.mint import user_claim
+from climb.schema import (
     AttemptClaim,
     Kind,
     Problem,
     Technique,
 )
-from algo_coach.techniques import codes, criteria, family, is_known, with_ancestors
+from climb.techniques import codes, criteria, family, is_known, with_ancestors
 
 
 def raw_list() -> list[dict]:
-    text = resources.files("algo_coach.techniques").joinpath("vocabulary.json").read_text()
+    text = resources.files("climb.techniques").joinpath("vocabulary.json").read_text()
     return json.loads(text)["techniques"]
 
 

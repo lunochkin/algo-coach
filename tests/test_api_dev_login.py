@@ -2,13 +2,13 @@ import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy import select
 
-from algo_coach.api import create_app
-from algo_coach.api.__main__ import app as served
-from algo_coach.api.context import SESSION_COOKIE
-from algo_coach.api.signin import Client, SignIn
-from algo_coach.log import Provider, hashed
-from algo_coach.log.table import sessions, users
-from algo_coach.storage import Database
+from climb.api import create_app
+from climb.api.__main__ import app as served
+from climb.api.context import SESSION_COOKIE
+from climb.api.signin import Client, SignIn
+from climb.log import Provider, hashed
+from climb.log.table import sessions, users
+from climb.storage import Database
 
 
 def browser(root, user: str = "local", host: str = "127.0.0.1") -> TestClient:
@@ -73,7 +73,7 @@ def test_the_dev_login_refuses_to_start_beside_a_provider_s_client():
 
 
 def test_the_served_app_signs_in_as_the_user_the_environment_names(monkeypatch):
-    monkeypatch.setenv("ALGO_COACH_DEV_LOGIN", "u-4f9c2a")
+    monkeypatch.setenv("CLIMB_DEV_LOGIN", "u-4f9c2a")
 
     app = served()
 
@@ -81,8 +81,8 @@ def test_the_served_app_signs_in_as_the_user_the_environment_names(monkeypatch):
 
 
 def test_an_empty_flag_enables_nothing(monkeypatch):
-    """A line left as `ALGO_COACH_DEV_LOGIN=` in `.env` names no user."""
-    monkeypatch.setenv("ALGO_COACH_DEV_LOGIN", "")
+    """A line left as `CLIMB_DEV_LOGIN=` in `.env` names no user."""
+    monkeypatch.setenv("CLIMB_DEV_LOGIN", "")
     client = TestClient(served(), base_url="http://127.0.0.1")
 
     assert client.get("/api/auth/dev").status_code == 404

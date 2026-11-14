@@ -3,8 +3,8 @@ from commands import TRANSPORT, connected, run_cli
 from helpers import FakeTransport, Verdict
 from matching import card, problem, seeded, stored
 
-from algo_coach import cli
-from algo_coach.matches import EFFORT, MODEL, MatchLog
+from climb import cli
+from climb.matches import EFFORT, MODEL, MatchLog
 
 
 def run(monkeypatch, client: FakeTransport, *argv: str) -> None:
@@ -54,7 +54,7 @@ def test_a_run_that_landed_nothing_exits_nonzero(root, monkeypatch, capsys):
 def test_a_missing_key_fails_before_the_run(root, monkeypatch, capsys):
     monkeypatch.delenv("OPENROUTER_API_KEY", raising=False)
     monkeypatch.setattr(TRANSPORT, "OpenRouter", lambda _api, **_: FakeTransport.answering())
-    monkeypatch.setattr("sys.argv", ["algo-coach", "match"])
+    monkeypatch.setattr("sys.argv", ["climb", "match"])
 
     with pytest.raises(SystemExit) as exit_info:
         cli.main()

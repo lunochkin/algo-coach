@@ -3,10 +3,10 @@ from datetime import UTC, datetime
 import pytest
 from helpers import PROVENANCE, stored_problem
 
-from algo_coach.cases import CaseLog
-from algo_coach.log import AttemptLog, SittingStore
-from algo_coach.mint import attempt_verification, case
-from algo_coach.schema import (
+from climb.cases import CaseLog
+from climb.log import AttemptLog, SittingStore
+from climb.mint import attempt_verification, case
+from climb.schema import (
     Attempt,
     CaseOutcome,
     CaseResult,
@@ -14,7 +14,7 @@ from algo_coach.schema import (
     FailureMode,
     Sitting,
 )
-from algo_coach.sitting import Missing, Refused, label, modes
+from climb.sitting import Missing, Refused, label, modes
 
 USER = "u-4f9c2a"
 

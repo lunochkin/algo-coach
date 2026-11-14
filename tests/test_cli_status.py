@@ -2,9 +2,9 @@ import os
 import re
 import threading
 
-from algo_coach.calls import Retry
-from algo_coach.cli.status import BAR, Status
-from algo_coach.schema import Configuration
+from climb.calls import Retry
+from climb.cli.status import BAR, Status
+from climb.schema import Configuration
 
 
 class Stream:

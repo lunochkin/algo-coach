@@ -1,4 +1,4 @@
-import { CLOCK_PREFERENCE_KEY, clockStartsItself, preferenceAfter } from '@algo-coach/core'
+import { CLOCK_PREFERENCE_KEY, clockStartsItself, preferenceAfter } from '@climb/core'
 
 // the clock preference in this browser: core decides what a press sets
 export function autoStarts(): boolean {

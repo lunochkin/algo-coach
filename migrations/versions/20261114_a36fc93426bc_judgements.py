@@ -44,6 +44,7 @@ def upgrade() -> None:
         " FOR EACH STATEMENT EXECUTE FUNCTION refuse_rewrite()"
     )
 
+
 def downgrade() -> None:
     op.drop_index(op.f("judgements_user_id_idx"), table_name="judgements")
     op.drop_index(op.f("judgements_item_id_idx"), table_name="judgements")

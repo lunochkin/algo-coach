@@ -68,7 +68,7 @@ import {
   keyPointLabel,
   lessonStopKicker,
   lessonRead,
-} from '@algo-coach/core';
+} from '@climb/core';
 import { EMPTY, type Edit, type Key, pressed } from '@/lib/keys';
 import { useStore, type ExamSession, type QueueSession } from '@/lib/store';
 import { Heading, PickPanel, PickRow } from '@/ui/rows';

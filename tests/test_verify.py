@@ -1,8 +1,8 @@
 from helpers import PROVENANCE
 
-from algo_coach.mint import case
-from algo_coach.runner import verify
-from algo_coach.schema import CaseOutcome
+from climb.mint import case
+from climb.runner import verify
+from climb.schema import CaseOutcome
 
 DOUBLE = "def solve(n):\n    return n * 2\n"
 

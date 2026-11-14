@@ -4,7 +4,7 @@ import pytest
 from commands import TRANSPORT, connected
 from helpers import FakeTransport, Verdict
 
-from algo_coach import cli
+from climb import cli
 
 
 @pytest.fixture
@@ -14,7 +14,7 @@ def cwd(database, tmp_path, monkeypatch):
     connected(database, monkeypatch)
     answering = FakeTransport.answering(Verdict(["greedy"]))
     monkeypatch.setattr(TRANSPORT, "OpenRouter", lambda _api, **_: answering)
-    monkeypatch.setattr("sys.argv", ["algo-coach", "claim", "attempts", "--user", "u1"])
+    monkeypatch.setattr("sys.argv", ["climb", "claim", "attempts", "--user", "u1"])
     return tmp_path
 
 
@@ -48,7 +48,7 @@ def test_ctrl_c_ends_the_command_rather_than_reporting_it(monkeypatch, capsys):
     The traceback would name the line the prompt was waiting on, which is
     where the user was rather than what went wrong."""
     monkeypatch.setattr(cli, "board", _interrupted)
-    monkeypatch.setattr("sys.argv", ["algo-coach", "board"])
+    monkeypatch.setattr("sys.argv", ["climb", "board"])
 
     with pytest.raises(SystemExit) as exit_info:
         cli.main()

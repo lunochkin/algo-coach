@@ -5,7 +5,7 @@ import {
   OF,
   PROBLEM_RETIRED,
   PROBLEM_OPENING,
-} from '@algo-coach/core'
+} from '@climb/core'
 import { lazy } from 'react'
 import { useParams, useSearchParams } from 'react-router'
 

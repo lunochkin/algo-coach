@@ -5,7 +5,7 @@ import {
   type Line,
   type SyncStore,
   type SyncTransport,
-} from '@algo-coach/core'
+} from '@climb/core'
 import { deleteDB, openDB, type DBSchema, type IDBPDatabase } from 'idb'
 
 // the browser's copy of the content and of one user's log: `knowledge.md`,
@@ -40,7 +40,7 @@ export interface Synced {
 }
 
 /** The database one user's copy lives in, so another account never reads it. */
-export const copyName = (user: string) => `algo-coach-knowledge:${user}`
+export const copyName = (user: string) => `climb-knowledge:${user}`
 
 export class Copy {
   private readonly db: IDBPDatabase<Schema>

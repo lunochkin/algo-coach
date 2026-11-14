@@ -2,8 +2,8 @@ from datetime import UTC, datetime, timedelta
 
 from helpers import GENERATED
 
-from algo_coach.board import candidates
-from algo_coach.schema import Attempt, Problem
+from climb.board import candidates
+from climb.schema import Attempt, Problem
 
 T0 = datetime(2026, 1, 1, tzinfo=UTC)
 

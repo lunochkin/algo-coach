@@ -316,7 +316,7 @@ summary {
   margin-bottom: 0;
 }
 
-/* the five code tokens, as the classes `@algo-coach/editor` maps Python's tags to.
+/* the five code tokens, as the classes `@climb/editor` maps Python's tags to.
    The editor and a template's form read the same mapping, so a form on a card
    is coloured as the editor colours it */
 .tok-keyword {

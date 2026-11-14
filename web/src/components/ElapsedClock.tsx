@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 
-import { duration, shownSeconds, ELAPSED_TIME } from '@algo-coach/core'
+import { duration, shownSeconds, ELAPSED_TIME } from '@climb/core'
 
 type Props = {
   // the engine's reading, none while the clock has not run, and the moment

@@ -3,7 +3,7 @@ import { ScrollView, View } from 'react-native';
 import { Text, useTheme } from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { depthSections, type components, CARDS_TITLE, OF, CARDS_NONE, CARDS_NOTE } from '@algo-coach/core';
+import { depthSections, type components, CARDS_TITLE, OF, CARDS_NONE, CARDS_NOTE } from '@climb/core';
 import { useEngine } from '@/lib/useEngine';
 import { AccountMenu } from '@/ui/account';
 import { CardPanel } from '@/ui/cards';

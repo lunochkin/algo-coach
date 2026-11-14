@@ -1,13 +1,13 @@
 import * as Crypto from 'expo-crypto';
 import * as WebBrowser from 'expo-web-browser';
 
-import { type components, refusal, SIGN_IN_CANCELLED, SIGN_IN_NO_CODE } from '@algo-coach/core';
+import { type components, refusal, SIGN_IN_CANCELLED, SIGN_IN_NO_CODE } from '@climb/core';
 
 import { call, engine } from './engine';
 
 // the engine redirects here, a constant on both sides: `docs/architecture/README.md`.
 // The dev app has a scheme of its own, so the release app never receives its code
-export const REDIRECT = __DEV__ ? 'algocoachdev://signed-in' : 'algocoach://signed-in';
+export const REDIRECT = __DEV__ ? 'climbancedev://signed-in' : 'climbance://signed-in';
 const CLIENT = __DEV__ ? 'app-dev' : 'app';
 
 // `dev` is the local engine's dev login, which signs the dev app alone in

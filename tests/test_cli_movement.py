@@ -2,8 +2,8 @@ import pytest
 from commands import connected, run_cli
 from helpers import attempt, logged, machine_claim, seed_problem
 
-from algo_coach.log import AttemptLog
-from algo_coach.mint import user_claim
+from climb.log import AttemptLog
+from climb.mint import user_claim
 
 
 def run(monkeypatch, *argv: str) -> None:

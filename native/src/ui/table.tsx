@@ -2,7 +2,7 @@ import { Children, isValidElement, useState, type ReactNode } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { Text, useTheme } from 'react-native-paper';
 
-import { TABLE_GAP, tableShape } from '@algo-coach/core';
+import { TABLE_GAP, tableShape } from '@climb/core';
 
 import { font, space } from '@/ui/tokens';
 

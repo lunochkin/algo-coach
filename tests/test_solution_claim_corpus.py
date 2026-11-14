@@ -9,20 +9,20 @@ from helpers import (
     stored_problem,
 )
 
-from algo_coach.calls import CallLog
-from algo_coach.classifier import DEFAULT, request_hash
-from algo_coach.ids import new_id
-from algo_coach.mint import machine_solution_claim, user_solution_claim
-from algo_coach.runs import ABORT_AFTER
-from algo_coach.schema import Configuration, MachineProvenance, Solution, SolutionRole
-from algo_coach.solution_claims import (
+from climb.calls import CallLog
+from climb.classifier import DEFAULT, request_hash
+from climb.ids import new_id
+from climb.mint import machine_solution_claim, user_solution_claim
+from climb.runs import ABORT_AFTER
+from climb.schema import Configuration, MachineProvenance, Solution, SolutionRole
+from climb.solution_claims import (
     Progress,
     SolutionClaimLog,
     candidates,
     outstanding,
     read_corpus,
 )
-from algo_coach.solutions import SolutionLog
+from climb.solutions import SolutionLog
 
 answering = FakeTransport.answering
 

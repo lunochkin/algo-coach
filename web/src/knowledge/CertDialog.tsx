@@ -13,7 +13,7 @@ import {
   type CertStatus,
   type Course,
   newRecord,
-} from '@algo-coach/core'
+} from '@climb/core'
 
 import { Button } from '@/components/ui/button'
 import {

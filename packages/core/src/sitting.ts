@@ -48,7 +48,7 @@ export function duration(seconds: number): string {
 // the clock preference: whether the next clock starts by itself. The user's
 // own press alone sets it, so a pause a hidden page took says nothing
 export type ClockMove = 'start' | 'pause' | 'resume' | 'end';
-export const CLOCK_PREFERENCE_KEY = 'algo-coach:clock';
+export const CLOCK_PREFERENCE_KEY = 'climb:clock';
 export const preferenceAfter = (pressed: 'start' | 'pause' | 'resume') => (pressed === 'pause' ? 'off' : 'on');
 export const clockStartsItself = (stored: string | null) => stored === 'on';
 
@@ -80,16 +80,16 @@ export interface Draft {
   restored?: boolean;
 }
 
-export const draftKey = (problemId: string) => `algo-coach:problem:${problemId}:draft`;
+export const draftKey = (problemId: string) => `climb:problem:${problemId}:draft`;
 
 /**
  * A browser's key for one user's draft. A browser is shared between the
  * accounts signed in on it, and an unsent draft is that user's own code.
  */
-export const userDraftKey = (user: string, problemId: string) => `algo-coach:user:${user}:problem:${problemId}:draft`;
+export const userDraftKey = (user: string, problemId: string) => `climb:user:${user}:problem:${problemId}:draft`;
 
 /** Every draft key a browser holds, any user's or none, which signing out deletes. */
-export const isDraftKey = (key: string) => key.startsWith('algo-coach:') && key.endsWith(':draft');
+export const isDraftKey = (key: string) => key.startsWith('climb:') && key.endsWith(':draft');
 
 export function isDraft(value: unknown): value is Draft {
   return (

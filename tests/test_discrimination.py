@@ -4,11 +4,11 @@ from dataclasses import dataclass, field
 import pytest
 from helpers import own
 
-from algo_coach.calls import CallLog, Reply
-from algo_coach.generation import GenerationError, propose_cases
-from algo_coach.generation.discrimination import DISCRIMINATION_DEFAULT, prompt, read, schema
-from algo_coach.mutation import Mutant, Operator
-from algo_coach.schema import Configuration
+from climb.calls import CallLog, Reply
+from climb.generation import GenerationError, propose_cases
+from climb.generation.discrimination import DISCRIMINATION_DEFAULT, prompt, read, schema
+from climb.mutation import Mutant, Operator
+from climb.schema import Configuration
 
 STATEMENT = "Given a list of readings, return the widest stretch that stays fair."
 CANONICAL = "def solve(xs):\n    return len(xs)\n"

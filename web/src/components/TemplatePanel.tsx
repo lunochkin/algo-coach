@@ -1,4 +1,4 @@
-import { RECALL_THIS, HIDE_FORM } from '@algo-coach/core'
+import { RECALL_THIS, HIDE_FORM } from '@climb/core'
 import { useState } from 'react'
 
 import { Link } from 'react-router'

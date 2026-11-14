@@ -17,7 +17,7 @@ import {
   BACK_LESSONS,
   OF,
   lessonPage,
-} from '@algo-coach/core'
+} from '@climb/core'
 
 import { SectionHeading } from '@/components/SectionHeading'
 import { Loaded } from '@/components/Loaded'

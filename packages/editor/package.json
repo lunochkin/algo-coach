@@ -1,5 +1,5 @@
 {
-  "name": "@algo-coach/editor",
+  "name": "@climb/editor",
   "version": "0.0.0",
   "private": true,
   "description": "The Python editor's setup, shared by the web's editor and the phone's",

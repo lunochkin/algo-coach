@@ -3,9 +3,9 @@ from commands import connected, run_cli
 from helpers import FakeTransport, Verdict
 from matching import canonicals, problem, stored
 
-from algo_coach.classifier import EFFORT, MODEL
-from algo_coach.solution_claims import SolutionClaimLog
-from algo_coach.solutions import SolutionLog
+from climb.classifier import EFFORT, MODEL
+from climb.solution_claims import SolutionClaimLog
+from climb.solutions import SolutionLog
 
 
 def run(monkeypatch, client: FakeTransport, *argv: str) -> None:

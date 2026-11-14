@@ -1,0 +1,79 @@
+from datetime import datetime
+from enum import StrEnum
+
+from pydantic import BaseModel, ConfigDict, Field, model_validator
+
+from climb.schema.provenance import MachineProvenance
+from climb.schema.record import AttemptRecord
+
+
+class FailureMode(StrEnum):
+    SPEED = "speed"  # solved, and slower than the solver judges; never a timeout
+    RUST = "rust"  # the form was held and not reached
+    GAP = "gap"  # the form was not held
+    SYNTAX = "syntax"  # language/implementation slip
+    NONE = "none"  # clean pass
+
+
+class Attempt(BaseModel):
+    model_config = ConfigDict(frozen=True)
+
+    id: str
+    user_id: str
+    problem_id: str
+    sitting_id: str | None = None  # absent on an attempt no sitting of the engine's minted
+    started_at: datetime | None = None  # absent where nothing timed the sitting
+    finished_at: datetime
+    language: str | None = None  # not always recorded; a default would guess
+    time_to_solve_sec: float | None = None
+    solved: bool
+    code: str | None = None
+    # whether the sitting restored an earlier solve before this submission.
+    # Absent on an attempt written before the field, which restored nothing
+    restored: bool | None = None
+
+    # what mastery counts as a solve: `log.md`. The verdict in `solved` stands
+    @property
+    def solved_unaided(self) -> bool:
+        return self.solved and not self.restored
+
+
+class SelfLabel(AttemptRecord):
+    """The user's own verdict on why an attempt went the way it did."""
+
+    mode: FailureMode
+
+
+class ClaimSource(StrEnum):
+    USER = "user"
+    CLASSIFIER = "classifier"
+
+
+class Confidence(StrEnum):
+    GUESS = "guess"
+    LEANING = "leaning"
+    SURE = "sure"
+
+
+class AttemptClaim(AttemptRecord, MachineProvenance):
+    """Which techniques an attempt used, as one writer claimed them."""
+
+    techniques: list[str] = Field(default_factory=list[str])  # empty is a verdict, and is stored
+    declined: bool = False  # the user's, stated rather than inferred from an empty set
+    source: ClaimSource  # required: a mislabelled claim cannot be corrected later
+    informed_by: list[str] = Field(
+        default_factory=list[str]
+    )  # calls its author saw, not provenance
+    confidence: Confidence | None = None  # absent on claims written before it was asked for
+
+    @model_validator(mode="after")
+    def _provenance_matches_source(self) -> AttemptClaim:
+        """Rejects a user claim that says nothing, a decline that names
+        techniques, and provenance that disagrees with the source."""
+        if self.source is ClaimSource.USER and not (self.techniques or self.declined):
+            raise ValueError("a user claim names at least one technique, or declines")
+        if self.techniques and self.declined:
+            raise ValueError("a claim that names techniques cannot decline")
+
+        self.check_provenance(self.source is ClaimSource.CLASSIFIER)
+        return self

@@ -1,7 +1,7 @@
 import { useState, type ReactNode } from 'react';
 import { Button } from 'react-native-paper';
 
-import { ARCHIVE_BODY, ARCHIVE_KEEP, archiveTitle, type Course, MODULE_ARCHIVE } from '@algo-coach/core';
+import { ARCHIVE_BODY, ARCHIVE_KEEP, archiveTitle, type Course, MODULE_ARCHIVE } from '@climb/core';
 import { useStore } from '@/lib/store';
 import { Sheet } from '@/ui/sheet';
 

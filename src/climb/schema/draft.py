@@ -1,0 +1,189 @@
+"""One writing, held as it is written.
+
+Working state rather than a log: a draft is revised in place and cleared at
+landing. `flows.md` gives the states and what a resume may not do.
+"""
+
+from enum import StrEnum
+from typing import Any
+
+from pydantic import BaseModel, ConfigDict, Field, model_validator
+
+from climb.schema.case import ExpectedSource
+from climb.schema.outcome import Gate
+from climb.schema.problem import ProblemDifficulty
+from climb.schema.provenance import MachineProvenance
+from climb.schema.target import one_target
+
+
+class WritingState(StrEnum):
+    """How far a problem has been written. One state per step that can fail, in
+    the order `flows.md` gives; `landed` is where `ProblemStatus` starts."""
+
+    DRAFTED = "drafted"
+    CHECKED = "checked"
+    SCREENED = "screened"
+    REFERENCED = "referenced"
+    AGREED = "agreed"
+    BUILT = "built"
+    PACED = "paced"
+    SEARCHED = "searched"
+    HARDENED = "hardened"
+    LANDED = "landed"
+    REJECTED = "rejected"  # terminal; `gate` says what reached it
+
+
+class DraftCase(BaseModel):
+    """One case as the generator wrote it: the arguments and what `solve` must
+    return."""
+
+    model_config = ConfigDict(frozen=True)
+
+    # no id, no problem and no `expected_from`: none of the three exists until
+    # the problem lands, and the reference recomputes `expected` before it does
+    # decoded values: a reply's text is decoded by `GeneratedCase`, since a
+    # stored string answer decoded again here would fail as JSON
+    args: list[Any]
+    expected: Any
+
+
+class SettledCase(BaseModel):
+    """One case a run established: whose answer it carries, and the call that
+    proposed the arguments."""
+
+    model_config = ConfigDict(frozen=True)
+
+    # neither a `TestCase`, which needs a problem id, nor a `DraftCase`, whose
+    # `expected` was declared rather than established by a run
+    args: list[Any]
+    expected: Any
+    expected_from: ExpectedSource
+    # the configuration rather than the call: the `TestCase` this becomes
+    # copies it, and a call carries its prompt whole, which every case of one
+    # draft would then hold a copy of
+    provenance: MachineProvenance
+    round: int | None = 0  # as `TestCase.round`
+    repeats: int = Field(default=1, ge=1)  # as `TestCase.repeats`
+
+
+class Draft(BaseModel):
+    """What the steps of one writing produced and no local run re-derives.
+
+    The mutants, the survivors and the loop's counters are not here: a tree
+    walk enumerates the first two and the site outcomes of this id carry the
+    third.
+    """
+
+    model_config = ConfigDict(frozen=True)
+
+    id: str = Field(min_length=1)  # the writing id the site outcomes group under
+    state: WritingState = WritingState.DRAFTED
+    # what rejected the answer, as the same gate on the site whose output made
+    # it decidable. A field rather than a record: nothing but the run writes it
+    gate: Gate | None = None
+    # the problem this draft landed as, absent until it did. A crash between
+    # landing and clearing leaves a draft naming one, which is what tells the
+    # next run to clear it rather than write the problem a second time
+    problem_id: str | None = Field(default=None, min_length=1)
+    # the target, as on `SiteOutcome` and the problem this lands as. A resume
+    # reads the template's `speedup`, and a sweep over the store has nothing
+    # else to find it from. Both absent where nothing recorded the writing
+    target_template_id: str | None = Field(default=None, min_length=1)
+    target_technique: str | None = Field(default=None, min_length=1)
+
+    # drafted: one call wrote all five, so a draft exists only once they do
+    title: str = Field(min_length=1)
+    statement: str = Field(min_length=1)
+    canonical: str = Field(min_length=1)
+    declared: list[DraftCase] = Field(min_length=1)
+    difficulty: ProblemDifficulty
+    # referenced: the second solution, written from the statement alone
+    reference: str | None = Field(default=None, min_length=1)
+    # agreed: what the two solutions settled, where `declared` holds what the
+    # generator's own call said each case returns
+    cases: list[SettledCase] = Field(default_factory=list[SettledCase])
+    # built: the code that builds an input of a given size, and the largest
+    # size the statement admits
+    input_generator: str | None = Field(default=None, min_length=1)
+    largest: int | None = Field(default=None, gt=0)
+    # paced: the naive solution the search measures the canonical against,
+    # written as the approach the form replaces. Absent where no speedup is
+    # claimed
+    naive: str | None = Field(default=None, min_length=1)
+    # searched: the case at the size the naive solution stops fitting, absent
+    # where the form is its own optimum or nothing separated. The site outcome
+    # stores the size alone, as `separating`
+    separating_case: SettledCase | None = None
+    # why the search stored no case, as the inputs site records it. A resume
+    # reads it: the exits a held draft leaves by differ by what stopped it
+    unseparated: str | None = Field(default=None, min_length=1)
+    # the bounds the search ran under. A resume re-walks where any of them
+    # moved, since a raised constant moves neither a configuration nor a
+    # prompt hash
+    ceiling: int | None = Field(default=None, gt=0)
+    margin: int | None = Field(default=None, gt=0)  # the share of the cap the canonical may take
+    repeats_max: int | None = Field(default=None, gt=0)  # the most calls a case may carry
+    # the search's own revision, which its bounds do not move with
+    search_revision: int | None = Field(default=None, gt=0)
+    # hardened: what the loop appended to the set. The inputs the fuzz pass
+    # kept, then the cases the rounds won. Neither lands where it killed
+    # nothing, so this is what the step was paid for
+    kept: list[SettledCase] = Field(default_factory=list[SettledCase])
+    won: list[SettledCase] = Field(default_factory=list[SettledCase])
+
+    # the configuration each step ran at, copied as its call returned. A resume
+    # starts at the first step whose configuration or prompt hash moved, which
+    # is why both are held here rather than only the outputs
+    generator_provenance: MachineProvenance | None = None
+    screen_provenance: MachineProvenance | None = None
+    blind_provenance: MachineProvenance | None = None
+    inputs_provenance: MachineProvenance | None = None  # the input generator and the search it fed
+    naive_provenance: MachineProvenance | None = (
+        None  # the naive solution a search measures against
+    )
+    discrimination_provenance: MachineProvenance | None = None
+
+    @model_validator(mode="after")
+    def _rejection_names_its_gate(self) -> Draft:
+        """Rejects a rejected draft with no gate, and a gate on one a resume
+        could still carry forward."""
+        rejected = self.state is WritingState.REJECTED
+        if rejected and self.gate is None:
+            raise ValueError("a rejected draft names the gate that reached it")
+        if not rejected and self.gate is not None:
+            raise ValueError(f"a {self.state} draft carries no gate")
+        return self
+
+    @model_validator(mode="after")
+    def _landing_names_the_problem(self) -> Draft:
+        """Rejects a landed draft naming no problem, and a problem named by one
+        that has not landed."""
+        landed = self.state is WritingState.LANDED
+        if landed and self.problem_id is None:
+            raise ValueError("a landed draft names the problem_id it became")
+        if not landed and self.problem_id is not None:
+            raise ValueError(f"a {self.state} draft carries no problem_id")
+        return self
+
+    @model_validator(mode="after")
+    def _one_target(self) -> Draft:
+        one_target(self.target_template_id, self.target_technique)
+        return self
+
+    @model_validator(mode="after")
+    def _the_input_generator_carries_its_bound(self) -> Draft:
+        """One call returned both, and a search asking for a size the statement
+        excludes is what a bound without code cannot stop."""
+        if (self.input_generator is None) != (self.largest is None):
+            raise ValueError("an input generator is stored with the bound its call reported")
+        return self
+
+    @model_validator(mode="after")
+    def _each_step_copies_a_whole_configuration(self) -> Draft:
+        """A step whose configuration is partly unknown could not be compared
+        with the one a resume would run."""
+        for site in ("generator", "screen", "blind", "inputs", "naive", "discrimination"):
+            copied = getattr(self, f"{site}_provenance")
+            if copied is not None:
+                copied.check_provenance(True)
+        return self

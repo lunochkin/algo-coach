@@ -2,9 +2,9 @@ from collections import Counter
 
 from helpers import attempt, seed_problem
 
-from algo_coach.attempt_claims import claimable, spread
-from algo_coach.mint import user_claim
-from algo_coach.solution_claims import load_problems
+from climb.attempt_claims import claimable, spread
+from climb.mint import user_claim
+from climb.solution_claims import load_problems
 
 
 def techniques_of(problems, drawn):

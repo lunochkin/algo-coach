@@ -18,7 +18,7 @@ Every page under a section carries the same two rows above its body.
 
 ```
 +- any page under a section ---------------------------------------------+
-| algo-coach   [ Practice ]  Problems  Cards  Knowledge           ☀  ≡   |
+| Climbance    [ Practice ]  Problems  Cards  Knowledge           ☀  ≡   |
 +------------------------------------------------------------------------+
 |                                                                        |
 | < Binary search                  the way back, named                   |
@@ -51,7 +51,7 @@ Every page under a section carries the same two rows above its body.
 
 ```
 +- / --------------------------------------------------------------------+
-| algo-coach   [ Practice ]  Problems  Cards  Knowledge           ☀  ≡   |
+| Climbance    [ Practice ]  Problems  Cards  Knowledge           ☀  ≡   |
 +------------------------------------------------------------------------+
 | Practice                                                               |
 | Continue a card in progress, or pick a technique.                      |
@@ -96,7 +96,7 @@ Every page under a section carries the same two rows above its body.
 
 ```
 +- /problems?technique=binary-search&difficulty=medium ------------------+
-| algo-coach   Practice  [ Problems ]  Cards  Knowledge           ☀  ≡   |
+| Climbance    Practice  [ Problems ]  Cards  Knowledge           ☀  ≡   |
 +------------------------------------------------------------------------+
 | Problems                                                               |
 | Every problem the engine has written. A difficulty and a tag narrow    |
@@ -140,7 +140,7 @@ Every page under a section carries the same two rows above its body.
 
 ```
 +- /techniques/binary-search --------------------------------------------+
-| algo-coach   [ Practice ]  Problems  Cards  Knowledge           ☀  ≡   |
+| Climbance    [ Practice ]  Problems  Cards  Knowledge           ☀  ≡   |
 +------------------------------------------------------------------------+
 | < Board                                                                |
 | binary-search                                                          |
@@ -177,7 +177,7 @@ problem's path reads as its record, as "Every problem" gives.
 
 ```
 +- /problems/p-91c2, solving --------------------------------------------+
-| algo-coach   [ Practice ]  Problems  Cards  Knowledge           ☀  ≡   |
+| Climbance    [ Practice ]  Problems  Cards  Knowledge           ☀  ≡   |
 +------------------------------------------------------------------------+
 | Smallest feasible speed              12:04  [ Pause ]  [ End ]         |
 +----------------------------------+-------------------------------------+
@@ -235,7 +235,7 @@ problem's path reads as its record, as "Every problem" gives.
 
 ```
 +- /problems/p-91c2, paused ---------------------------------------------+
-| algo-coach   [ Practice ]  Problems  Cards  Knowledge           ☀  ≡   |
+| Climbance    [ Practice ]  Problems  Cards  Knowledge           ☀  ≡   |
 +------------------------------------------------------------------------+
 | Smallest feasible speed     12:04 paused  [ Start ]  [ End ]           |
 +------------------------------------------------------------------------+
@@ -253,7 +253,7 @@ problem's path reads as its record, as "Every problem" gives.
 
 ```
 +- /problems/p-91c2, at phone width ------+
-| algo-coach  [ Practice ] Problems Cards ☀ ≡ |
+| Climbance   [ Practice ] Problems Cards ☀ ≡ |
 +-----------------------------------------+
 | < Back to the card                      |
 | Smallest feasible speed                 |
@@ -326,7 +326,7 @@ problem's path reads as its record, as "Every problem" gives.
 
 ```
 +- /cards ---------------------------------------------------------------+
-| algo-coach   Practice  Problems  [ Cards ]  Knowledge           ☀  ≡   |
+| Climbance    Practice  Problems  [ Cards ]  Knowledge           ☀  ≡   |
 +------------------------------------------------------------------------+
 | Cards                                                                  |
 | One card teaches one technique: when to reach for it, and the forms to |
@@ -393,7 +393,7 @@ problem's path reads as its record, as "Every problem" gives.
 
 ```
 +- /cards/binary-search -------------------------------------------------+
-| algo-coach   Practice  Problems  [ Cards ]  Knowledge           ☀  ≡   |
+| Climbance    Practice  Problems  [ Cards ]  Knowledge           ☀  ≡   |
 +------------------------------------------------------------------------+
 | < Cards                                                                |
 | Binary search                                                          |
@@ -445,7 +445,7 @@ problem's path reads as its record, as "Every problem" gives.
 
 ```
 +- /knowledge -----------------------------------------------------------+
-| algo-coach   Practice  Problems  Cards  [ Knowledge ]           ☀  ≡   |
+| Climbance    Practice  Problems  Cards  [ Knowledge ]           ☀  ≡   |
 +------------------------------------------------------------------------+
 | Knowledge                                                              |
 | Answer the questions due, then the new ones.                           |
@@ -512,7 +512,7 @@ problem's path reads as its record, as "Every problem" gives.
 
 ```
 +- /knowledge/modules/python --------------------------------------------+
-| algo-coach   Practice  Problems  Cards  [ Knowledge ]           ☀  ≡   |
+| Climbance    Practice  Problems  Cards  [ Knowledge ]           ☀  ≡   |
 +------------------------------------------------------------------------+
 | < Knowledge                                                            |
 | Python                                                                 |
@@ -554,7 +554,7 @@ problem's path reads as its record, as "Every problem" gives.
 
 ```
 +- /knowledge/modules/python --------------------------------------------+
-| algo-coach   Practice  Problems  Cards  [ Knowledge ]           ☀  ≡   |
+| Climbance    Practice  Problems  Cards  [ Knowledge ]           ☀  ≡   |
 +------------------------------------------------------------------------+
 | Python                                                                 |
 |   +-----------------------------------------------------+              |
@@ -581,7 +581,7 @@ problem's path reads as its record, as "Every problem" gives.
 
 ```
 +- /knowledge/queue?mode=next -------------------------------------------+
-| algo-coach   Practice  Problems  Cards  [ Knowledge ]           ☀  ≡   |
+| Climbance    Practice  Problems  Cards  [ Knowledge ]           ☀  ≡   |
 +------------------------------------------------------------------------+
 | Next                                          3 answered ( Stop )      |
 | Python . Core . Names, Associate                         new           |
@@ -610,7 +610,7 @@ problem's path reads as its record, as "Every problem" gives.
 
 ```
 +- /knowledge/queue?mode=next -------------------------------------------+
-| algo-coach   Practice  Problems  Cards  [ Knowledge ]           ☀  ≡   |
+| Climbance    Practice  Problems  Cards  [ Knowledge ]           ☀  ≡   |
 +------------------------------------------------------------------------+
 | Next                                          4 answered ( Stop )      |
 | Python . Core . Names, Associate                                       |
@@ -640,7 +640,7 @@ problem's path reads as its record, as "Every problem" gives.
 
 ```
 +- /knowledge/queue?mode=next -------------------------------------------+
-| algo-coach   Practice  Problems  Cards  [ Knowledge ]           ☀  ≡   |
+| Climbance    Practice  Problems  Cards  [ Knowledge ]           ☀  ≡   |
 +------------------------------------------------------------------------+
 | Next                                          4 answered ( Stop )      |
 | Python . Core . Mutability, Professional                               |
@@ -667,7 +667,7 @@ problem's path reads as its record, as "Every problem" gives.
 
 ```
 +- /knowledge/queue?mode=next -------------------------------------------+
-| algo-coach   Practice  Problems  Cards  [ Knowledge ]           ☀  ≡   |
+| Climbance    Practice  Problems  Cards  [ Knowledge ]           ☀  ≡   |
 +------------------------------------------------------------------------+
 | Next, stopped                                                          |
 | 9 answered . 7 correct                                                 |
@@ -690,7 +690,7 @@ problem's path reads as its record, as "Every problem" gives.
 
 ```
 +- /knowledge/exam ------------------------------------------------------+
-| algo-coach   Practice  Problems  Cards  [ Knowledge ]           ☀  ≡   |
+| Climbance    Practice  Problems  Cards  [ Knowledge ]           ☀  ≡   |
 +------------------------------------------------------------------------+
 | < Knowledge                                                            |
 | Exam                                                                   |
@@ -715,7 +715,7 @@ problem's path reads as its record, as "Every problem" gives.
 
 ```
 +- /knowledge/lessons ---------------------------------------------------+
-| algo-coach   Practice  Problems  Cards  [ Knowledge ]           ☀  ≡   |
+| Climbance    Practice  Problems  Cards  [ Knowledge ]           ☀  ≡   |
 +------------------------------------------------------------------------+
 | < Knowledge                                                            |
 | Lessons                                                                |
@@ -736,7 +736,7 @@ problem's path reads as its record, as "Every problem" gives.
 
 ```
 +- /knowledge/lessons/python/names --------------------------------------+
-| algo-coach   Practice  Problems  Cards  [ Knowledge ]           ☀  ≡   |
+| Climbance    Practice  Problems  Cards  [ Knowledge ]           ☀  ≡   |
 +------------------------------------------------------------------------+
 | < Lessons                                                              |
 | Names and binding                                                      |
@@ -758,7 +758,7 @@ problem's path reads as its record, as "Every problem" gives.
 
 ```
 +- /knowledge/certifications --------------------------------------------+
-| algo-coach   Practice  Problems  Cards  [ Knowledge ]           ☀  ≡   |
+| Climbance    Practice  Problems  Cards  [ Knowledge ]           ☀  ≡   |
 +------------------------------------------------------------------------+
 | < Knowledge                                                            |
 | Certifications                                                         |
@@ -789,7 +789,7 @@ problem's path reads as its record, as "Every problem" gives.
 
 ```
 +- /settings ------------------------------------------------------------+
-| algo-coach   Practice  Problems  Cards  Knowledge               ☀  ≡   |
+| Climbance    Practice  Problems  Cards  Knowledge               ☀  ≡   |
 +------------------------------------------------------------------------+
 | Settings                                                               |
 | The study settings hold on every device you sign in on.                |
@@ -821,7 +821,7 @@ problem's path reads as its record, as "Every problem" gives.
 +- /login ---------------------------------------------------------------+
 |                                      no navigation                     |
 |                                                                        |
-|   algo-coach                                                           |
+|   Climbance                                                            |
 |   Sign in                                                              |
 |   Deliberate practice of algorithmic problem-solving. Access is by     |
 |   invitation.                                                          |
@@ -882,7 +882,7 @@ problem's path reads as its record, as "Every problem" gives.
 
 ```
 +- any path naming no page ----------------------------------------------+
-| algo-coach   Practice  Problems  Cards  Knowledge               ☀  ≡   |
+| Climbance    Practice  Problems  Cards  Knowledge               ☀  ≡   |
 +------------------------------------------------------------------------+
 | No page here.                                                          |
 |                                                                        |
@@ -919,7 +919,7 @@ problem's path reads as its record, as "Every problem" gives.
 
 ```
 +- /cards/binary-search, no run open ------------------------------------+
-| algo-coach   Practice  Problems  [ Cards ]  Knowledge           ☀  ≡   |
+| Climbance    Practice  Problems  [ Cards ]  Knowledge           ☀  ≡   |
 +------------------------------------------------------------------------+
 | < Cards                                                                |
 | Binary search                                                          |
@@ -971,7 +971,7 @@ problem's path reads as its record, as "Every problem" gives.
 
 ```
 +- /cards/binary-search, a run open -------------------------------------+
-| algo-coach   Practice  Problems  [ Cards ]  Knowledge           ☀  ≡   |
+| Climbance    Practice  Problems  [ Cards ]  Knowledge           ☀  ≡   |
 +------------------------------------------------------------------------+
 | < Cards                                                                |
 | Binary search                                                          |
@@ -1038,7 +1038,7 @@ names the card. The sitting's bar offers a press back to the card throughout.
 
 ```
 +- the recall trainer, before a hint ------------------------------------+
-| algo-coach   Practice  Problems  [ Cards ]  Knowledge           ☀  ≡   |
+| Climbance    Practice  Problems  [ Cards ]  Knowledge           ☀  ≡   |
 +------------------------------------------------------------------------+
 | < Binary search                                                        |
 | Lower bound                                                            |

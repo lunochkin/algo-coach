@@ -1,6 +1,6 @@
 import pytest
 
-from algo_coach.cli.transport import CREDENTIALS
+from climb.cli.transport import CREDENTIALS
 
 # what signing in reads, so a developer's own clients or dev login user reach no
 # route and no command
@@ -9,9 +9,9 @@ SIGN_IN = (
     "GOOGLE_CLIENT_SECRET",
     "GITHUB_CLIENT_ID",
     "GITHUB_CLIENT_SECRET",
-    "ALGO_COACH_ORIGIN",
-    "ALGO_COACH_SECRET",
-    "ALGO_COACH_DEV_LOGIN",
+    "CLIMB_ORIGIN",
+    "CLIMB_SECRET",
+    "CLIMB_DEV_LOGIN",
 )
 
 # the Postgres fixtures, one database per worker
@@ -35,7 +35,7 @@ def off_the_developer_machine(tmp_path, monkeypatch):
     every command a test runs.
     """
     monkeypatch.chdir(tmp_path)
-    # ALGO_COACH_BROKER too: a developer's broker would answer every run a
+    # CLIMB_BROKER too: a developer's broker would answer every run a
     # test makes, in a container rather than the local subprocess
-    for name in ("DATABASE_URL", "ALGO_COACH_BROKER", *CREDENTIALS, *SIGN_IN):
+    for name in ("DATABASE_URL", "CLIMB_BROKER", *CREDENTIALS, *SIGN_IN):
         monkeypatch.delenv(name, raising=False)

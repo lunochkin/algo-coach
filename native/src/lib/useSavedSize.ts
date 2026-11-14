@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 
-import { SIZE_SAVE_MS, sizeToSave } from '@algo-coach/core';
+import { SIZE_SAVE_MS, sizeToSave } from '@climb/core';
 
 import { useStore } from './store';
 

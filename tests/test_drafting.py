@@ -2,13 +2,13 @@ import pytest
 from generating import CANONICAL, SLOW, FakeWriter, Raises
 from matching import card, seeded, template
 
-from algo_coach.calls import CallLog
-from algo_coach.drafts import DraftStore
-from algo_coach.generation import Corpus, reject, write_problems
-from algo_coach.generation.drafting import moved
-from algo_coach.outcomes import OutcomeLog
-from algo_coach.problems import ProblemStore
-from algo_coach.schema import Draft, Gate, WritingState
+from climb.calls import CallLog
+from climb.drafts import DraftStore
+from climb.generation import Corpus, reject, write_problems
+from climb.generation.drafting import moved
+from climb.outcomes import OutcomeLog
+from climb.problems import ProblemStore
+from climb.schema import Draft, Gate, WritingState
 
 BUILDS = "def solve(size, seed):\n    return [list(range(size))]\n"
 WRONG = "def solve(xs):\n    return len(xs) + 1\n"
@@ -98,7 +98,7 @@ def test_the_reference_a_rejected_draft_paid_for_is_kept(database):
 def test_a_draft_holds_what_each_step_answered(database, monkeypatch):
     """The statement's own cases, the reference, the input generator and its
     bound, each written as the step that produced it answered."""
-    monkeypatch.setattr("algo_coach.generation.timing.DRILL_CAP_MS", 60)
+    monkeypatch.setattr("climb.generation.timing.DRILL_CAP_MS", 60)
     result, _ = run(database, FakeWriter(slow=SLOW, generator=BUILDS), templates=[CLAIMS])
     (stored,) = result.drafted
 
@@ -144,7 +144,7 @@ def test_the_draft_and_its_site_outcomes_carry_one_id(database):
 def test_a_separated_problem_lands(database, monkeypatch):
     """The case that demonstrates the claim is stored, so the draft runs on
     through the loop."""
-    monkeypatch.setattr("algo_coach.generation.timing.DRILL_CAP_MS", 60)
+    monkeypatch.setattr("climb.generation.timing.DRILL_CAP_MS", 60)
     model = FakeWriter(slow=SLOW, generator=BUILDS)
 
     result, drafts = run(database, model, templates=[CLAIMS])

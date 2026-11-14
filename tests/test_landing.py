@@ -3,9 +3,9 @@ from datetime import UTC, datetime
 import pytest
 from matching import card, seeded
 
-from algo_coach.calls import CallLog
-from algo_coach.generation import Corpus, land
-from algo_coach.schema import (
+from climb.calls import CallLog
+from climb.generation import Corpus, land
+from climb.schema import (
     Call,
     Draft,
     ExpectedSource,

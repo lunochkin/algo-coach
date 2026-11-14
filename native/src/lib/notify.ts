@@ -1,6 +1,6 @@
 import * as Notifications from 'expo-notifications';
 
-import { earliestReview, nextReminderAt, REMINDER_CHANNEL, reviewCount, type Board } from '@algo-coach/core';
+import { earliestReview, nextReminderAt, REMINDER_CHANNEL, reviewCount, type Board } from '@climb/core';
 
 import { getMeta, setMeta } from './db';
 import { APP_NAME } from './name';

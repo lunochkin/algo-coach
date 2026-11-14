@@ -1,7 +1,7 @@
 import { createContext, useCallback, useContext, useEffect, useState, type ReactNode } from 'react';
 import { useColorScheme } from 'react-native';
 
-import type { SchemeChoice } from '@algo-coach/core';
+import type { SchemeChoice } from '@climb/core';
 import { getMeta, setMeta } from './db';
 
 // about this phone rather than the account, so it stays on the device, as the

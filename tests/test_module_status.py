@@ -1,4 +1,4 @@
-from algo_coach.knowledge.authoring.status import Written, markdown, topics
+from climb.knowledge.authoring.status import Written, markdown, topics
 
 
 def course(root):

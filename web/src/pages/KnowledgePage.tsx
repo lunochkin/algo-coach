@@ -19,7 +19,7 @@ import {
   knowledgeHome,
   forecastView,
   reviewForecast,
-} from '@algo-coach/core'
+} from '@climb/core'
 
 import { ErrorLine } from '@/components/ErrorLine'
 import { Loaded } from '@/components/Loaded'

@@ -6,7 +6,7 @@ from typing import Any
 
 import pytest
 
-from algo_coach.broker.__main__ import PORT
+from climb.broker.__main__ import PORT
 
 DEPLOY = Path(__file__).parent.parent / "deploy"
 SOCKET = "/var/run/docker.sock"
@@ -71,4 +71,4 @@ def test_the_api_runs_a_submission_through_the_broker(resolved: dict[str, Any]):
     outside the sandbox."""
     environment = resolved["services"]["api"]["environment"]
 
-    assert environment["ALGO_COACH_BROKER"] == f"http://broker:{PORT}"
+    assert environment["CLIMB_BROKER"] == f"http://broker:{PORT}"

@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { loadSnapshot } from '@algo-coach/core'
+import { loadSnapshot } from '@climb/core'
 
 import { filteredQuery, filteredScope } from '@/knowledge/filtered'
 

@@ -34,7 +34,7 @@ Read both files, and the module's `CLAUDE.md`, before the first step.
 - **The fixer** applies a review in place. It may be the session itself.
 
 Every agent runs code from the engine repo root with `uv run`, and runs
-`uv run algo-coach module check <module> --sub <sub>` before it reports.
+`uv run climb module check <module> --sub <sub>` before it reports.
 `--sub` lists the subtopic's own findings and counts the rest, so the
 output stays short as the module grows. A reviewer
 judges no prose line's width, since markdown reflows prose.
@@ -211,7 +211,7 @@ nohup uv run python .claude/skills/concept-author/run.py --level 0 \
 - **Releasing.** `run.py --release`, given when the author says, merges
   `py-auto` into the content repository's `main` and seeds the module
   locally, then in prod through the deployment repo's tunnel. It rewrites
-  `modules/py/STATUS.md` from `algo-coach module status py` and commits it.
+  `modules/py/STATUS.md` from `climb module status py` and commits it.
   It also rewrites each `Release` item's count in `docs/TODO.md`, ticking a
   complete topic, and leaves that change for a commit the author asks for.
 - **Order.** A subtopic starts once every subtopic it `needs` is merged, at

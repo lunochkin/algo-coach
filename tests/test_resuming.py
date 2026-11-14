@@ -2,9 +2,9 @@ import pytest
 from generating import CANONICAL, SLOW, FakeWriter, Raises
 from matching import card, seeded, template
 
-from algo_coach.calls import CallLog
-from algo_coach.drafts import DraftStore
-from algo_coach.generation import (
+from climb.calls import CallLog
+from climb.drafts import DraftStore
+from climb.generation import (
     BENCH,
     ORDER,
     Bench,
@@ -21,9 +21,9 @@ from algo_coach.generation import (
     sending,
     write_problems,
 )
-from algo_coach.generation.speedup import CEILING, MARGIN, REPEATS_MAX, SEARCH_REVISION
-from algo_coach.outcomes import OutcomeLog
-from algo_coach.schema import CallSite, Card, Configuration, Draft, WritingState
+from climb.generation.speedup import CEILING, MARGIN, REPEATS_MAX, SEARCH_REVISION
+from climb.outcomes import OutcomeLog
+from climb.schema import CallSite, Card, Configuration, Draft, WritingState
 
 BUILDS = "def solve(size, seed):\n    return [list(range(size))]\n"
 # four mutation sites, so a survivor reaches a round and the loop pays a call
@@ -332,7 +332,7 @@ def written(database, model: FakeWriter, drafts: DraftStore, **overrides):
 def test_a_resume_ends_on_the_row_a_writing_ends_on(database, monkeypatch):
     """A resumed draft's stage lines otherwise stop at its last step, and
     whether it landed is readable only once the whole sweep is over."""
-    monkeypatch.setattr("algo_coach.generation.timing.DRILL_CAP_MS", 60)
+    monkeypatch.setattr("climb.generation.timing.DRILL_CAP_MS", 60)
     drafts = DraftStore(database)
     one, first = written(database, FakeWriter(generator=BUILDS), drafts, templates=CLAIMED)
     (stopped,) = first.held
@@ -357,7 +357,7 @@ def test_a_resume_ends_on_the_row_a_writing_ends_on(database, monkeypatch):
 def test_a_resumed_draw_separates_where_the_stored_naive_solution_did_not(database, monkeypatch):
     """The exit a held draft takes where nothing was wrong with the run: the
     site is asked again and this answer is slow."""
-    monkeypatch.setattr("algo_coach.generation.timing.DRILL_CAP_MS", 60)
+    monkeypatch.setattr("climb.generation.timing.DRILL_CAP_MS", 60)
     drafts = DraftStore(database)
     one, first = written(database, FakeWriter(generator=BUILDS), drafts, templates=CLAIMED)
     (stopped,) = first.held
@@ -383,7 +383,7 @@ def test_a_redrawn_naive_solution_carries_the_size_its_search_found(database, mo
     """The input generator was reused, so the inputs site made no call and wrote
     no record. Filed nowhere, the size a resumed problem landed on would be
     readable only from the arguments of its own case."""
-    monkeypatch.setattr("algo_coach.generation.timing.DRILL_CAP_MS", 60)
+    monkeypatch.setattr("climb.generation.timing.DRILL_CAP_MS", 60)
     drafts = DraftStore(database)
     one, first = written(database, FakeWriter(generator=BUILDS), drafts, templates=CLAIMED)
     (stopped,) = first.held
@@ -406,7 +406,7 @@ def test_a_redrawn_naive_solution_carries_the_size_its_search_found(database, mo
 def test_a_moved_naive_solution_re_pays_that_call_and_no_other(database, monkeypatch):
     """The reference and the input generator are written from the statement,
     which this bench did not move."""
-    monkeypatch.setattr("algo_coach.generation.timing.DRILL_CAP_MS", 60)
+    monkeypatch.setattr("climb.generation.timing.DRILL_CAP_MS", 60)
     drafts = DraftStore(database)
     one, first = written(database, FakeWriter(generator=BUILDS), drafts, templates=CLAIMED)
     (stopped,) = first.held
@@ -433,7 +433,7 @@ def test_a_moved_naive_solution_re_pays_that_call_and_no_other(database, monkeyp
 def test_a_resume_pays_for_the_step_that_had_no_answer_and_no_other(database, monkeypatch):
     """The draft holds the reference the first run bought, so the resume is
     charged for the input generator alone."""
-    monkeypatch.setattr("algo_coach.generation.timing.DRILL_CAP_MS", 60)
+    monkeypatch.setattr("climb.generation.timing.DRILL_CAP_MS", 60)
     drafts = DraftStore(database)
     one, first = written(database, FakeWriter(slow=SLOW), drafts, templates=CLAIMED)
     (stopped,) = first.held

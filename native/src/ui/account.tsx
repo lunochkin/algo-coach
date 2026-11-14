@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 import { View } from 'react-native';
 import { Appbar, Divider, Menu, Text, useTheme } from 'react-native-paper';
 
-import { type components, meLine, named, SETTINGS, SIGN_OUT, SIGNED_IN_DEVICES, YOUR_ACCOUNT } from '@algo-coach/core';
+import { type components, meLine, named, SETTINGS, SIGN_OUT, SIGNED_IN_DEVICES, YOUR_ACCOUNT } from '@climb/core';
 import { engine } from '@/lib/engine';
 import { getToken } from '@/lib/settings';
 import { useStore } from '@/lib/store';

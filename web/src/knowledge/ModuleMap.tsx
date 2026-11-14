@@ -36,7 +36,7 @@ import {
   mapOpening,
   mapLessonLabel,
   LESSON_FALLBACK,
-} from '@algo-coach/core'
+} from '@climb/core'
 
 import { Link } from 'react-router'
 

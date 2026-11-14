@@ -5,12 +5,12 @@ import pytest
 from commands import TRANSPORT, connected, run_cli
 from helpers import T0, FakeTransport, Verdict, attempt, logged, seed_problem
 
-from algo_coach import cli
-from algo_coach.calls import UNSENT
-from algo_coach.classifier import EFFORT, MODEL, PIN, TEMPERATURE, request_hash
-from algo_coach.log import AttemptLog
-from algo_coach.mint import classifier_claim, user_claim
-from algo_coach.schema import ClaimSource, MachineProvenance
+from climb import cli
+from climb.calls import UNSENT
+from climb.classifier import EFFORT, MODEL, PIN, TEMPERATURE, request_hash
+from climb.log import AttemptLog
+from climb.mint import classifier_claim, user_claim
+from climb.schema import ClaimSource, MachineProvenance
 
 
 def run(monkeypatch, client: FakeTransport, *argv: str) -> None:
@@ -236,7 +236,7 @@ def test_a_stored_run_makes_no_call_and_needs_no_key(hand_claimed, monkeypatch, 
     logged(hand_claimed, stored_claim("a1", ["greedy"]))
     for name in TRANSPORT.CREDENTIALS:
         monkeypatch.delenv(name, raising=False)
-    monkeypatch.setattr("sys.argv", ["algo-coach", "score", "--user", "u1", "--stored"])
+    monkeypatch.setattr("sys.argv", ["climb", "score", "--user", "u1", "--stored"])
 
     cli.main()
 

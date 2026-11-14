@@ -6,7 +6,7 @@ import rehypeKatex from 'rehype-katex'
 import remarkGfm from 'remark-gfm'
 import remarkMath from 'remark-math'
 
-import { anchor } from '@algo-coach/core'
+import { anchor } from '@climb/core'
 
 import { lessonPath } from '@/knowledge/paths'
 import { CodeFence, ProseLink, ProseTable } from '@/components/Markdown'

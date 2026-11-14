@@ -4,9 +4,9 @@ from typing import Any
 import httpx
 import pytest
 
-from algo_coach.runner import CaseRun, RunOutcome, run, runner
-from algo_coach.runner.execution import LOCAL_RUNNER, RunnerError
-from algo_coach.runner.remote import BROKER, RUNNER, request
+from climb.runner import CaseRun, RunOutcome, run, runner
+from climb.runner.execution import LOCAL_RUNNER, RunnerError
+from climb.runner.remote import BROKER, RUNNER, request
 
 DOUBLE = "def solve(n):\n    return n * 2\n"
 
@@ -33,7 +33,7 @@ def brokered(monkeypatch: pytest.MonkeyPatch):
 
     def named(answered: Answered) -> Answered:
         monkeypatch.setenv(BROKER, "http://broker:8001")
-        monkeypatch.setattr("algo_coach.runner.remote.TRANSPORT", answered.transport())
+        monkeypatch.setattr("climb.runner.remote.TRANSPORT", answered.transport())
         return answered
 
     return named
@@ -87,7 +87,7 @@ def test_a_broker_that_answers_no_result_is_the_runner_s_own_fault(brokered):
 def test_a_broker_nothing_answers_at_is_the_runner_s_own_fault(monkeypatch):
     monkeypatch.setenv(BROKER, "http://broker:8001")
     monkeypatch.setattr(
-        "algo_coach.runner.remote.TRANSPORT",
+        "climb.runner.remote.TRANSPORT",
         httpx.MockTransport(lambda _: (_ for _ in ()).throw(httpx.ConnectError("refused"))),
     )
 

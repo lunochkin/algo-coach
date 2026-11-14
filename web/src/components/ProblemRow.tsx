@@ -1,4 +1,4 @@
-import { techniquesLine } from '@algo-coach/core'
+import { techniquesLine } from '@climb/core'
 
 import type { Candidate, Listed } from '@/api/client'
 import { PickRow } from '@/components/PickRow'

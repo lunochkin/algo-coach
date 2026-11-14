@@ -16,7 +16,7 @@ import {
   PRIVACY_NOTE,
   DEV_LOGIN_INTRO,
   validOrigin,
-} from '@algo-coach/core';
+} from '@climb/core';
 import { offered, signIn, type Offered, type Provider } from '@/lib/auth';
 import { described } from '@/lib/engine';
 import { APP_NAME } from '@/lib/name';

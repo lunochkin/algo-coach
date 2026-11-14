@@ -1,0 +1,39 @@
+from typing import Annotated
+
+from fastapi import Depends, HTTPException, Request
+
+from climb.log import app_user_of, user_of
+from climb.storage import Database
+
+# the cookie a signed-in browser carries its session's token in
+SESSION_COOKIE = "session"
+
+
+def _root(request: Request) -> Database:
+    return request.app.state.root
+
+
+Root = Annotated[Database, Depends(_root)]
+
+
+def bearer_of(request: Request) -> str | None:
+    """The app's token where the request carries one."""
+    scheme, _, token = request.headers.get("authorization", "").partition(" ")
+    return token if scheme.lower() == "bearer" and token else None
+
+
+def _user_id(request: Request, root: Root) -> str:
+    # an app's bearer token or the pages' session, read on every request, so a
+    # revoked one ends at once. Each reaches every route: `README.md`
+    token = bearer_of(request)
+    if token:
+        user_id = app_user_of(root, token)
+    else:
+        cookie = request.cookies.get(SESSION_COOKIE)
+        user_id = user_of(root, cookie) if cookie else None
+    if user_id is None:
+        raise HTTPException(401, "not signed in")
+    return user_id
+
+
+UserId = Annotated[str, Depends(_user_id)]

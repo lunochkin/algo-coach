@@ -1,4 +1,4 @@
-import { failures, OUTCOME_LABELS, SEVEREST, severest } from '@algo-coach/core'
+import { failures, OUTCOME_LABELS, SEVEREST, severest } from '@climb/core'
 
 export { failures, SEVEREST, severest }
 

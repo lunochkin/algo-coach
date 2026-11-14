@@ -1,6 +1,6 @@
 import json
 
-from algo_coach.cards.check import check_card, siblings
+from climb.cards.check import check_card, siblings
 
 FORM = "def solve(xs):\n    return sorted(xs)[0] if xs else None\n"
 

@@ -1,8 +1,8 @@
 from dataclasses import dataclass
 from typing import Any
 
-from algo_coach.mutation import FLOOR_MS, PACE, Mutant, Operator, kill, mutants, pace, survivors
-from algo_coach.schema import CaseOutcome
+from climb.mutation import FLOOR_MS, PACE, Mutant, Operator, kill, mutants, pace, survivors
+from climb.schema import CaseOutcome
 
 CAP_MS = 1000
 DOUBLE = "def solve(x):\n    return x * 2\n"

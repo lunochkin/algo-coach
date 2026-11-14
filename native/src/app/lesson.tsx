@@ -19,7 +19,7 @@ import {
   LESSON_RELATED,
   OF,
   lessonPage,
-} from '@algo-coach/core';
+} from '@climb/core';
 import { useStore } from '@/lib/store';
 import { Blank, BottomBar, fromCopy, Loaded, styles, Press, ScreenHeader } from '@/ui/common';
 import { BLOCK_GAP, CodeRenderer, InlineCode, type InlineCodeProps, useMarkdownOptions } from '@/ui/markdown';

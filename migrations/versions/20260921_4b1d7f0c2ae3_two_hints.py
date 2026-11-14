@@ -17,7 +17,7 @@ depends_on: str | Sequence[str] | None = None
 def upgrade() -> None:
     # the trainer names the template now, so the title answers nothing a hint
     # was for. Postgres drops no enum value, so the type is written again
-    op.execute("SET LOCAL algo_coach.erasing = 'on'")
+    op.execute("SET LOCAL climb.erasing = 'on'")
     # the case results first: they key to the attempt they were run under
     op.execute(
         "DELETE FROM recall_attempt_case_results WHERE recall_attempt_id IN"

@@ -1,7 +1,7 @@
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { Tabs } from 'expo-router/js-tabs';
 
-import { SECTION_PRACTICE, SECTION_PROBLEMS, SECTION_CARDS, SECTION_KNOWLEDGE } from '@algo-coach/core';
+import { SECTION_PRACTICE, SECTION_PROBLEMS, SECTION_CARDS, SECTION_KNOWLEDGE } from '@climb/core';
 import { Frozen } from '@/ui/frozen';
 
 // the sections the phone holds, as bottom tabs: `pages.md`, The structure. A
