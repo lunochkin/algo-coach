@@ -7,10 +7,12 @@ import json
 import sys
 from pathlib import Path
 
-# name, model, effort, and whether the candidate reviews this round
+# name, model (None: the reference's), effort, and whether it reviews this
+# round. The baseline is a second reference review: what it misses is the
+# noise between two reviews, which a candidate's misses are read against.
 CANDIDATES = [
-    ("opus-medium", "opus", "medium", lambda stage, kind: True),
-    ("sonnet", "sonnet", None, lambda stage, kind: kind == "diff" or stage == 2),
+    ("baseline", None, None, lambda stage, kind: True),
+    ("sonnet", "sonnet", None, lambda stage, kind: kind == "diff" or stage > 1),
 ]
 
 
@@ -18,15 +20,25 @@ def reviews(job, n: int, r: int, kind: str, given: str, scope: str, report: Path
     folder = report.parent
     chosen = [c for c in CANDIDATES if c[3](n, kind)]
 
-    def one(name: str, model: str, effort: str | None) -> None:
+    def one(name: str, model: str | None, effort: str | None) -> None:
         mine = folder / f"review-{r}.{name}.md"
         step = f"stage {n} review {r} ({kind}) shadow {name}"
+        log = job.log.with_suffix(f".{name}.log")
+        model = model or job.models["reviewer"]
         job.session(
-            "review", model, step, given=given, effort=effort, stage=n, scope=scope, report=mine
+            "review",
+            model,
+            step,
+            given=given,
+            effort=effort,
+            log=log,
+            stage=n,
+            scope=scope,
+            report=mine,
         )
         if mine.exists():
             out = folder / f"review-{r}.{name}.json"
-            job.session("judge", "sonnet", f"{step} judge", a=report, b=mine, out=out)
+            job.session("judge", "sonnet", f"{step} judge", log=log, a=report, b=mine, out=out)
 
     with cf.ThreadPoolExecutor(len(chosen)) as pool:
         for done in [pool.submit(one, *c[:3]) for c in chosen]:

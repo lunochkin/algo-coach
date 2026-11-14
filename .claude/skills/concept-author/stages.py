@@ -92,16 +92,20 @@ class Job:
         step: str,
         given: str = "",
         effort: str | None = None,
+        log: Path | None = None,
         **extra: object,
     ) -> None:
+        # a session running beside another needs its own log: each reads its
+        # result from the events appended after its start
+        log = log or self.log
         f = self.fields(**extra)
         text = (BRIEFS / f"{brief}.md").read_text().format(**f)
         # the solver's agents and the judge read their own files alone
         if brief not in ("solve", "form", "judge"):
             text = (BRIEFS / "common.md").read_text().format(**f) + text + given
         while True:
-            start = self.log.stat().st_size if self.log.exists() else 0
-            with self.log.open("a") as out:
+            start = log.stat().st_size if log.exists() else 0
+            with log.open("a") as out:
                 out.write(f"\n### {time.strftime('%F %T')} {step} ({model})\n")
                 out.flush()
                 subprocess.run(
@@ -126,7 +130,7 @@ class Job:
                     stderr=subprocess.STDOUT,
                     timeout=self.hours * 3600,
                 )
-            with self.log.open() as f:
+            with log.open() as f:
                 f.seek(start)
                 events = f.read()
             wait = limit_reset(events)
