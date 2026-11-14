@@ -71,6 +71,44 @@ the coverage map for a module written by concept.
   return replaces an exception in flight". The interaction is its own claim,
   so a question still names one concept.
 
+## Levels
+
+A concept's level says how far into Python a learner is before the concept
+matters to them. `docs/architecture/knowledge.md` names the four levels. This
+section gives the test the stage 1 writer applies and the reviewer checks.
+
+| Level | Name | The learner it serves | A concept at it |
+|---|---|---|---|
+| 0 | Foundation | one writing a first program | one construct and the result it gives |
+| 1 | Associate | one writing Python every working day | an exception to a rule, a pitfall, or a choice between two tools |
+| 2 | Professional | one writing code that others build on | two mechanisms interacting, or a protocol a class implements |
+| 3 | Expert | one maintaining a runtime, a library or a large codebase | an implementation detail, a difference between versions, or a rare failure |
+
+- **A concept sits at the lowest level whose learner meets it in ordinary
+  code.** A first program meets `round(2.5)`, and a week of work meets a
+  closure binding its loop variable late. A fact deferred past that level
+  arrives after the learner needed it.
+- **A concept's level is at least the level of every fact its claim needs**,
+  in its own subtopic or a needed one. Its witness and its questions then use
+  only what a learner at that level holds.
+- **A level 0 claim states one construct's result.** It may carry the
+  exception most first programs meet. A case only some programs meet is left
+  out of the claim and written at a higher level, or not at all.
+- **A level 2 concept often combines two facts a learner holds at level 1.**
+  `__eq__` defined without `__hash__` combines equality with hashing, and
+  neither fact predicts the combination alone.
+- **A level 3 concept may need a `versions` field or a quote.** Behaviour that
+  differs between builds, or that no witness shows on every build, sits here.
+  A witness is still preferred, since a quote gives the review nothing to run.
+- **The levels are relative to the module, not to the language.** A level 1
+  concept of `core` and one of `concurrency` both serve a learner who writes
+  Python every working day, and the second learner simply works with
+  threads.
+- **The subtopics written before this section are not examples to copy.**
+  Their levels were set without a rubric, so a review may move a concept they
+  hold. `round-half-even` and `try-except-catches` stand at level 0, and
+  `default-evaluated-once` and `late-binding` at level 1, as this test gives.
+
 ## Lessons and questions
 
 - **A lesson section asserts only the claims of the concepts that name it.**
@@ -291,6 +329,9 @@ back to a concept in the pilot broke one of them.
   witness and was false for `case [a, b]:`.
 - **The claim follows the module's writing rules**, since a lesson copies
   its wording.
+- **The concept's level follows `## Levels`.** A review reports a level the
+  test does not give as a gap. Moved now, a concept moves one record. Moved
+  after stage 3, it moves a lesson section and its questions too.
 - **Stage 1 ends when an independent review finds no wrong claim.** A review
   sorts each finding as wrong, gap or style. A disputed scope goes to the
   author. The writer fixes the gaps a lesson will clearly need and leaves
