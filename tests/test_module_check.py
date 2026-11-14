@@ -279,5 +279,7 @@ def test_a_subtopic_scope_names_its_own_files_alone(tmp_path):
     assert named("[18] lessons/les.md: no question points at #x")
     assert named("[19] coverage/t.toml sub/c: no question at L0")
     assert named("[21] a: id used 2 times")
+    assert named("[0] seed: t/sub:a: 2 why for 3 choices")
     assert not named("[19] banks/t/other.toml b: wrong choice C names no misconception")
     assert not named("[19] coverage/t.toml other/c: no question at L0")
+    assert not named("[0] seed: t/other:b: 2 why for 3 choices")

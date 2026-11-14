@@ -112,8 +112,16 @@ def in_sub(course: Course, sub: str) -> Callable[[str], bool]:
     ids = {q["id"] for q in course.questions if q["_sub"] == sub}
 
     def named(finding: str) -> bool:
-        at = finding.partition("] ")[2].partition(": ")[0].split()
-        return any(t in files or t in ids or t.startswith(f"{sub}/") for t in at)
+        # a refusal of the seed is located as "seed: <topic>/<sub>:<id>: ..."
+        rest = finding.partition("] ")[2].removeprefix("seed: ")
+        at = rest.partition(": ")[0].split()
+        return any(
+            t in files
+            or t in ids
+            or t.startswith(f"{sub}/")
+            or t.partition(":")[0].endswith(f"/{sub}")
+            for t in at
+        )
 
     return named
 
