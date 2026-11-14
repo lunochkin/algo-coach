@@ -1,10 +1,10 @@
 from typing import Any
 
-from sqlalchemy import ColumnElement, Connection, delete, select, update
+from sqlalchemy import ColumnElement, Connection, Table, delete, select, update
 from sqlalchemy.dialects.postgresql import insert
 
 from algo_coach.cards.table import card_requirements, card_templates, cards, template_cases
-from algo_coach.schema import Card, Template
+from algo_coach.schema import Card
 from algo_coach.storage import Database
 
 
@@ -19,33 +19,74 @@ class CardStore:
         self.put_all([record])
 
     def put_all(self, records: list[Card]) -> None:
-        """One transaction, the edges last: a card may require another card the
-        same batch adds."""
+        """One transaction and one batched statement per table, the edges last:
+        a card may require another card the same batch adds. Through a tunnel
+        each statement waits a round trip, so none is sent per row."""
+        if not records:
+            return
+        ids = [one.id for one in records]
+        kept = [template.id for one in records for template in one.templates]
         with self.root.begin() as conn:
             # cleared first, so no edge holds a template a re-seed removes
+            conn.execute(delete(card_requirements).where(card_requirements.c.card_id.in_(ids)))
+            _upsert(
+                conn,
+                cards,
+                [
+                    one.model_dump(exclude={"templates", "selector", "requires"})
+                    | {
+                        f"selector_{name}": value
+                        for name, value in one.selector.model_dump().items()
+                    }
+                    for one in records
+                ],
+            )
+            # upserted by id rather than replaced: a problem names its template,
+            # and a deleted row would refuse the problem pointing at it
             conn.execute(
-                delete(card_requirements).where(
-                    card_requirements.c.card_id.in_([one.id for one in records])
+                delete(card_templates).where(
+                    card_templates.c.card_id.in_(ids), card_templates.c.id.not_in(kept)
                 )
             )
-            for record in records:
-                values = record.model_dump(exclude={"templates", "selector", "requires"}) | {
-                    f"selector_{name}": value
-                    for name, value in record.selector.model_dump().items()
-                }
-                conn.execute(
-                    insert(cards)
-                    .values(values)
-                    .on_conflict_do_update(index_elements=["id"], set_=values)
-                )
-                self._templates(conn, record)
-            for record in records:
-                for position, one in enumerate(record.requires):
-                    conn.execute(
-                        insert(card_requirements).values(
-                            card_id=record.id, position=position, **one.model_dump()
-                        )
-                    )
+            # out of the way first, so a reordering never holds two templates at
+            # one position of one card
+            conn.execute(
+                update(card_templates)
+                .where(card_templates.c.card_id.in_(ids))
+                .values(position=-card_templates.c.position - 1)
+            )
+            _upsert(
+                conn,
+                card_templates,
+                [
+                    template.model_dump(exclude={"cases"})
+                    | {"card_id": one.id, "position": position}
+                    for one in records
+                    for position, template in enumerate(one.templates)
+                ],
+            )
+            # a template's cases, replaced whole: no record points at one, so a
+            # re-seed rewrites the set the author last wrote
+            conn.execute(delete(template_cases).where(template_cases.c.template_id.in_(kept)))
+            _insert(
+                conn,
+                template_cases,
+                [
+                    {"template_id": template.id, "position": position, **case.model_dump()}
+                    for one in records
+                    for template in one.templates
+                    for position, case in enumerate(template.cases)
+                ],
+            )
+            _insert(
+                conn,
+                card_requirements,
+                [
+                    {"card_id": one.id, "position": position, **edge.model_dump()}
+                    for one in records
+                    for position, edge in enumerate(one.requires)
+                ],
+            )
 
     def get(self, id: str) -> Card | None:
         found = self._read(cards.c.id == id)
@@ -57,45 +98,6 @@ class CardStore:
     def by_slug(self, slug: str) -> Card | None:
         found = self._read(cards.c.slug == slug)
         return found[0] if found else None
-
-    def _templates(self, conn: Connection, record: Card) -> None:
-        # upserted by id rather than replaced: a problem names its template, and
-        # a deleted row would refuse the problem pointing at it
-        kept = [one.id for one in record.templates]
-        conn.execute(
-            delete(card_templates).where(
-                card_templates.c.card_id == record.id, card_templates.c.id.not_in(kept)
-            )
-        )
-        # out of the way first, so a reordering never holds two templates at one
-        # position of one card
-        conn.execute(
-            update(card_templates)
-            .where(card_templates.c.card_id == record.id)
-            .values(position=-card_templates.c.position - 1)
-        )
-        for position, template in enumerate(record.templates):
-            values = template.model_dump(exclude={"cases"}) | {
-                "card_id": record.id,
-                "position": position,
-            }
-            conn.execute(
-                insert(card_templates)
-                .values(values)
-                .on_conflict_do_update(index_elements=["id"], set_=values)
-            )
-            self._cases(conn, template)
-
-    def _cases(self, conn: Connection, template: Template) -> None:
-        """A template's cases, replaced whole: no record points at one, so a
-        re-seed rewrites the set the author last wrote."""
-        conn.execute(delete(template_cases).where(template_cases.c.template_id == template.id))
-        for position, case in enumerate(template.cases):
-            conn.execute(
-                insert(template_cases).values(
-                    template_id=template.id, position=position, **case.model_dump()
-                )
-            )
 
     def _read(self, *where: ColumnElement[bool]) -> list[Card]:
         with self.root.connect() as conn:
@@ -148,3 +150,22 @@ class CardStore:
             )
             for row in rows
         ]
+
+
+def _upsert(conn: Connection, table: Table, rows: list[dict[str, Any]]) -> None:
+    """Every row in one statement, each refreshed where its id is stored."""
+    if not rows:
+        return
+    statement = insert(table)
+    columns = [name for name in rows[0] if name != "id"]
+    conn.execute(
+        statement.on_conflict_do_update(
+            index_elements=["id"], set_={name: statement.excluded[name] for name in columns}
+        ),
+        rows,
+    )
+
+
+def _insert(conn: Connection, table: Table, rows: list[dict[str, Any]]) -> None:
+    if rows:
+        conn.execute(insert(table), rows)

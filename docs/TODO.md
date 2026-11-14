@@ -159,6 +159,9 @@ pipeline, Phase 17, which keeps the rest for the next module.
       check`, and report each survivor as a case the template lacks.
       `algo_coach.mutation` enumerates them already, and the pass costs no
       call
+- [x] Seed cards in a few round trips: batch the template and case inserts,
+      and skip a card the store already holds unchanged. A seed through the
+      tunnel paid one round trip per row
 
 ### Judging a solution
 

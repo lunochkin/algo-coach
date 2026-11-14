@@ -349,3 +349,15 @@ def test_a_slug_seeded_twice_in_one_batch_is_refused(database):
     result = seed_cards([dsu(), dsu()], store=CardStore(database))
 
     assert [(one.index, one.reason) for one in result.rejected] == [(1, "seeded twice: union-find")]
+
+
+def test_a_card_stored_as_authored_is_not_written_again(database):
+    """A re-seed after one edit writes one card, which through a tunnel is
+    the difference between seconds and minutes."""
+    store = CardStore(database)
+    seed_cards([dsu(), kruskal(edge())], store=store)
+
+    result = seed_cards([dsu(), kruskal(edge(), title="Kruskal, revised")], store=store)
+
+    assert (result.unchanged, result.updated, result.ingested) == (1, 1, 0)
+    assert store.by_slug("minimum-tree").title == "Kruskal, revised"

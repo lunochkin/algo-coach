@@ -18,6 +18,7 @@ class Rejected(BaseModel):
 class CardSeedResult(BaseModel):
     ingested: int = 0
     updated: int = 0  # a slug already seeded; the card refreshes, its id stays
+    unchanged: int = 0  # a slug already seeded as authored; nothing is written
     rejected: list[Rejected] = []
 
 
@@ -67,19 +68,23 @@ def seed_cards(records: Iterable[Mapping[str, Any]], *, store: CardStore) -> Car
     for _, seed in accepted.values():
         existing = stored.get(seed.slug)
         ids = {template.slug: template.id for template in existing.templates} if existing else {}
-        minted.append(
-            Card(
-                **seed.model_dump(exclude={"templates"}),
-                id=existing.id if existing else new_id(),
-                templates=[
-                    Template(
-                        **template.model_dump(exclude={"equivalent"}),
-                        id=ids.get(template.slug) or new_id(),
-                    )
-                    for template in seed.templates
-                ],
-            )
+        card = Card(
+            **seed.model_dump(exclude={"templates"}),
+            id=existing.id if existing else new_id(),
+            templates=[
+                Template(
+                    **template.model_dump(exclude={"equivalent"}),
+                    id=ids.get(template.slug) or new_id(),
+                )
+                for template in seed.templates
+            ],
         )
+        # a card stored exactly as authored is left alone: a re-seed after one
+        # edit then writes one card
+        if existing is not None and existing.model_dump() == card.model_dump():
+            result.unchanged += 1
+            continue
+        minted.append(card)
         if existing:
             result.updated += 1
         else:
