@@ -32,6 +32,10 @@ holds the answer. Work in a scratchpad folder of the run's own, `<out>`.
    It writes `questions.json` (prompt, code and choices, shuffled), `form.json`
    (the choices alone) and `key.json`, which no agent reads. A card is
    skipped, since its key is the points a learner recalls.
+   `questions.json` holds the `principle` and `pattern` questions alone: the
+   module check proves an `output` or `debug` key by running its code. Pass
+   `--all` to answer every question, as for a module no interpreter proves.
+   With no question to answer, skip step 2 and write `replies.json` as `[]`.
 
 2. **Solve.** Spawn one agent with this brief and `<out>/questions.json`:
    - Answer every question as a learner of the module's subject would. For a
@@ -74,5 +78,6 @@ holds the answer. Work in a scratchpad folder of the run's own, `<out>`.
      ways. On `py`, a second run gave 7 DIFFERS, all the solver's errors.
    - The solver earns most on `principle` and `pattern` questions, and on a
      module no interpreter proves. The form pass earns on every bank: on `py`
-     it found 22 keys from the choices alone, against none from the solver. A defect goes to the stage's fixer, or
-   to the module's author for a module outside the `concept-author` flow.
+     it found 22 keys from the choices alone, against none from the solver.
+   - A defect goes to the stage's fixer, or to the module's author for a
+     module outside the `concept-author` flow.

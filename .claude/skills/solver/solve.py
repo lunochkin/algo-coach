@@ -1,7 +1,7 @@
 """The solver's two halves: extract a module's questions without their keys,
 and score the solver's replies against the keys. SKILL.md gives the flow.
 
-    solve.py extract <module dir> <out dir> [sub ...]
+    solve.py extract <module dir> <out dir> [sub ...] [--all]
     solve.py score <out dir>
 """
 
@@ -14,9 +14,11 @@ from pathlib import Path
 from algo_coach.knowledge.authoring.course import norm
 
 LETTERS = "ABCDEFGH"
+# the module check proves these keys by running the code, rule 1
+PROVEN = frozenset({"output", "debug"})
 
 
-def extract(module: Path, out: Path, subs: list[str]) -> None:
+def extract(module: Path, out: Path, subs: list[str], every: bool) -> None:
     out.mkdir(parents=True, exist_ok=True)
     asked, form, key = [], [], {}
     banks = sorted((module / "banks").glob("*/*.toml"))
@@ -43,12 +45,13 @@ def extract(module: Path, out: Path, subs: list[str]) -> None:
                 form.append({"n": n, "choices": item["choices"], "pick": item["pick"]})
             else:
                 entry["accept"] = q["accept"]
-            asked.append(item)
+            if every or q["kind"] not in PROVEN:
+                asked.append(item)
             key[n] = entry
     (out / "questions.json").write_text(json.dumps(asked, indent=1))
     (out / "form.json").write_text(json.dumps(form, indent=1))
     (out / "key.json").write_text(json.dumps(key, indent=1))
-    print(f"{len(asked)} questions, {len(form)} with choices, in {out}")
+    print(f"{len(asked)} to answer, {len(form)} for the form pass, in {out}")
 
 
 def score(out: Path) -> None:
@@ -60,23 +63,22 @@ def score(out: Path) -> None:
     for n, e in sorted(key.items()):
         r = replies.get(n)
         at = f"{e['bank']}:{e['id']}"
-        if r is None:
-            lines.append(f"- {at}: no reply")
-            continue
-        if e["format"] == "choice":
-            right = sorted(r.get("pick", [])) == e["key"]
-            said = ",".join(r.get("pick", []))
-        else:
-            right = norm(str(r.get("reply", ""))) in {norm(a) for a in e["accept"]}
-            said = r.get("reply", "")
-        if not right:
-            counts["differs"] += 1
-            lines.append(
-                f"- {at}: DIFFERS, replied {said!r} ({r.get('confidence')}): {r.get('reason')}"
-            )
-        elif r.get("confidence") == "guess":
-            counts["guessed"] += 1
-            lines.append(f"- {at}: GUESSED right: {r.get('reason')}")
+        # a question the answer pass skipped is judged by the form pass alone
+        if r is not None:
+            if e["format"] == "choice":
+                right = sorted(r.get("pick", [])) == e["key"]
+                said = ",".join(r.get("pick", []))
+            else:
+                right = norm(str(r.get("reply", ""))) in {norm(a) for a in e["accept"]}
+                said = r.get("reply", "")
+            if not right:
+                counts["differs"] += 1
+                lines.append(
+                    f"- {at}: DIFFERS, replied {said!r} ({r.get('confidence')}): {r.get('reason')}"
+                )
+            elif r.get("confidence") == "guess":
+                counts["guessed"] += 1
+                lines.append(f"- {at}: GUESSED right: {r.get('reason')}")
         f = forms.get(n)
         if (
             f
@@ -95,6 +97,7 @@ def score(out: Path) -> None:
 if __name__ == "__main__":
     command, *args = sys.argv[1:]
     if command == "extract":
-        extract(Path(args[0]), Path(args[1]), args[2:])
+        rest = [a for a in args[2:] if a != "--all"]
+        extract(Path(args[0]), Path(args[1]), rest, "--all" in args)
     else:
         score(Path(args[0]))

@@ -153,13 +153,31 @@ the coverage map for a module written by concept.
 ## Stages
 
 A subtopic is written in three stages. A stage starts once the one before it
-is approved.
+meets the stopping rule.
+
+The author of the module approves by exception. A session applies each
+fix a review recommends and records the decision, and asks the author
+first only for what changes the subject taught or the rules. In the pilot
+the author approved the recommended fix nearly every time, so a question
+per fix cost the author's time and changed little.
+
+- **A session decides alone, and records each decision in the subtopic's
+  digest:** a fix that follows the written rules, a misconception added
+  where a clause of the claim already refutes it, a rewritten choice or
+  snippet, a pair kept as one fact asked twice, and a scope where the
+  reviewer and the writer agree.
+- **A session asks the author first, and goes on without the change:** a
+  claim reworded or narrowed, a scope the reviewer and the writer dispute,
+  and a change to `rules.md`, this file, a skill or the engine.
+- **The digest** is `review/<topic>-<sub>-L<level>.md` in the module's
+  directory: what was written, each decision taken alone, and each open
+  question. The author reads the digests a topic at a time, and the concept
+  file's header records the topic's approval.
 
 1. **Concepts.** The concepts are written from the sources, and the module
    check runs every witness. A reviewer checks the concepts against the
-   stage 1 checklist below, and the author of the module approves the list
-   after that review. A list of about thirty claims reads in minutes, and an
-   error caught here reaches no lesson and no question.
+   stage 1 checklist below. An error caught here reaches no lesson and no
+   question.
    - Stage 1 also lays out the subtopic's lessons, since each `taught_by`
      names a lesson and a section. Each lesson's `needs` and the order of
      its headings follow the concept order, so every construct a witness
@@ -180,8 +198,8 @@ is approved.
    reviewer checks each against its concept and the section teaching it,
    and names a new task for each question repeating its section. The
    findings are fixed in place, and the stage ends on the stopping rule of
-   stage 1. A finding about a concept goes to the author of the module
-   first, since it reopens stage 1.
+   stage 1. A finding about a concept reopens stage 1, and is decided as
+   the digest rules above give.
 
 In every stage, the stopping rule waives a full review of the fixed layer,
 not rule 23: a second reader reviews the last fix pass on its diff. In stage
@@ -189,9 +207,11 @@ not rule 23: a second reader reviews the last fix pass on its diff. In stage
 seven new defects, which only a review of its diff found.
 
 - **After the first full review that finds nothing wrong, each round is a
-  review of the last fix pass's diff.** The stage ends when a diff review
-  finds nothing wrong and no defect, and its style findings are applied
-  without a further review. A fresh full review after each fix pass found
+  review of the last fix pass's diff.** A stage runs at most two full
+  reviews: after the second, each round reviews the diff even when the full
+  review found a wrong claim. The stage ends when a diff review finds
+  nothing wrong and no defect, and its style findings are applied without a
+  further review. A fresh full review after each fix pass found
   one wrong claim each time in prose the fix pass had just written, and a
   review of the diff finds that prose too.
 - **A finding about an approved layer does not pause the stage.** The stage
@@ -244,9 +264,9 @@ back to a concept in the pilot broke one of them.
 - **The claim follows the module's writing rules**, since a lesson copies
   its wording.
 - **Stage 1 ends when an independent review finds no wrong claim.** A review
-  sorts each finding as wrong, gap or style. The author of the module decides
-  a disputed scope. The author fixes the gaps a lesson will clearly need and
-  leaves the rest, since a gap that matters returns in stage 2 as a lesson
+  sorts each finding as wrong, gap or style. A disputed scope goes to the
+  author. The writer fixes the gaps a lesson will clearly need and leaves
+  the rest, since a gap that matters returns in stage 2 as a lesson
   finding. Style is applied without a further review. In the pilot, four
   rounds of review brought wrong claims to one a round, while each fresh
   reviewer found about ten new gaps, so a rule waiting for no gaps never ends.
