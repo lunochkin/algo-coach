@@ -33,6 +33,16 @@ LAYERS = {
 }
 
 
+# a fix in the decide rounds answers what the stage rules leave open, so it
+# writes no question the decide session would have answered
+DECIDING = (
+    "\n\nThis fix follows the decide session's review. A finding the stage rules"
+    " would leave for the author is decided as {brief} gives: apply it,"
+    " keep the files, or defer it. Only a change outside the subtopic's files, or"
+    " one retiring a question on `main`, goes to the digest's `## For you`."
+)
+
+
 class Failed(Exception):
     pass
 
@@ -382,7 +392,8 @@ def fix(
         "fix",
         job.fixer(n),
         f"{label} fix {r}",
-        given=job.given("fix", n, [report, job.scratch / "decisions.md"]),
+        given=(DECIDING.format(brief=BRIEFS / "decide.md") if tag == "d" else "")
+        + job.given("fix", n, [report, job.scratch / "decisions.md"]),
         stage=n,
         report=report,
     )

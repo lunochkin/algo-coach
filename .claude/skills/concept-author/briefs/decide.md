@@ -7,6 +7,7 @@ For each question:
 - Apply a change in the subtopic's own files alone: its concepts, its lessons and its bank. A claim you change stays true in every case its wording covers, so run the cases you rely on. Where a claim changes, its lesson section, its misconceptions and the questions resting on it follow, and each misconception keeps a wrong choice embodying it.
 - A construct a subtopic this one needs teaches is taught here too: graph.toml `[needs]` names those subtopics. Such a construct needs no change to the baseline.
 - Leave two kinds for the author, and change nothing for them. The first is a change outside the subtopic's files: `rules.md`, `concepts.md`, a skill, the engine, or the module's `CLAUDE.md` and its baseline. The second retires a question already on the content repository's `main`: `git -C {wt} show main:modules/{module}/banks/{topic}/{sub}.toml` lists those. Rewriting such a question as a new task retires it. A reworded prompt, choice, `explain` or `why` does not.
+- Before leaving a question for the author, look for a change inside the subtopic's files that makes the outside change unneeded, such as a rewritten example, or a question not yet on `main` rewritten as a new task. Leave the question only where no such change exists. Both baseline questions of the first trial had one.
 
 Then rewrite the digest's opening, keeping its first line `DONE` and its `## Log` unchanged:
 
