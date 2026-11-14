@@ -45,7 +45,7 @@ complete. `modules/py/STATUS.md` gives each subtopic.
       to "Your", after a cold start too
 - [x] Release `py` `core` at level 0: 7 of 7 subtopics
 - [ ] Release `py` `stdlib` at level 0: 2 of 8 subtopics
-- [ ] Release `py` `internals` at level 0: 0 of 7 subtopics
+- [ ] Release `py` `internals` at level 0: 2 of 7 subtopics
 - [ ] Release `py` `typing` at level 0: 0 of 7 subtopics
 - [ ] Release `py` `runtime` at level 0: 0 of 6 subtopics
 - [ ] Release `py` `concurrency` at level 0: 0 of 5 subtopics
