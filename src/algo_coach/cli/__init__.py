@@ -414,6 +414,14 @@ def main() -> None:
     check_parser.add_argument(
         "--sub", help="report one subtopic's findings, and the rest of the module as counts"
     )
+    status_parser = module_action.add_parser(
+        "status", help="print which subtopics the module has written at each level"
+    )
+    status_parser.add_argument("slug", help="the module's directory under --content")
+    status_parser.add_argument(
+        "--content", default="content/modules", help="the directory holding the modules"
+    )
+    status_parser.add_argument("--json", action="store_true", help="emit the status as JSON")
 
     log_parser = _command(sub, "log", "one user's whole log, read out or erased")
     action = log_parser.add_subparsers(dest="action", required=True)

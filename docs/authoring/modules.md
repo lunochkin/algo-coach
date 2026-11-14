@@ -167,6 +167,11 @@ precedence over this file.
 - **The module check and the seed's own gate pass after every change.**
   `rules.md` names what each checks. The content repository's pre-commit hook
   and `just seed-module` both run them.
+- **`algo-coach module status <slug>` prints which subtopics a module
+  written by concept holds at each level**, with the concepts and the
+  questions at each. A subtopic is written at a level once its concept file
+  holds a concept there. The output is read from the files, so a status page
+  copied from it stays true until the files change.
 
 ## A new module
 

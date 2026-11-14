@@ -5,6 +5,7 @@ import sys
 from pathlib import Path
 
 from algo_coach.knowledge.authoring import Checked, check, in_sub, load, near
+from algo_coach.knowledge.authoring.status import markdown, topics
 
 # set once the run has restarted itself with the module's libraries
 RESTARTED = "CHECK_REQUIREMENTS"
@@ -13,7 +14,23 @@ RESTARTED = "CHECK_REQUIREMENTS"
 def module(args: argparse.Namespace, parser: argparse.ArgumentParser) -> None:
     root = Path(args.content) / args.slug
     if not (root / "course.toml").exists():
-        parser.exit(2, f"module check: no module at {root}\n")
+        parser.exit(2, f"module {args.action}: no module at {root}\n")
+    if args.action == "status":
+        found = topics(root)
+        if args.json:
+            rows = [
+                {
+                    "topic": t.slug,
+                    "subtopic": s.slug,
+                    "levels": {n: vars(w) for n, w in s.levels.items()},
+                }
+                for t in found
+                for s in t.subtopics
+            ]
+            print(json.dumps(rows, indent=2))
+        else:
+            print(markdown(args.slug, found), end="")
+        return
     requirements = root / "requirements.txt"
     if requirements.exists() and os.environ.get(RESTARTED) != str(requirements):
         # snippets run on this interpreter, which holds the module's libraries
