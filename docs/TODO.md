@@ -97,7 +97,7 @@ labelled easy, where the platforms call it hard.
       generator writes for. A sweep cannot fill the easy rungs while the
       generator picks the level itself
 - [x] Rate by hand every served problem the list found mislabelled
-- [ ] Run sweeps until every card's ladder is full at its selector's
+- [x] Run sweeps until every card's ladder is full at its selector's
       difficulty: easy on a root card, medium or hard on the rest. A card
       deeper than a root serves an easy problem only where `corpus.md` admits
       one
